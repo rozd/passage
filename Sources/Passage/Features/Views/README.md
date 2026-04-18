@@ -72,6 +72,8 @@ Passage.Configuration(
 | `magicLinkVerify` | Magic link verification result | [Passwordless](../Passwordless/README.md) |
 | `linkAccountSelect` | Select account to link (OAuth) | [Linking](../Linking/README.md) |
 | `linkAccountVerify` | Verify ownership for linking | [Linking](../Linking/README.md) |
+| `passkeySignup` | Create an account with a passkey (WebAuthn registration ceremony, `navigator.credentials.create()`) — public signup flow only; the authenticated "add passkey" flow is JSON-only and has no Leaf view | [Passkey](../Passkey/README.md) |
+| `passkeyAuthenticate` | Sign in with an existing passkey (WebAuthn authentication ceremony, `navigator.credentials.get()`, discoverable flow) | [Passkey](../Passkey/README.md) |
 
 ### View Options
 
@@ -104,6 +106,8 @@ Views register GET routes that render HTML pages:
 | GET | `/auth/magic-link/request` | `magicLinkRequest` | Request magic link |
 | GET | `/auth/connect/link/select` | `linkAccountSelect` | Select account to link |
 | GET | `/auth/connect/link/verify` | `linkAccountVerify` | Verify account ownership |
+| GET | `/auth/passkey/signup/begin` | `passkeySignup` | Passkey signup form |
+| GET | `/auth/passkey/authenticate/begin` | `passkeyAuthenticate` | Passkey sign-in form (single button, no identifier input — discoverable flow) |
 
 ## Styles
 

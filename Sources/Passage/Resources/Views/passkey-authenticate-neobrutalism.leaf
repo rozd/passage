@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in with Passkey</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial Black', Arial, sans-serif;
+            background: #(theme.colors.background);
+            color: #(theme.colors.onBackground);
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: #(theme.colors.surface);
+            border: 4px solid #000000;
+            box-shadow: 8px 8px 0 #000000;
+            padding: 40px 30px;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 900;
+            color: #(theme.colors.onSurface);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            color: #(theme.colors.onSurfaceVariant);
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .error,
+        .success {
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            border: 3px solid #000000;
+            font-weight: 700;
+            font-size: 14px;
+            box-shadow: 4px 4px 0 #000000;
+        }
+
+        .error {
+            background: #(theme.colors.error);
+            color: #(theme.colors.onError);
+        }
+
+        .success {
+            background: #(theme.colors.success);
+            color: #(theme.colors.onSuccess);
+        }
+
+        button {
+            width: 100%;
+            padding: 18px;
+            font-size: 16px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: #(theme.colors.primary);
+            color: #(theme.colors.onPrimary);
+            border: 3px solid #000000;
+            border-radius: 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: 'Arial Black', Arial, sans-serif;
+            box-shadow: 6px 6px 0 #000000;
+            transition: all 0.1s ease;
+        }
+
+        button:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 4px 4px 0 #000000;
+        }
+
+        button:active {
+            transform: translate(4px, 4px);
+            box-shadow: 2px 2px 0 #000000;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 6px 6px 0 #000000;
+        }
+
+        button svg path {
+            fill: #(theme.colors.onPrimary);
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+                border-width: 3px;
+                box-shadow: 6px 6px 0 #000000;
+            }
+
+            h1 {
+                font-size: 26px;
+            }
+
+            button {
+                box-shadow: 4px 4px 0 #000000;
+            }
+
+            button:hover {
+                box-shadow: 3px 3px 0 #000000;
+            }
+
+            button:disabled {
+                box-shadow: 4px 4px 0 #000000;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <form id="passkey-form" method="POST">
+            <h1>Sign in with Passkey</h1>
+            <p class="subtitle">Use Face ID, Touch ID, your device PIN, or a security key to sign in. No password required.</p>
+
+            #if(params.error):
+            <div class="error">#(params.error)</div>
+            #endif
+
+            #if(params.success):
+            <div class="success">#(params.success)</div>
+            #endif
+
+            <div id="status" class="error" style="display:none"></div>
+            <div id="status-success" class="success" style="display:none"></div>
+
+            <button type="submit" id="passkey-submit">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+                    <path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,7A3,3 0 0,1 15,10A3,3 0 0,1 12,13A3,3 0 0,1 9,10A3,3 0 0,1 12,7M17.13,17C15.92,18.85 14.11,20.24 12,20.92C9.89,20.24 8.08,18.85 6.87,17C6.53,16.5 6.24,16 6,15.47C6,13.82 8.71,12.47 12,12.47C15.29,12.47 18,13.79 18,15.47C17.76,16 17.47,16.5 17.13,17Z"></path>
+                </svg>
+                Sign in with Passkey
+            </button>
+        </form>
+    </div>
+
+    <script>
+    (function () {
+        const form = document.getElementById('passkey-form');
+        const submitButton = document.getElementById('passkey-submit');
+        const errorBox = document.getElementById('status');
+        const successBox = document.getElementById('status-success');
+        const beginURL = "#(params.authenticateBeginURL)";
+        const finishURL = "#(params.authenticateFinishURL)";
+        const redirectOnSuccess = "#(params.redirectOnSuccess)";
+
+        function showError(message) {
+            errorBox.textContent = message;
+            errorBox.style.display = 'block';
+            successBox.style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            successBox.textContent = message;
+            successBox.style.display = 'block';
+            errorBox.style.display = 'none';
+        }
+
+        function clearStatus() {
+            errorBox.style.display = 'none';
+            successBox.style.display = 'none';
+        }
+
+        function base64urlToBytes(input) {
+            const pad = input.length % 4 === 0 ? '' : '='.repeat(4 - (input.length % 4));
+            const b64 = (input + pad).replace(/-/g, '+').replace(/_/g, '/');
+            const bin = atob(b64);
+            const bytes = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+            return bytes;
+        }
+
+        function bytesToBase64url(buffer) {
+            const bytes = new Uint8Array(buffer);
+            let bin = '';
+            for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+            return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+
+        function decodeRequestOptions(options) {
+            options.challenge = base64urlToBytes(options.challenge);
+            if (Array.isArray(options.allowCredentials)) {
+                options.allowCredentials = options.allowCredentials.map(function (c) {
+                    return Object.assign({}, c, { id: base64urlToBytes(c.id) });
+                });
+            }
+            return options;
+        }
+
+        function encodeAssertion(credential) {
+            const r = credential.response;
+            const payload = {
+                id: credential.id,
+                rawId: bytesToBase64url(credential.rawId),
+                type: credential.type,
+                response: {
+                    clientDataJSON: bytesToBase64url(r.clientDataJSON),
+                    authenticatorData: bytesToBase64url(r.authenticatorData),
+                    signature: bytesToBase64url(r.signature)
+                },
+                clientExtensionResults: typeof credential.getClientExtensionResults === 'function'
+                    ? credential.getClientExtensionResults()
+                    : {}
+            };
+            if (r.userHandle) {
+                payload.response.userHandle = bytesToBase64url(r.userHandle);
+            }
+            if (credential.authenticatorAttachment) {
+                payload.authenticatorAttachment = credential.authenticatorAttachment;
+            }
+            return payload;
+        }
+
+        function buildRedirect(base, code) {
+            if (!base) return null;
+            if (!code) return base;
+            return base.indexOf('?') >= 0
+                ? base + '&code=' + encodeURIComponent(code)
+                : base + '?code=' + encodeURIComponent(code);
+        }
+
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            clearStatus();
+
+            if (!window.PublicKeyCredential || !navigator.credentials || !navigator.credentials.get) {
+                showError('This browser does not support passkeys.');
+                return;
+            }
+
+            submitButton.disabled = true;
+
+            try {
+                const beginResponse = await fetch(beginURL, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'same-origin',
+                    body: '{}'
+                });
+
+                if (!beginResponse.ok) {
+                    const text = await beginResponse.text();
+                    showError('Failed to start sign-in: ' + (text || beginResponse.statusText));
+                    return;
+                }
+
+                const options = decodeRequestOptions(await beginResponse.json());
+
+                const credential = await navigator.credentials.get({ publicKey: options });
+                if (!credential) {
+                    showError('No credential was selected.');
+                    return;
+                }
+
+                const finishResponse = await fetch(finishURL, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify(encodeAssertion(credential))
+                });
+
+                if (!finishResponse.ok) {
+                    const text = await finishResponse.text();
+                    showError('Failed to finish sign-in: ' + (text || finishResponse.statusText));
+                    return;
+                }
+
+                const result = await finishResponse.json().catch(function () { return {}; });
+                const redirectURL = buildRedirect(redirectOnSuccess, result.code);
+                if (redirectURL) {
+                    window.location.assign(redirectURL);
+                    return;
+                }
+
+                showSuccess('Signed in successfully.');
+            } catch (err) {
+                showError(err && err.message ? err.message : 'Passkey sign-in failed.');
+            } finally {
+                submitButton.disabled = false;
+            }
+        });
+    })();
+    </script>
+</body>
+</html>

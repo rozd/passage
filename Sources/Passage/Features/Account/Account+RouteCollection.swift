@@ -90,7 +90,6 @@ extension Passage.Account.RouteCollection {
                 with: error
             )
         }
-
     }
 
 }

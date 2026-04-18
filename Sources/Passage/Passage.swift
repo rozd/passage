@@ -65,18 +65,26 @@ public struct Passage: Sendable {
         if configuration.views.enabled {
             try Views.registerLeafTempleates(on: app)
             try app.register(collection: Views.RouteCollection(
+                group: configuration.routes.group,
                 config: configuration.views,
                 routes: configuration.routes,
                 restoration: configuration.restoration,
                 passwordless: configuration.passwordless,
                 federatedLogin: configuration.federatedLogin,
-                group: configuration.routes.group
+                passkey: configuration.passkey,
             ))
         }
 
         if configuration.federatedLogin.accountLinking.enabled {
             try app.register(collection: Linking.RouteCollection(
                 configuration: configuration
+            ))
+        }
+
+        if let _ = services.passkey {
+            try app.register(collection: Passkey.RouteCollection(
+                routes: configuration.passkey.routes,
+                groupPath: configuration.routes.group,
             ))
         }
 

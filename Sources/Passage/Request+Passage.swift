@@ -18,6 +18,10 @@ extension Request {
         application.passage.contracts
     }
 
+    var services: Passage.Services {
+        application.passage.services
+    }
+
     var store: any Passage.Store {
         application.passage.store
     }

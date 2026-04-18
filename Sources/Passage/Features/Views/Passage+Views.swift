@@ -493,7 +493,7 @@ extension Passage.Views {
 
 // MARK: - Redirect Helpers
 
-fileprivate extension Passage.Views {
+extension Passage.Views {
 
     func redirect(
         view: Passage.Configuration.Views.View,

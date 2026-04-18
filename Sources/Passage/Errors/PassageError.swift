@@ -7,14 +7,17 @@ public enum PassageError: Error {
     case emailDeliveryNotConfigured
     case phoneDeliveryNotConfigured
     case emailMagicLinkNotConfigured
+    case passkeyNotConfigured
     case missingEnvironmentVariable(name: String)
     case unexpected(message: String)
+    case passkeyServiceNotAvailable
+
 }
 
 extension PassageError: AbortError {
     public var status: HTTPResponseStatus {
         switch self {
-        case .notConfigured, .storeNotConfigured, .jwksNotConfigured, .emailDeliveryNotConfigured, .phoneDeliveryNotConfigured, .emailMagicLinkNotConfigured, .unexpected:
+        case .notConfigured, .storeNotConfigured, .jwksNotConfigured, .emailDeliveryNotConfigured, .phoneDeliveryNotConfigured, .emailMagicLinkNotConfigured, .passkeyNotConfigured, .unexpected, .passkeyServiceNotAvailable:
             return .internalServerError
         case .missingEnvironmentVariable(name: _):
             return .internalServerError
@@ -35,10 +38,14 @@ extension PassageError: AbortError {
             return "Phone delivery is not configured. Provide deliveryPhone in app.passage.configure()."
         case .emailMagicLinkNotConfigured:
             return "Email magic link is not configured. Provide emailMagicLink in passwordless configuration."
+        case .passkeyNotConfigured:
+            return "Passkey is not configured. Provide passkey in app.passage.configure()."
         case .unexpected(let message):
             return message
         case .missingEnvironmentVariable(name: let name):
             return "Missing environment variable: \(name)"
+        case .passkeyServiceNotAvailable:
+            return "Passkey service is not available. Please ensure you have integrated a passkey service implementation."
         }
     }
 }

@@ -17,8 +17,9 @@ A comprehensive identity management and authentication framework for Vapor appli
 - ✨ **Passwordless Magic Links** - Email-based passwordless authentication with one-click login
 - 🎫 **JWT Access Tokens** - Stateless authentication with JWKS support
 - 🔄 **Refresh Token Rotation** - Secure token refresh with family-based revocation
-- 🔑 **Password Reset Flow** - Email and phone-based password recovery
+- 🔓 **Password Reset Flow** - Email and phone-based password recovery
 - 🌐 **OAuth Integration** - Federated login (Google, GitHub, custom providers)
+- 🔑 **Passkeys (WebAuthn)** - Phishing-resistant public-key credentials with three HTTP flows (public signup, authenticated "add passkey", discoverable sign-in), one-shot challenge storage, sign-count tracking, and opt-in Leaf templates for signup + sign-in — pluggable backend via `PasskeyService`
 - 🔗 **Account Linking** - Link multiple identifiers to a single user account (automatic or manual)
 - 📋 **Web Forms** - Built-in Leaf templates for registration, login, and password reset
 - ⚡ **Async Queue Support** - Optional background job processing via Vapor Queues
@@ -219,6 +220,81 @@ try await app.passage.configure(
 )
 ```
 
+### PasskeyService (Optional)
+
+The `PasskeyService` protocol handles WebAuthn cryptographic verification for all passkey ceremonies. Passage core stays free of any WebAuthn-library dependency — the service is the single seam where a concrete backend (e.g. `swift-webauthn`) is plugged in. Providing a `PasskeyService` is the single gate that enables every passkey route; `configuration.passkey` has sensible defaults and does not need to be customized for a working setup.
+
+**Recommended Implementation**: Use the [passage-webauthn](https://github.com/rozd/passage-webauthn) package, which wraps [swift-webauthn](https://github.com/swift-server/webauthn-swift) — Relying-party identity and origins are configured on the `WebAuthnManager.Configuration`, not on `Passage.Configuration.Passkey`:
+
+```swift
+import PassageWebAuthn
+import WebAuthn
+
+let passkeyService = WebAuthnPasskeyService(
+    configuration: WebAuthnManager.Configuration(
+        relyingPartyID: "example.com",
+        relyingPartyName: "My App",
+        relyingPartyOrigin: "https://example.com"
+    )
+)
+
+try await app.passage.configure(
+    services: .init(
+        store: store,              // must expose passkeyCredentials + passkeyChallenges sub-stores
+        passkey: passkeyService
+    ),
+    configuration: .init(
+        origin: URL(string: "https://example.com")!,
+        passkey: .init(
+            policy: .init(
+                timeout: .seconds(60),
+                attestation: .none,
+                userVerification: .preferred,
+                supportedAlgorithms: [.ES256, .RS256],
+                allowDiscoverableLogin: true      // required for the sign-in ceremony
+            )
+        )
+    )
+)
+```
+
+Enabling passkeys additionally requires `Store.passkeyCredentials` and `Store.passkeyChallenges` sub-stores to be provided. `PassageFluent.DatabaseStore` will gain these alongside the upcoming passage-fluent model work; `PassageOnlyForTest.InMemoryStore` already includes them for tests.
+
+#### Three ceremony flows
+
+Passage exposes three distinct passkey flows with different trust models:
+
+| Flow | Endpoints | Trust model |
+|------|-----------|-------------|
+| **Signup** — create an account with a passkey | `POST /auth/passkey/signup/{begin,finish}` | Public. Client submits a `PasskeySignupForm` (email / phone / username + display name); the identifier is self-asserted. |
+| **Register** — logged-in user adds a passkey | `POST /auth/passkey/register/{begin,finish}` | Requires an authenticated session or bearer token (`PassageSessionAuthenticator` + `PassageBearerAuthenticator`). The posted body only carries an optional `displayName`. |
+| **Authenticate** — sign in with a passkey | `POST /auth/passkey/authenticate/{begin,finish}` | Public, discoverable-only. `begin` takes no body — the authenticator reveals which credential the user picked. `finish` returns `{ code }` and sets a session cookie, mirroring the OAuth exchange-code handoff. |
+
+On successful authentication, the server calls `request.passage.login(user)` (setting the session cookie if sessions are enabled) and mints an exchange code via `request.tokens.createExchangeCode(for: user)` — the same primitive the federated-login flow uses.
+
+#### Leaf views (opt-in)
+
+Two Leaf templates ship with Passage for the public flows. Opt in per ceremony:
+
+```swift
+views: .init(
+    passkeySignup: .init(
+        style: .minimalism,
+        theme: .init(colors: .defaultLight),
+        identifier: .email
+    ),
+    passkeyAuthenticate: .init(
+        style: .minimalism,
+        theme: .init(colors: .defaultLight),
+        redirect: .init(onSuccess: "/")       // the JS navigates here with ?code=... appended
+    )
+)
+```
+
+The authentication form has **no identifier field** — the user clicks one button and the browser picks the credential. The authenticated "add passkey" flow is JSON-only and has no Leaf view.
+
+See the [Passkey feature guide](./Sources/Passage/Features/Passkey/README.md) for the full route + DTO reference, storage protocols, and flow diagrams.
+
 ### RandomGenerator (Optional)
 
 The `RandomGenerator` protocol generates secure verification codes and tokens. **A default implementation is provided** using Swift's `RandomNumberGenerator`, so you typically don't need to implement this yourself.
@@ -344,6 +420,7 @@ try await app.passage.configure(
 - **Restoration**: Configure password reset flows for email/phone
 - **Passwordless**: Configure magic link authentication with link expiration, auto-create users, and same-browser verification
 - **OAuth**: Define providers and callback routes
+- **Passkeys**: Tune `policy` (`timeout`, `attestation`, `userVerification`, `supportedAlgorithms`, `allowDiscoverableLogin`), `challengeTTL`, and the per-ceremony route paths. The feature activates as soon as a `PasskeyService` is provided in `services`.
 - **Views**: Enable web forms with customizable Leaf templates
 
 ### JWKS Configuration
