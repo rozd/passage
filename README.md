@@ -19,7 +19,7 @@ A comprehensive identity management and authentication framework for Vapor appli
 - 🔄 **Refresh Token Rotation** - Secure token refresh with family-based revocation
 - 🔓 **Password Reset Flow** - Email and phone-based password recovery
 - 🌐 **OAuth Integration** - Federated login (Google, GitHub, custom providers)
-- 🔑 **Passkeys (WebAuthn)** - Phishing-resistant public-key credentials with three HTTP flows (public signup, authenticated "add passkey", discoverable sign-in), one-shot challenge storage, sign-count tracking, and opt-in Leaf templates for signup + sign-in — pluggable backend via `PasskeyService`
+- 🔑 **Passkeys (WebAuthn)** - Phishing-resistant public-key credentials with signup, sign-in, and "add passkey" flows — pluggable backend via `PasskeyService`
 - 🔗 **Account Linking** - Link multiple identifiers to a single user account (automatic or manual)
 - 📋 **Web Forms** - Built-in Leaf templates for registration, login, and password reset
 - ⚡ **Async Queue Support** - Optional background job processing via Vapor Queues
