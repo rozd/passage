@@ -405,8 +405,6 @@ struct ManualLinkingRouteCollectionIntegrationTests {
             )
             let userId = user.id!.description
 
-            var sessionCookie: String?
-
             // Step 1: Initiate linking
             try await app.testing().test(
                 .POST, "test/initiate-linking",
@@ -423,7 +421,6 @@ struct ManualLinkingRouteCollectionIntegrationTests {
                     let response = try res.content.decode(InitiateLinkingResponse.self)
                     // Without views, should return conflict (can't proceed with manual flow)
                     #expect(response.status == "conflict")
-                    sessionCookie = extractSessionCookie(from: res)
                 }
             )
         }
@@ -717,8 +714,6 @@ struct ManualLinkingRouteCollectionIntegrationTests {
             )
             let userId = user.id!.description
 
-            var sessionCookie: String?
-
             // Initiate - with views=false, returns conflict
             try await app.testing().test(
                 .POST, "test/initiate-linking",
@@ -734,7 +729,6 @@ struct ManualLinkingRouteCollectionIntegrationTests {
                     let response = try res.content.decode(InitiateLinkingResponse.self)
                     // Without views, conflict is returned
                     #expect(response.status == "conflict")
-                    sessionCookie = extractSessionCookie(from: res)
                 }
             )
         }
