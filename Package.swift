@@ -11,12 +11,12 @@ let package = Package(
         .library(name: "PassageOnlyForTest", targets: ["PassageOnlyForTest"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/vapor/vapor.git", from: "4.119.2"),
+        .package(url: "https://github.com/vapor/vapor.git", from: "4.121.4"),
         .package(url: "https://github.com/vapor/jwt.git", from: "5.1.2"),
         .package(url: "https://github.com/vapor/leaf.git", from: "4.5.1"),
-        .package(url: "https://github.com/vapor/leaf-kit.git", from: "1.14.0"),
-        .package(url: "https://github.com/vapor/queues.git", from: "1.17.2"),
-        .package(url: "https://github.com/swiftlang/swift-docc-plugin", from: "1.1.0"),
+        .package(url: "https://github.com/vapor/leaf-kit.git", from: "1.14.2"),
+        .package(url: "https://github.com/vapor/queues.git", from: "1.18.0"),
+        .package(url: "https://github.com/swiftlang/swift-docc-plugin", from: "1.4.5"),
     ],
     targets: [
         .target(
