@@ -391,8 +391,8 @@ struct ManualLinkingRouteCollectionIntegrationTests {
 
     // MARK: - Link Verify Route Tests (With Session)
 
-    @Test("POST to link/verify with correct password completes linking via route")
-    func postLinkVerifyWithCorrectPasswordCompletesLinking() async throws {
+    @Test("POST to initiate-linking without views returns conflict")
+    func postInitiateLinkingWithoutViewsReturnsConflict() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: false)
         }) { app in
@@ -403,7 +403,6 @@ struct ManualLinkingRouteCollectionIntegrationTests {
                 password: "correct-password",
                 isEmailVerified: true
             )
-            let userId = user.id!.description
 
             // Step 1: Initiate linking
             try await app.testing().test(
@@ -701,8 +700,8 @@ struct ManualLinkingRouteCollectionIntegrationTests {
 
     // MARK: - Redirect URL Tests
 
-    @Test("Successful linking redirects with exchange code via route")
-    func successfulLinkingRedirectsWithExchangeCode() async throws {
+    @Test("Initiating linking returns conflict when views are disabled via route")
+    func initiateLinkingReturnsConflictWhenViewsDisabled() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: false)
         }) { app in
@@ -712,7 +711,6 @@ struct ManualLinkingRouteCollectionIntegrationTests {
                 password: "password123",
                 isEmailVerified: true
             )
-            let userId = user.id!.description
 
             // Initiate - with views=false, returns conflict
             try await app.testing().test(
