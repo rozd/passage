@@ -126,7 +126,7 @@ Passage is designed for flexibility through:
 Passage exposes six service protocols for pluggable backends. Only `Store` is required; every other service is optional and unlocks a related feature when provided. Each section below links to [DEVELOPER_NOTES.md](./DEVELOPER_NOTES.md) for protocol signatures, sub-protocol breakdowns, invariants, and integration recipes.
 
 <details>
-<summary><h3>Store</h3> (Required) — persists users, tokens, verification codes, magic links, and passkey records.</summary>
+<summary><h3>🗄️ Store</h3> (Required) — persists users, tokens, verification codes, magic links, and passkey records.</summary>
 
 #### Recommended implementation:
 [passage-fluent](https://github.com/rozd/passage-fluent) — a Fluent-backed `DatabaseStore` with ready-made migrations for PostgreSQL, MySQL, and SQLite. For tests, use `PassageOnlyForTest.InMemoryStore`, which ships in this repo.
@@ -138,7 +138,7 @@ See [DEVELOPER_NOTES.md#store](./DEVELOPER_NOTES.md#store) for the full sub-stor
 </details>
 
 <details>
-<summary><h3>EmailDelivery</h3> (Optional) — sends verification codes, welcome emails, magic links, and password-reset emails.</summary>
+<summary><h3>📧 EmailDelivery</h3> (Optional) — sends verification codes, welcome emails, magic links, and password-reset emails.</summary>
 
 #### Recommended implementation:
 [passage-mailgun](https://github.com/rozd/passage-mailgun) — Mailgun-backed delivery configured with an API key, default domain, and sender identity. For SES, Postmark, Sendgrid, or other providers, conform to `Passage.EmailDelivery` against the provider SDK directly.
@@ -150,7 +150,7 @@ See [DEVELOPER_NOTES.md#email-delivery](./DEVELOPER_NOTES.md#email-delivery) for
 </details>
 
 <details>
-<summary><h3>PhoneDelivery</h3> (Optional) — sends SMS verification codes and password-reset messages.</summary>
+<summary><h3>📱 PhoneDelivery</h3> (Optional) — sends SMS verification codes and password-reset messages.</summary>
 
 #### Recommended implementation:
 no companion package ships yet — implement against Twilio, AWS SNS, Vonage, or your SMS gateway of choice.
@@ -162,7 +162,7 @@ See [DEVELOPER_NOTES.md#phone-delivery](./DEVELOPER_NOTES.md#phone-delivery) for
 </details>
 
 <details>
-<summary><h3>FederatedLoginService</h3> (Optional) — registers OAuth provider routes and resolves federated identities on callback.</summary>
+<summary><h3>🌐 FederatedLoginService</h3> (Optional) — registers OAuth provider routes and resolves federated identities on callback.</summary>
 
 #### Recommended implementation:
 [passage-imperial](https://github.com/rozd/passage-imperial) — integrates with the Imperial OAuth library to support GitHub, Google, and custom providers.
@@ -174,7 +174,7 @@ See [DEVELOPER_NOTES.md#federated-login-service](./DEVELOPER_NOTES.md#federated-
 </details>
 
 <details>
-<summary><h3>PasskeyService</h3> (Optional) — library-agnostic WebAuthn seam that drives all four passkey ceremony boundaries.</summary>
+<summary><h3>🔐 PasskeyService</h3> (Optional) — library-agnostic WebAuthn seam that drives all four passkey ceremony boundaries.</summary>
 
 #### Recommended implementation:
 [passage-webauthn](https://github.com/rozd/passage-webauthn) — wraps [swift-webauthn](https://github.com/swift-server/webauthn-swift). Relying-party identity and origins are configured on `WebAuthnManager.Configuration`, not on `Passage.Configuration.Passkey`.
@@ -188,7 +188,7 @@ See [DEVELOPER_NOTES.md#passkey-service](./DEVELOPER_NOTES.md#passkey-service) f
 </details>
 
 <details>
-<summary><h3>RandomGenerator</h3> (Optional) — produces secure random tokens, verification codes, and SHA-256 hashes.</summary>
+<summary><h3>🎲 RandomGenerator</h3> (Optional) — produces secure random tokens, verification codes, and SHA-256 hashes.</summary>
 
 #### Recommended implementation:
 `DefaultRandomGenerator` ships with Passage and is used unless you override it. Override only if you need a different code format (e.g. numeric-only codes for IVR flows) or stricter cryptographic guarantees.
@@ -204,7 +204,7 @@ See [DEVELOPER_NOTES.md#random-generator](./DEVELOPER_NOTES.md#random-generator)
 Each feature maps to a directory under [`Sources/Passage/Features/`](./Sources/Passage/Features/) and is activated independently by supplying the relevant service (where required) and configuration. Expand a section to see what to wire and where to find a working example.
 
 <details>
-<summary><h3>Account</h3> — user registration, login, logout, and current-user retrieval.</summary>
+<summary><h3>👤 Account</h3> — user registration, login, logout, and current-user retrieval.</summary>
 
 #### Configuration
 ```swift
@@ -228,7 +228,7 @@ See [PassageExample in passage-example](https://github.com/rozd/passage-example#
 </details>
 
 <details>
-<summary><h3>Verification</h3> — email and phone verification codes that confirm identifier ownership after registration.</summary>
+<summary><h3>✅ Verification</h3> — email and phone verification codes that confirm identifier ownership after registration.</summary>
 
 #### Service setup
 Requires `EmailDelivery` for email verification, `PhoneDelivery` for phone verification — supply either or both. See the [Services chapter](#services-to-implement) for integration options.
@@ -263,7 +263,7 @@ _No dedicated example yet — see [rozd/passage-example](https://github.com/rozd
 </details>
 
 <details>
-<summary><h3>Passwordless</h3> — magic-link authentication over email for password-free sign-in.</summary>
+<summary><h3>🪄 Passwordless</h3> — magic-link authentication over email for password-free sign-in.</summary>
 
 #### Service setup
 Requires `EmailDelivery`. See the [Services chapter](#services-to-implement) for integration options.
@@ -293,7 +293,7 @@ _No dedicated example yet — see [rozd/passage-example](https://github.com/rozd
 </details>
 
 <details>
-<summary><h3>Tokens</h3> — JWT access tokens, opaque refresh tokens with rotation, and one-time exchange codes.</summary>
+<summary><h3>🎟️ Tokens</h3> — JWT access tokens, opaque refresh tokens with rotation, and one-time exchange codes.</summary>
 
 #### Configuration
 ```swift
@@ -332,7 +332,7 @@ _No dedicated example yet — see [rozd/passage-example](https://github.com/rozd
 </details>
 
 <details>
-<summary><h3>Restoration</h3> — password reset via email or SMS code, with automatic refresh-token revocation on success.</summary>
+<summary><h3>🔓 Restoration</h3> — password reset via email or SMS code, with automatic refresh-token revocation on success.</summary>
 
 #### Service setup
 Requires `EmailDelivery` for email reset, `PhoneDelivery` for phone reset — supply either or both. See the [Services chapter](#services-to-implement) for integration options.
@@ -368,7 +368,7 @@ _No dedicated example yet — see [rozd/passage-example](https://github.com/rozd
 </details>
 
 <details>
-<summary><h3>Federated Login</h3> — OAuth/OpenID Connect sign-in via Google, GitHub, Apple, or custom providers.</summary>
+<summary><h3>🌐 Federated Login</h3> — OAuth/OpenID Connect sign-in via Google, GitHub, Apple, or custom providers.</summary>
 
 #### Service setup
 Requires `FederatedLoginService`. Use [passage-imperial](https://github.com/rozd/passage-imperial) for a ready-made Imperial-based implementation:
@@ -409,7 +409,7 @@ See [PassageFederatedLoginExample in passage-example](https://github.com/rozd/pa
 </details>
 
 <details>
-<summary><h3>Passkey</h3> — WebAuthn / FIDO2 passkeys with public signup, authenticated "add passkey", and discoverable sign-in flows.</summary>
+<summary><h3>🔑 Passkey</h3> — WebAuthn / FIDO2 passkeys with public signup, authenticated "add passkey", and discoverable sign-in flows.</summary>
 
 #### Service setup
 Requires `PasskeyService` plus the two passkey sub-stores on your `Store` (`passkeyCredentials`, `passkeyChallenges`). Use [passage-webauthn](https://github.com/rozd/passage-webauthn) for a ready-made `swift-webauthn`-backed implementation:
@@ -454,7 +454,7 @@ See [PassagePasskeyExample in passage-example](https://github.com/rozd/passage-e
 </details>
 
 <details>
-<summary><h3>Linking</h3> — links OAuth logins to existing user accounts by matching verified email or phone.</summary>
+<summary><h3>🔗 Linking</h3> — links OAuth logins to existing user accounts by matching verified email or phone.</summary>
 
 #### Service setup
 Requires `FederatedLoginService` (linking is triggered from the OAuth callback). See the Federated Login section above for the service wiring.
@@ -486,7 +486,7 @@ _No dedicated example yet — see [rozd/passage-example](https://github.com/rozd
 </details>
 
 <details>
-<summary><h3>Views</h3> — server-rendered Leaf templates for login, registration, password reset, magic link, account linking, and passkeys.</summary>
+<summary><h3>📋 Views</h3> — server-rendered Leaf templates for login, registration, password reset, magic link, account linking, and passkeys.</summary>
 
 #### Configuration
 ```swift

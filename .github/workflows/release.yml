@@ -282,6 +282,14 @@ jobs:
           event-type: passage-release
           client-payload: '{"version": "${{ needs.calculate-version.outputs.version }}"}'
 
+      - name: Notify passage-webauthn
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.DEPENDENT_REPOS_PAT }}
+          repository: rozd/passage-webauthn
+          event-type: passage-release
+          client-payload: '{"version": "${{ needs.calculate-version.outputs.version }}"}'
+
   create-bug-issue:
     runs-on: ubuntu-latest
     needs: build-test-archive
