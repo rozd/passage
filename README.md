@@ -199,132 +199,330 @@ The default generator emits 32-byte base64 opaque tokens, hex-encoded SHA-256 ha
 See [DEVELOPER_NOTES.md#random-generator](./DEVELOPER_NOTES.md#random-generator) for the protocol surface and a numeric-only override example.
 </details>
 
-## Configuration
+## Feature Discovery
 
-Configure Passage behavior through the `Passage.Configuration` struct:
+Each feature maps to a directory under [`Sources/Passage/Features/`](./Sources/Passage/Features/) and is activated independently by supplying the relevant service (where required) and configuration. Expand a section to see what to wire and where to find a working example.
 
+<details>
+<summary><h3>Account</h3> — user registration, login, logout, and current-user retrieval.</summary>
+
+#### Configuration
 ```swift
-try await app.passage.configure(
-    services: services,
-    configuration: .init(
-        // Base origin URL for your API
-        origin: URL(string: "https://api.example.com")!,
+Passage.Configuration(
+    // ... other config ...
+    routes: .init(
+        group: "auth",                                              // Base path for auth routes
+        register: .init(path: "register"),                          // POST /auth/register
+        login: .init(path: "login"),                                // POST /auth/login
+        logout: .init(path: "logout"),                              // POST /auth/logout
+        currentUser: .init(path: "me", shouldBypassGroup: true)     // GET /me
+    )
+)
+```
 
-        // Customize route paths
-        routes: .init(
-            group: "auth",              // Base path (default: "auth")
-            register: .init(path: "register"),
-            login: .init(path: "login"),
-            logout: .init(path: "logout"),
-            refreshToken: .init(path: "refresh-token"),
-            currentUser: .init(path: "me")
-        ),
+#### Feature guide
+See [`Sources/Passage/Features/Account/README.md`](./Sources/Passage/Features/Account/README.md) for the full route reference, error table, and flow diagrams.
 
-        // Configure token lifetimes
-        tokens: .init(
-            issuer: "https://api.example.com",
-            accessToken: .init(
-                timeToLive: 900          // 15 minutes
-            ),
-            refreshToken: .init(
-                timeToLive: 2_592_000    // 30 days
-            ),
-        ),
+#### Example
+See [PassageExample in passage-example](https://github.com/rozd/passage-example#passageexample-1).
+</details>
 
-        // JWT/JWKS configuration
-        jwt: .init(
-            jwks: try .fileFromEnvironment(),  // Load from JWKS env var or file
-        ),
-        
-        // Passwordless authentication (magic links)
-        passwordless: .init(
-            emailMagicLink: .email(
-                autoCreateUser: true,
-                requireSameBrowser: true
-            )
-        ),
+<details>
+<summary><h3>Verification</h3> — email and phone verification codes that confirm identifier ownership after registration.</summary>
 
-        // Email/Phone verification settings; providing an `EmailDelivery` or `PhoneDelivery` service enables verification
-        verification: .init(
-            email: .init(
-                codeLength: 6,
-                codeExpiration: 600,
-                maxAttempts: 5
-            ),
-            phone: .init(
-                                codeLength: 6,
-                codeExpiration: 600,
-                maxAttempts: 5
-            ),
-            useQueues: true  // Global queue setting
-        ),
+#### Service setup
+Requires `EmailDelivery` for email verification, `PhoneDelivery` for phone verification — supply either or both. See the [Services chapter](#services-to-implement) for integration options.
 
-        // Password reset settings; as with verification, providing `EmailDelivery` or `PhoneDelivery` enables password reset
-        restoration: .init(
-            preferredDelivery: .email,
-            email: .init(
-                codeLength: 6,
-                codeExpiration: 600,
-                maxAttempts: 5
-            )
-            useQueues: true
+#### Configuration
+```swift
+Passage.Configuration(
+    // ... other config ...
+    verification: .init(
+        email: .init(
+            codeLength: 6,
+            codeExpiration: 15 * 60,        // 15 minutes
+            maxAttempts: 3
         ),
-
-        // Federated Login configuration
-        federatedLogin: .init(
-            providers: [
-                .github(
-                    credentials: .conventional
-                ),
-                .google(
-                    credentials: .conventional,
-                    scope: ["profile", "email"]
-                )
-            ],
-            accountLinking: .init(
-                resolution: .automatic(
-                    matchBy: [.email, .phone],
-                    // Links accounts automatically by matching identifiers;
-                    // falls back to manual linking when multiple matches exist
-                    onAmbiguity: .requestManualSelection
-                )
-            )
+        phone: .init(
+            codeLength: 6,
+            codeExpiration: 5 * 60,         // 5 minutes (shorter for SMS)
+            maxAttempts: 3
         ),
+        useQueues: true                     // Dispatch send as Vapor Queue jobs
+    )
+)
+```
 
-        // Web form views (Leaf templates)
-        views: .init(
-            register: .init(/* ... */),
-            login: .init(/* ... */),
-            passwordResetRequest: .init(/* ... */)
+Routes for each channel register only when the corresponding delivery service is provided. `useQueues: true` dispatches `SendEmailCodeJob` / `SendPhoneCodeJob` onto your Vapor Queues setup.
+
+#### Feature guide
+See [`Sources/Passage/Features/Verification/README.md`](./Sources/Passage/Features/Verification/README.md) for the verification flow, route list, and error reference.
+
+#### Example
+_No dedicated example yet — see [rozd/passage-example](https://github.com/rozd/passage-example) for the canonical walkthrough._
+</details>
+
+<details>
+<summary><h3>Passwordless</h3> — magic-link authentication over email for password-free sign-in.</summary>
+
+#### Service setup
+Requires `EmailDelivery`. See the [Services chapter](#services-to-implement) for integration options.
+
+#### Configuration
+```swift
+Passage.Configuration(
+    // ... other config ...
+    passwordless: .init(
+        revokeExistingTokens: true,
+        emailMagicLink: .email(
+            useQueues: true,
+            linkExpiration: 15 * 60,        // 15 minutes
+            maxAttempts: 5,
+            autoCreateUser: true,           // Create user on first successful link
+            requireSameBrowser: false       // Gate verification to the requesting browser
         )
     )
 )
 ```
 
-### Key Configuration Options
+#### Feature guide
+See [`Sources/Passage/Features/Passwordless/README.md`](./Sources/Passage/Features/Passwordless/README.md) for the request/verify flow, same-browser enforcement, and token-security details.
 
-- **Routes**: Customize all endpoint paths (registration, login, logout, token refresh, user info, verification, password reset)
-- **Tokens**: Set TTLs for access and refresh tokens
-- **JWT/JWKS**: Configure issuer, audience, and load JWKS from environment or file
-- **Verification**: Enable/disable email/phone verification, set code TTLs, enable async queue processing
-- **Restoration**: Configure password reset flows for email/phone
-- **Passwordless**: Configure magic link authentication with link expiration, auto-create users, and same-browser verification
-- **OAuth**: Define providers and callback routes
-- **Passkeys**: Tune `policy` (`timeout`, `attestation`, `userVerification`, `supportedAlgorithms`, `allowDiscoverableLogin`), `challengeTTL`, and the per-ceremony route paths. The feature activates as soon as a `PasskeyService` is provided in `services`.
-- **Views**: Enable web forms with customizable Leaf templates
+#### Example
+_No dedicated example yet — see [rozd/passage-example](https://github.com/rozd/passage-example) for the canonical walkthrough._
+</details>
 
-### JWKS Configuration
+<details>
+<summary><h3>Tokens</h3> — JWT access tokens, opaque refresh tokens with rotation, and one-time exchange codes.</summary>
 
-Load JWKS from environment variable or file:
+#### Configuration
+```swift
+Passage.Configuration(
+    // ... other config ...
+    tokens: .init(
+        issuer: "https://api.example.com",                      // JWT `iss` claim
+        accessToken: .init(timeToLive: 15 * 60),                // 15 minutes
+        refreshToken: .init(timeToLive: 7 * 24 * 3600)          // 7 days
+    ),
+    jwt: .init(
+        jwks: try .fileFromEnvironment()                        // JWKS env var or file
+    ),
+    routes: .init(
+        refreshToken: .init(path: "refresh-token"),             // POST /auth/refresh-token
+        exchangeCode: .init(path: "exchange")                   // POST /auth/exchange
+    )
+)
+```
+
+**JWKS loading** — `JWKS.fileFromEnvironment()` reads the JWKS payload from the `JWKS` environment variable or, failing that, from the path in `JWKS_FILE_PATH`:
 
 ```bash
-# Option 1: Environment variable
 export JWKS='{"keys":[...]}'
-
-# Option 2: File path
+# or
 export JWKS_FILE_PATH="/path/to/jwks.json"
 ```
 
+Refresh tokens rotate on each refresh and revoke the entire token family on reuse detection — see the feature guide for the rotation chain.
+
+#### Feature guide
+See [`Sources/Passage/Features/Tokens/README.md`](./Sources/Passage/Features/Tokens/README.md) for claim definitions, rotation semantics, and exchange-code usage.
+
+#### Example
+_No dedicated example yet — see [rozd/passage-example](https://github.com/rozd/passage-example) for the canonical walkthrough._
+</details>
+
+<details>
+<summary><h3>Restoration</h3> — password reset via email or SMS code, with automatic refresh-token revocation on success.</summary>
+
+#### Service setup
+Requires `EmailDelivery` for email reset, `PhoneDelivery` for phone reset — supply either or both. See the [Services chapter](#services-to-implement) for integration options.
+
+#### Configuration
 ```swift
-jwt: .init(jwks: try .fileFromEnvironment())
+Passage.Configuration(
+    // ... other config ...
+    restoration: .init(
+        preferredDelivery: .email,          // Fallback channel for username / federated logins
+        email: .init(
+            codeLength: 6,
+            codeExpiration: 15 * 60,        // 15 minutes
+            maxAttempts: 3
+        ),
+        phone: .init(
+            codeLength: 6,
+            codeExpiration: 5 * 60,         // 5 minutes
+            maxAttempts: 3
+        ),
+        useQueues: true                     // Dispatch send as Vapor Queue jobs
+    )
+)
 ```
+
+A successful reset hashes the new password with BCrypt and revokes **all** refresh tokens for the user, forcing re-authentication on every device.
+
+#### Feature guide
+See [`Sources/Passage/Features/Restoration/README.md`](./Sources/Passage/Features/Restoration/README.md) for the request/verify flow, token-revocation behavior, and error reference.
+
+#### Example
+_No dedicated example yet — see [rozd/passage-example](https://github.com/rozd/passage-example) for the canonical walkthrough._
+</details>
+
+<details>
+<summary><h3>Federated Login</h3> — OAuth/OpenID Connect sign-in via Google, GitHub, Apple, or custom providers.</summary>
+
+#### Service setup
+Requires `FederatedLoginService`. Use [passage-imperial](https://github.com/rozd/passage-imperial) for a ready-made Imperial-based implementation:
+
+```swift
+import PassageImperial
+
+let federatedLogin = ImperialFederatedLoginService(
+    services: [
+        .github          : GitHub.self,
+        .named("google") : Google.self,
+    ]
+)
+```
+
+#### Configuration
+```swift
+Passage.Configuration(
+    // ... other config ...
+    federatedLogin: .init(
+        routes: .init(group: "connect"),                        // Base path: /auth/connect
+        providers: [
+            .init(provider: .google),                           // /auth/connect/google
+            .init(provider: .github)                            // /auth/connect/github
+        ],
+        redirectLocation: "/dashboard"                          // Post-login redirect target
+    )
+)
+```
+
+OAuth callbacks redirect to `redirectLocation` with an exchange `?code=…` that the client swaps for JWT tokens via `POST /auth/exchange`.
+
+#### Feature guide
+See [`Sources/Passage/Features/FederatedLogin/README.md`](./Sources/Passage/Features/FederatedLogin/README.md) for the OAuth flow, callback processing, and `FederatedIdentity` shape.
+
+#### Example
+See [PassageFederatedLoginExample in passage-example](https://github.com/rozd/passage-example#passagefederatedloginexample).
+</details>
+
+<details>
+<summary><h3>Passkey</h3> — WebAuthn / FIDO2 passkeys with public signup, authenticated "add passkey", and discoverable sign-in flows.</summary>
+
+#### Service setup
+Requires `PasskeyService` plus the two passkey sub-stores on your `Store` (`passkeyCredentials`, `passkeyChallenges`). Use [passage-webauthn](https://github.com/rozd/passage-webauthn) for a ready-made `swift-webauthn`-backed implementation:
+
+```swift
+import PassageWebAuthn
+import WebAuthn
+
+let passkeyService = WebAuthnPasskeyService(
+    configuration: WebAuthnManager.Configuration(
+        relyingPartyID: "example.com",
+        relyingPartyName: "My App",
+        relyingPartyOrigin: "https://example.com"
+    )
+)
+```
+
+Relying-party identity and allowed origin are configured on the service's underlying `WebAuthnManager.Configuration`, not on `Configuration.Passkey`.
+
+#### Configuration
+```swift
+Passage.Configuration(
+    // ... other config ...
+    passkey: .init(
+        policy: .init(
+            timeout: .seconds(60),
+            attestation: .none,
+            userVerification: .preferred,
+            supportedAlgorithms: [.ES256, .RS256],
+            allowDiscoverableLogin: true        // Required for the sign-in ceremony
+        ),
+        challengeTTL: 300                       // 5 minutes
+    )
+)
+```
+
+#### Feature guide
+See [`Sources/Passage/Features/Passkey/README.md`](./Sources/Passage/Features/Passkey/README.md) for the three ceremony flows, route reference, DTOs, and flow diagrams.
+
+#### Example
+See [PassagePasskeyExample in passage-example](https://github.com/rozd/passage-example#passagepasskeyexample).
+</details>
+
+<details>
+<summary><h3>Linking</h3> — links OAuth logins to existing user accounts by matching verified email or phone.</summary>
+
+#### Service setup
+Requires `FederatedLoginService` (linking is triggered from the OAuth callback). See the Federated Login section above for the service wiring.
+
+#### Configuration
+```swift
+Passage.Configuration(
+    // ... other config ...
+    federatedLogin: .init(
+        providers: [.google, .github],
+        accountLinking: .init(
+            resolution: .automatic(
+                matchBy: [.email, .phone],                      // Match only verified identifiers
+                onAmbiguity: .requestManualSelection            // Fall back to manual on multiple matches
+            ),
+            stateExpiration: 600                                // Manual linking flow TTL (seconds)
+        )
+    )
+)
+```
+
+Only **verified** emails and phones are considered for automatic linking — this prevents account takeover through unverified claims.
+
+#### Feature guide
+See [`Sources/Passage/Features/Linking/README.md`](./Sources/Passage/Features/Linking/README.md) for the automatic vs. manual flows, candidate-matching rules, and state storage.
+
+#### Example
+_No dedicated example yet — see [rozd/passage-example](https://github.com/rozd/passage-example) for the canonical walkthrough._
+</details>
+
+<details>
+<summary><h3>Views</h3> — server-rendered Leaf templates for login, registration, password reset, magic link, account linking, and passkeys.</summary>
+
+#### Configuration
+```swift
+Passage.Configuration(
+    // ... other config ...
+    views: .init(
+        login: .init(
+            style: .material,
+            theme: .init(colors: .oceanLight),
+            redirect: .init(onSuccess: "/dashboard"),
+            identifier: .email
+        ),
+        register: .init(
+            style: .material,
+            theme: .init(colors: .oceanLight),
+            identifier: .email
+        ),
+        passwordResetRequest: .init(style: .material, theme: .init(colors: .oceanLight)),
+        passwordResetConfirm: .init(style: .material, theme: .init(colors: .oceanLight)),
+        magicLinkRequest: .init(style: .material, theme: .init(colors: .oceanLight)),
+        magicLinkVerify: .init(
+            style: .material,
+            theme: .init(colors: .oceanLight),
+            redirect: .init(onSuccess: "/dashboard")
+        ),
+        linkAccountSelect: .init(style: .material, theme: .init(colors: .oceanLight)),
+        linkAccountVerify: .init(style: .material, theme: .init(colors: .oceanLight))
+    )
+)
+```
+
+Four styles ship (`.neobrutalism`, `.neomorphism`, `.minimalism`, `.material`) and 17 color palettes with light/dark variants. Views are registered only when configured — omit a view key to skip the corresponding GET route.
+
+#### Feature guide
+See [`Sources/Passage/Features/Views/README.md`](./Sources/Passage/Features/Views/README.md) for the full view list, theme options, and custom-color recipes.
+
+#### Example
+_No dedicated example yet — see [rozd/passage-example](https://github.com/rozd/passage-example) for the canonical walkthrough._
+</details>
