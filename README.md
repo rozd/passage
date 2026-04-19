@@ -126,71 +126,77 @@ Passage is designed for flexibility through:
 Passage exposes six service protocols for pluggable backends. Only `Store` is required; every other service is optional and unlocks a related feature when provided. Each section below links to [DEVELOPER_NOTES.md](./DEVELOPER_NOTES.md) for protocol signatures, sub-protocol breakdowns, invariants, and integration recipes.
 
 <details>
-<summary><strong>Store</strong> (Required) — persists users, tokens, verification codes, magic links, and passkey records.</summary>
+<summary><h3>Store</h3> (Required) — persists users, tokens, verification codes, magic links, and passkey records.</summary>
 
-**Recommended implementation:** [passage-fluent](https://github.com/rozd/passage-fluent) — a Fluent-backed `DatabaseStore` with ready-made migrations for PostgreSQL, MySQL, and SQLite. For tests, use `PassageOnlyForTest.InMemoryStore`, which ships in this repo.
+#### Recommended implementation:
+[passage-fluent](https://github.com/rozd/passage-fluent) — a Fluent-backed `DatabaseStore` with ready-made migrations for PostgreSQL, MySQL, and SQLite. For tests, use `PassageOnlyForTest.InMemoryStore`, which ships in this repo.
 
 `Store` is a composite that exposes eight sub-stores — one per persistence concern (users, refresh tokens, verification codes, restoration codes, magic-link tokens, exchange tokens, and the two optional passkey stores). It is the one required service because every Passage feature ultimately reads or writes through it.
 
+#### Implementation guide:
 See [DEVELOPER_NOTES.md#store](./DEVELOPER_NOTES.md#store) for the full sub-store list, hashing invariants, and the refresh-token rotation chain.
-
 </details>
 
 <details>
-<summary><strong>EmailDelivery</strong> (Optional) — sends verification codes, welcome emails, magic links, and password-reset emails.</summary>
+<summary><h3>EmailDelivery</h3> (Optional) — sends verification codes, welcome emails, magic links, and password-reset emails.</summary>
 
-**Recommended implementation:** [passage-mailgun](https://github.com/rozd/passage-mailgun) — Mailgun-backed delivery configured with an API key, default domain, and sender identity. For SES, Postmark, Sendgrid, or other providers, conform to `Passage.EmailDelivery` against the provider SDK directly.
+#### Recommended implementation:
+[passage-mailgun](https://github.com/rozd/passage-mailgun) — Mailgun-backed delivery configured with an API key, default domain, and sender identity. For SES, Postmark, Sendgrid, or other providers, conform to `Passage.EmailDelivery` against the provider SDK directly.
 
 Supplying this service enables the email-side of every feature that sends mail: email verification, email-based password reset, magic-link passwordless login, and welcome emails on registration. Passage hands your implementation fully-constructed URLs, so there's no path construction on your side — template selection and HTML rendering are the only responsibilities.
 
+#### Implementation guide:
 See [DEVELOPER_NOTES.md#email-delivery](./DEVELOPER_NOTES.md#email-delivery) for the method-by-method surface and the Mailgun integration example.
-
 </details>
 
 <details>
-<summary><strong>PhoneDelivery</strong> (Optional) — sends SMS verification codes and password-reset messages.</summary>
+<summary><h3>PhoneDelivery</h3> (Optional) — sends SMS verification codes and password-reset messages.</summary>
 
-**Recommended implementation:** no companion package ships yet — implement against Twilio, AWS SNS, Vonage, or your SMS gateway of choice.
+#### Recommended implementation:
+no companion package ships yet — implement against Twilio, AWS SNS, Vonage, or your SMS gateway of choice.
 
 Supplying this service enables phone-based verification and phone-based password reset. SMS messages carry raw codes rather than URLs, since users on mobile shouldn't need to click links. Message formatting — brand prefix, language, length — is entirely your implementation's choice.
 
+#### Implementation guide:
 See [DEVELOPER_NOTES.md#phone-delivery](./DEVELOPER_NOTES.md#phone-delivery) for the three methods and a Twilio-shaped example.
-
 </details>
 
 <details>
-<summary><strong>FederatedLoginService</strong> (Optional) — registers OAuth provider routes and resolves federated identities on callback.</summary>
+<summary><h3>FederatedLoginService</h3> (Optional) — registers OAuth provider routes and resolves federated identities on callback.</summary>
 
-**Recommended implementation:** [passage-imperial](https://github.com/rozd/passage-imperial) — integrates with the Imperial OAuth library to support GitHub, Google, and custom providers.
+#### Recommended implementation:
+[passage-imperial](https://github.com/rozd/passage-imperial) — integrates with the Imperial OAuth library to support GitHub, Google, and custom providers.
 
 Unlike the other services, this one is a "bring a whole subsystem" contract: a single `register(...)` method that attaches provider routes onto Passage's router group and fires an `onSignIn` closure when a callback resolves. Passage uses that closure to reconcile against `UserStore` (linking, account-matching, creating) and to mint the exchange code the client swaps for an access token. See [`Sources/Passage/Features/FederatedLogin/README.md`](./Sources/Passage/Features/FederatedLogin/README.md) for the on-the-wire route shape.
 
+#### Implementation guide:
 See [DEVELOPER_NOTES.md#federated-login-service](./DEVELOPER_NOTES.md#federated-login-service) for the protocol signature and the Imperial wiring example.
-
 </details>
 
 <details>
-<summary><strong>PasskeyService</strong> (Optional) — library-agnostic WebAuthn seam that drives all four passkey ceremony boundaries.</summary>
+<summary><h3>PasskeyService</h3> (Optional) — library-agnostic WebAuthn seam that drives all four passkey ceremony boundaries.</summary>
 
-**Recommended implementation:** [passage-webauthn](https://github.com/rozd/passage-webauthn) — wraps [swift-webauthn](https://github.com/swift-server/webauthn-swift). Relying-party identity and origins are configured on `WebAuthnManager.Configuration`, not on `Passage.Configuration.Passkey`.
+#### Recommended implementation:
+[passage-webauthn](https://github.com/rozd/passage-webauthn) — wraps [swift-webauthn](https://github.com/swift-server/webauthn-swift). Relying-party identity and origins are configured on `WebAuthnManager.Configuration`, not on `Passage.Configuration.Passkey`.
 
 `PasskeyService` is the single seam between Passage core and a concrete WebAuthn library — core has **zero** WebAuthn-library dependencies and talks only through this protocol. Providing a `PasskeyService` is the one gate that enables every passkey route; Passage additionally needs `Store.passkeyCredentials` and `Store.passkeyChallenges` sub-stores to be non-nil. `PassageFluent.DatabaseStore` will gain these alongside the upcoming passage-fluent model work; `PassageOnlyForTest.InMemoryStore` already includes them for tests.
 
 Passage exposes three distinct passkey ceremony flows (public signup, authenticated "add passkey", discoverable sign-in), with one-shot challenge storage, sign-count tracking, and opt-in Leaf templates for signup and sign-in. See the [Passkey feature guide](./Sources/Passage/Features/Passkey/README.md) for the full route + DTO reference, trust models, and flow diagrams.
 
+#### Implementation guide:
 See [DEVELOPER_NOTES.md#passkey-service](./DEVELOPER_NOTES.md#passkey-service) for the four-method protocol surface, challenge-lookup invariants, and the `WebAuthnPasskeyService` integration example.
-
 </details>
 
 <details>
-<summary><strong>RandomGenerator</strong> (Optional) — produces secure random tokens, verification codes, and SHA-256 hashes.</summary>
+<summary><h3>RandomGenerator</h3> (Optional) — produces secure random tokens, verification codes, and SHA-256 hashes.</summary>
 
-**Recommended implementation:** `DefaultRandomGenerator` ships with Passage and is used unless you override it. Override only if you need a different code format (e.g. numeric-only codes for IVR flows) or stricter cryptographic guarantees.
+#### Recommended implementation:
+`DefaultRandomGenerator` ships with Passage and is used unless you override it. Override only if you need a different code format (e.g. numeric-only codes for IVR flows) or stricter cryptographic guarantees.
 
 The default generator emits 32-byte base64 opaque tokens, hex-encoded SHA-256 hashes, and verification codes drawn from a readability-tuned alphabet (`ABCDEFGHJKLMNPQRSTUVWXYZ23456789`) that eliminates the visual ambiguity of `0/O` and `1/I/L`. Most apps should leave this service alone.
 
+#### Implementation guide:
 See [DEVELOPER_NOTES.md#random-generator](./DEVELOPER_NOTES.md#random-generator) for the protocol surface and a numeric-only override example.
-
 </details>
 
 ## Configuration
