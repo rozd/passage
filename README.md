@@ -129,7 +129,7 @@ Passage exposes six service protocols for pluggable backends. Only `Store` is re
 <summary><h3>🗄️ Store</h3> (Required) — persists users, tokens, verification codes, magic links, and passkey records.</summary>
 
 #### Recommended implementation:
-[passage-fluent](https://github.com/rozd/passage-fluent) — a Fluent-backed `DatabaseStore` with ready-made migrations for PostgreSQL, MySQL, and SQLite. For tests, use `PassageOnlyForTest.InMemoryStore`, which ships in this repo.
+[passage-fluent](https://github.com/rozd/passage-fluent) — a Fluent-backed `DatabaseStore` with ready-made migrations for PostgreSQL, MySQL, and SQLite. For tests, use `Passage.OnlyForTest.InMemoryStore`, which ships in this repo.
 
 `Store` is a composite that exposes eight sub-stores — one per persistence concern (users, refresh tokens, verification codes, restoration codes, magic-link tokens, exchange tokens, and the two optional passkey stores). It is the one required service because every Passage feature ultimately reads or writes through it.
 
@@ -179,7 +179,7 @@ See [DEVELOPER_NOTES.md#federated-login-service](./DEVELOPER_NOTES.md#federated-
 #### Recommended implementation:
 [passage-webauthn](https://github.com/rozd/passage-webauthn) — wraps [swift-webauthn](https://github.com/swift-server/webauthn-swift). Relying-party identity and origins are configured on `WebAuthnManager.Configuration`, not on `Passage.Configuration.Passkey`.
 
-`PasskeyService` is the single seam between Passage core and a concrete WebAuthn library — core has **zero** WebAuthn-library dependencies and talks only through this protocol. Providing a `PasskeyService` is the one gate that enables every passkey route; Passage additionally needs `Store.passkeyCredentials` and `Store.passkeyChallenges` sub-stores to be non-nil. `PassageFluent.DatabaseStore` will gain these alongside the upcoming passage-fluent model work; `PassageOnlyForTest.InMemoryStore` already includes them for tests.
+`PasskeyService` is the single seam between Passage core and a concrete WebAuthn library — core has **zero** WebAuthn-library dependencies and talks only through this protocol. Providing a `PasskeyService` is the one gate that enables every passkey route; Passage additionally needs `Store.passkeyCredentials` and `Store.passkeyChallenges` sub-stores to be non-nil. `PassageFluent.DatabaseStore` will gain these alongside the upcoming passage-fluent model work; `Passage.OnlyForTest.InMemoryStore` already includes them for tests.
 
 Passage exposes three distinct passkey ceremony flows (public signup, authenticated "add passkey", discoverable sign-in), with one-shot challenge storage, sign-count tracking, and opt-in Leaf templates for signup and sign-in. See the [Passkey feature guide](./Sources/Passage/Features/Passkey/README.md) for the full route + DTO reference, trust models, and flow diagrams.
 
@@ -305,7 +305,7 @@ Passage.Configuration(
         refreshToken: .init(timeToLive: 7 * 24 * 3600)          // 7 days
     ),
     jwt: .init(
-        jwks: try .fileFromEnvironment()                        // JWKS env var or file
+        jwks: try .fileFromEnvironment()                        // JWKS file path from `JWKS_FILE_PATH`
     ),
     routes: .init(
         refreshToken: .init(path: "refresh-token"),             // POST /auth/refresh-token
@@ -314,12 +314,12 @@ Passage.Configuration(
 )
 ```
 
-**JWKS loading** — `JWKS.fileFromEnvironment()` reads the JWKS payload from the `JWKS` environment variable or, failing that, from the path in `JWKS_FILE_PATH`:
+**JWKS loading** — `JWKS.fileFromEnvironment()` reads the JWKS payload from the file path in `JWKS_FILE_PATH`. If you want to load the JWKS payload directly from the `JWKS` environment variable, use `JWKS.environment()` instead:
 
 ```bash
-export JWKS='{"keys":[...]}'
-# or
 export JWKS_FILE_PATH="/path/to/jwks.json"
+# or
+export JWKS='{"keys":[...]}'
 ```
 
 Refresh tokens rotate on each refresh and revoke the entire token family on reuse detection — see the feature guide for the rotation chain.

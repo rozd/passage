@@ -59,7 +59,7 @@ public protocol Store: Sendable {
 ### Reference implementations
 
 - **[passage-fluent](https://github.com/rozd/passage-fluent)** — `DatabaseStore` backs all eight sub-stores with Fluent models and ships migrations for PostgreSQL, MySQL, and SQLite. The recommended production choice.
-- **`PassageOnlyForTest.InMemoryStore`** — Ships in this repo under the `PassageOnlyForTest` product. Full in-memory implementation of every sub-store; use for tests only.
+- **`Passage.OnlyForTest.InMemoryStore`** — Ships in this repo under the `PassageOnlyForTest` product. Full in-memory implementation of every sub-store; use for tests only.
 
 ---
 
