@@ -5,7 +5,7 @@
 
 version: 2
 updates:
-  - package-ecosystem: "Swift"
+  - package-ecosystem: "swift"
     directory: "/"
     schedule:
       interval: "daily"
