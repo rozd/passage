@@ -141,6 +141,37 @@ struct UserProtocolTests {
         }
     }
 
+    // MARK: - equals() Tests
+
+    @Test("User equals returns true when both users have the same ID")
+    func equalsReturnsTrueForSameId() {
+        let id = UUID()
+        let user1 = MockUser(id: id, email: "a@example.com", phone: nil, username: nil, passwordHash: nil, isAnonymous: false, isEmailVerified: false, isPhoneVerified: false)
+        let user2 = MockUser(id: id, email: "b@example.com", phone: nil, username: nil, passwordHash: nil, isAnonymous: false, isEmailVerified: false, isPhoneVerified: false)
+        #expect(user1.equals(to: user2))
+    }
+
+    @Test("User equals returns false when users have different IDs")
+    func equalsReturnsFalseForDifferentIds() {
+        let user1 = MockUser(id: UUID(), email: nil, phone: nil, username: nil, passwordHash: nil, isAnonymous: false, isEmailVerified: false, isPhoneVerified: false)
+        let user2 = MockUser(id: UUID(), email: nil, phone: nil, username: nil, passwordHash: nil, isAnonymous: false, isEmailVerified: false, isPhoneVerified: false)
+        #expect(!user1.equals(to: user2))
+    }
+
+    @Test("User equals returns false when self has nil ID")
+    func equalsReturnsFalseWhenSelfHasNilId() {
+        let user1 = MockUser(id: nil, email: nil, phone: nil, username: nil, passwordHash: nil, isAnonymous: false, isEmailVerified: false, isPhoneVerified: false)
+        let user2 = MockUser(id: UUID(), email: nil, phone: nil, username: nil, passwordHash: nil, isAnonymous: false, isEmailVerified: false, isPhoneVerified: false)
+        #expect(!user1.equals(to: user2))
+    }
+
+    @Test("User equals returns false when other has nil ID")
+    func equalsReturnsFalseWhenOtherHasNilId() {
+        let user1 = MockUser(id: UUID(), email: nil, phone: nil, username: nil, passwordHash: nil, isAnonymous: false, isEmailVerified: false, isPhoneVerified: false)
+        let user2 = MockUser(id: nil, email: nil, phone: nil, username: nil, passwordHash: nil, isAnonymous: false, isEmailVerified: false, isPhoneVerified: false)
+        #expect(!user1.equals(to: user2))
+    }
+
     // MARK: - Username Check Tests
 
     @Test("User check succeeds for username without verification")
@@ -157,6 +188,22 @@ struct UserProtocolTests {
         )
 
         let identifier = Identifier.username("johndoe")
+        try user.check(identifier: identifier)
+    }
+
+    @Test("User check succeeds for federated identifier without requiring verification")
+    func checkFederatedIdentifier() throws {
+        let user = MockUser(
+            id: UUID(),
+            email: nil,
+            phone: nil,
+            username: nil,
+            passwordHash: nil,
+            isAnonymous: false,
+            isEmailVerified: false,
+            isPhoneVerified: false
+        )
+        let identifier = Identifier.federated(.google, userId: "google-user-123")
         try user.check(identifier: identifier)
     }
 
