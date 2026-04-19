@@ -28,7 +28,7 @@ try await app.passage.configure(
 | `restoration` | `Configuration+Restoration.swift` | Password reset |
 | `passwordless` | `Configuration+Passwordless.swift` | Magic links |
 | `federatedLogin` | `Configuration+FederatedLogin.swift` | OAuth providers |
-| `passkey` | `Configuration+Passkey.swift` | WebAuthn / FIDO2 passkeys (optional, default `nil`) |
+| `passkey` | `Configuration+Passkey.swift` | WebAuthn / FIDO2 passkeys (default `.init()`) |
 | `views` | `Configuration+Views.swift` | Server-rendered UI |
 
 ## Required Parameters
