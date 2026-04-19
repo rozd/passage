@@ -23,6 +23,7 @@ public extension Passage {
         let emailMagicLinkResendForm: any EmailMagicLinkResendForm.Type
         let linkAccountSelectForm: any LinkAccountSelectForm.Type
         let linkAccountVerifyForm: any LinkAccountVerifyForm.Type
+        let passkeySignupForm: any PasskeySignupForm.Type
 
         public init(
             loginForm: (any LoginForm.Type)? = nil,
@@ -45,6 +46,7 @@ public extension Passage {
             emailMagicLinkResendForm: (any EmailMagicLinkResendForm.Type)? = nil,
             linkAccountSelectForm: (any LinkAccountSelectForm.Type)? = nil,
             linkAccountVerifyForm: (any LinkAccountVerifyForm.Type)? = nil,
+            passkeySignupForm: (any PasskeySignupForm.Type)? = nil
         ) {
             self.loginForm = loginForm ?? DefaultLoginForm.self
             self.logoutForm = logoutForm ?? DefaultLogoutForm.self
@@ -66,6 +68,7 @@ public extension Passage {
             self.emailMagicLinkResendForm = emailMagicLinkResendForm ?? DefaultEmailMagicLinkResendForm.self
             self.linkAccountSelectForm = linkAccountSelectForm ?? DefaultLinkAccountSelectForm.self
             self.linkAccountVerifyForm = linkAccountVerifyForm ?? DefaultLinkAccountVerifyForm.self
+            self.passkeySignupForm = passkeySignupForm ?? DefaultPasskeySignupForm.self
         }
     }
 

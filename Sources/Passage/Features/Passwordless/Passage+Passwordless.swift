@@ -205,7 +205,7 @@ extension Passage.Passwordless {
 
 extension Passage.Passwordless {
 
-    func createUserWithEmailIdentifier(
+    private func createUserWithEmailIdentifier(
         _ identifier: Identifier
     ) async throws -> any User {
         guard identifier.kind == .email else {

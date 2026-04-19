@@ -242,4 +242,65 @@ struct ViewsConfigurationTests {
         )
         let _: any Sendable = loginView
     }
+
+    // MARK: - PasskeyAuthenticateView Tests
+
+    @Test("PasskeyAuthenticateView initialization")
+    func passkeyAuthenticateViewInitialization() {
+        let view = Passage.Configuration.Views.PasskeyAuthenticateView(
+            style: .minimalism,
+            theme: createTestTheme()
+        )
+        #expect(view.name == "passkey-authenticate")
+        #expect(view.style == .minimalism)
+        #expect(view.redirect.onSuccess == nil)
+    }
+
+    @Test("PasskeyAuthenticateView template name", arguments: [
+        (Passage.Views.Style.minimalism, "passkey-authenticate-minimalism"),
+        (Passage.Views.Style.material, "passkey-authenticate-material"),
+        (Passage.Views.Style.neobrutalism, "passkey-authenticate-neobrutalism"),
+        (Passage.Views.Style.neomorphism, "passkey-authenticate-neomorphism"),
+    ])
+    func passkeyAuthenticateViewTemplate(style: Passage.Views.Style, expected: String) {
+        let view = Passage.Configuration.Views.PasskeyAuthenticateView(
+            style: style,
+            theme: createTestTheme()
+        )
+        #expect(view.template == expected)
+    }
+
+    @Test("PasskeyAuthenticateView with custom redirect")
+    func passkeyAuthenticateViewWithRedirect() {
+        let view = Passage.Configuration.Views.PasskeyAuthenticateView(
+            style: .minimalism,
+            theme: createTestTheme(),
+            redirect: .init(onSuccess: "/dashboard")
+        )
+        #expect(view.redirect.onSuccess == "/dashboard")
+    }
+
+    @Test("Views with passkeyAuthenticate enabled")
+    func viewsWithPasskeyAuthenticate() {
+        let views = Passage.Configuration.Views(
+            passkeyAuthenticate: .init(style: .minimalism, theme: createTestTheme())
+        )
+        #expect(views.passkeyAuthenticate != nil)
+        #expect(views.enabled == true)
+    }
+
+    @Test("Views without passkeyAuthenticate is disabled (when nothing else is set)")
+    func viewsWithoutPasskeyAuthenticateDefaultNil() {
+        let views = Passage.Configuration.Views()
+        #expect(views.passkeyAuthenticate == nil)
+    }
+
+    @Test("PasskeyAuthenticateView Sendable conformance")
+    func passkeyAuthenticateViewSendable() {
+        let _: any Sendable = Passage.Configuration.Views.PasskeyAuthenticateView(
+            style: .minimalism,
+            theme: createTestTheme()
+        )
+        #expect(Bool(true))
+    }
 }

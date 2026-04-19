@@ -27,12 +27,13 @@ struct ViewsRouteCollectionTests {
         let passwordlessConfig = Passage.Configuration.Passwordless()
         let federatedLoginConfig = Passage.Configuration.FederatedLogin(providers: [])
         let collection = Passage.Views.RouteCollection(
+            group: [],
             config: viewsConfig,
             routes: routesConfig,
             restoration: restorationConfig,
             passwordless: passwordlessConfig,
             federatedLogin: federatedLoginConfig,
-            group: []
+            passkey: nil
         )
 
         #expect(collection.group.isEmpty)
@@ -59,12 +60,13 @@ struct ViewsRouteCollectionTests {
         let passwordlessConfig = Passage.Configuration.Passwordless()
         let federatedLoginConfig = Passage.Configuration.FederatedLogin(providers: [])
         let collection = Passage.Views.RouteCollection(
+            group: groupPath,
             config: viewsConfig,
             routes: routesConfig,
             restoration: restorationConfig,
             passwordless: passwordlessConfig,
             federatedLogin: federatedLoginConfig,
-            group: groupPath
+            passkey: nil
         )
 
         #expect(collection.group.count == 2)
@@ -94,12 +96,13 @@ struct ViewsRouteCollectionTests {
         let passwordlessConfig = Passage.Configuration.Passwordless()
         let federatedLoginConfig = Passage.Configuration.FederatedLogin(providers: [])
         let collection = Passage.Views.RouteCollection(
+            group: [],
             config: viewsConfig,
             routes: routesConfig,
             restoration: restorationConfig,
             passwordless: passwordlessConfig,
             federatedLogin: federatedLoginConfig,
-            group: []
+            passkey: nil
         )
 
         #expect(collection.config.register?.style == .minimalism)
@@ -140,12 +143,13 @@ struct ViewsRouteCollectionTests {
         let passwordlessConfig = Passage.Configuration.Passwordless()
         let federatedLoginConfig = Passage.Configuration.FederatedLogin(providers: [])
         let collection = Passage.Views.RouteCollection(
+            group: [],
             config: viewsConfig,
             routes: routesConfig,
             restoration: restorationConfig,
             passwordless: passwordlessConfig,
             federatedLogin: federatedLoginConfig,
-            group: []
+            passkey: nil
         )
 
         #expect(collection.config.login != nil)
@@ -168,12 +172,13 @@ struct ViewsRouteCollectionTests {
         let passwordlessConfig = Passage.Configuration.Passwordless()
         let federatedLoginConfig = Passage.Configuration.FederatedLogin(providers: [])
         let collection = Passage.Views.RouteCollection(
+            group: [],
             config: viewsConfig,
             routes: routesConfig,
             restoration: restorationConfig,
             passwordless: passwordlessConfig,
             federatedLogin: federatedLoginConfig,
-            group: []
+            passkey: nil
         )
 
         #expect(collection.config.login == nil)
@@ -204,12 +209,13 @@ struct ViewsRouteCollectionTests {
         let passwordlessConfig = Passage.Configuration.Passwordless()
         let federatedLoginConfig = Passage.Configuration.FederatedLogin(providers: [])
         let collection = Passage.Views.RouteCollection(
+            group: [],
             config: viewsConfig,
             routes: routesConfig,
             restoration: restorationConfig,
             passwordless: passwordlessConfig,
             federatedLogin: federatedLoginConfig,
-            group: []
+            passkey: nil
         )
 
         let _: any RouteCollection = collection
@@ -243,12 +249,13 @@ struct ViewsRouteCollectionTests {
         let passwordlessConfig = Passage.Configuration.Passwordless()
         let federatedLoginConfig = Passage.Configuration.FederatedLogin(providers: [])
         let collection = Passage.Views.RouteCollection(
+            group: [],
             config: viewsConfig,
             routes: routesConfig,
             restoration: restorationConfig,
             passwordless: passwordlessConfig,
             federatedLogin: federatedLoginConfig,
-            group: []
+            passkey: nil
         )
 
         #expect(collection.restoration.email.routes.request.path.count == 3)
@@ -274,12 +281,13 @@ struct ViewsRouteCollectionTests {
         let federatedLoginConfig = Passage.Configuration.FederatedLogin(providers: [])
 
         let collection = Passage.Views.RouteCollection(
+            group: group,
             config: viewsConfig,
             routes: routesConfig,
             restoration: restorationConfig,
             passwordless: passwordlessConfig,
             federatedLogin: federatedLoginConfig,
-            group: group
+            passkey: nil
         )
 
         #expect(collection.group.count == group.count)
@@ -301,12 +309,13 @@ struct ViewsRouteCollectionTests {
         let passwordless = Passage.Configuration.Passwordless()
         let federatedLogin = Passage.Configuration.FederatedLogin(providers: [])
         assertSendable(Passage.Views.RouteCollection(
+            group: [],
             config: config,
             routes: routes,
             restoration: restoration,
             passwordless: passwordless,
             federatedLogin: federatedLogin,
-            group: []
+            passkey: nil
         ))
     }
 }

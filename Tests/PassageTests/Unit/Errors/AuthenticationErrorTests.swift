@@ -80,6 +80,15 @@ struct AuthenticationErrorTests {
         #expect(error.status == expectedStatus)
     }
 
+    @Test("Passkey error status codes", arguments: [
+        (AuthenticationError.invalidPasskeyChallenge, HTTPResponseStatus.unauthorized),
+        (AuthenticationError.unknownPasskey, HTTPResponseStatus.unauthorized),
+        (AuthenticationError.discoverableLoginDisabled, HTTPResponseStatus.badRequest)
+    ])
+    func passkeyErrorStatusCodes(error: AuthenticationError, expectedStatus: HTTPResponseStatus) {
+        #expect(error.status == expectedStatus)
+    }
+
     // MARK: - Error Reason Tests
 
     @Test("Registration error reasons", arguments: [
@@ -152,6 +161,15 @@ struct AuthenticationErrorTests {
         (AuthenticationError.restorationDeliveryNotAvailable, "Password reset delivery is not available for this identifier type.")
     ])
     func restorationErrorReasons(error: AuthenticationError, expectedReason: String) {
+        #expect(error.reason == expectedReason)
+    }
+
+    @Test("Passkey error reasons", arguments: [
+        (AuthenticationError.invalidPasskeyChallenge, "Invalid or expired passkey challenge."),
+        (AuthenticationError.unknownPasskey, "Passkey is not registered."),
+        (AuthenticationError.discoverableLoginDisabled, "Discoverable passkey login is disabled by server policy.")
+    ])
+    func passkeyErrorReasons(error: AuthenticationError, expectedReason: String) {
         #expect(error.reason == expectedReason)
     }
 
@@ -261,7 +279,10 @@ struct AuthenticationErrorTests {
             .restorationCodeExpired,
             .restorationCodeMaxAttempts,
             .restorationIdentifierNotFound,
-            .restorationDeliveryNotAvailable
+            .restorationDeliveryNotAvailable,
+            .invalidPasskeyChallenge,
+            .unknownPasskey,
+            .discoverableLoginDisabled
         ]
 
         for error in allErrors {
@@ -297,7 +318,10 @@ struct AuthenticationErrorTests {
             .restorationCodeExpired,
             .restorationCodeMaxAttempts,
             .restorationIdentifierNotFound,
-            .restorationDeliveryNotAvailable
+            .restorationDeliveryNotAvailable,
+            .invalidPasskeyChallenge,
+            .unknownPasskey,
+            .discoverableLoginDisabled
         ]
 
         for error in allErrors {

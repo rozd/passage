@@ -11,6 +11,8 @@ public extension Passage {
             public let restorationCodes: any Passage.RestorationCodeStore
             public let magicLinkTokens: any Passage.MagicLinkTokenStore
             public let exchangeTokens: any Passage.ExchangeTokenStore
+            public let passkeyCredentials: (any Passage.PasskeyCredentialStore)?
+            public let passkeyChallenges: (any Passage.PasskeyChallengeStore)?
 
             public init() {
                 self.users = InMemoryUserStore()
@@ -19,6 +21,8 @@ public extension Passage {
                 self.restorationCodes = InMemoryRestorationStore()
                 self.magicLinkTokens = InMemoryMagicLinkTokenStore()
                 self.exchangeTokens = InMemoryExchangeTokenStore()
+                self.passkeyCredentials = InMemoryPasskeyCredentialStore()
+                self.passkeyChallenges = InMemoryPasskeyChallengeStore()
             }
         }
 

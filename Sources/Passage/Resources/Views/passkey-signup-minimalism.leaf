@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Passkey</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background: #(theme.colors.background);
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background-color: #(theme.colors.surface);
+            padding: 30px;
+            width: 450px;
+            max-width: 100%;
+            border-radius: 20px;
+        }
+
+        h1 {
+            color: #(theme.colors.onSurface);
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #(theme.colors.onSurfaceVariant);
+            font-size: 14px;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .error {
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            background-color: #(theme.colors.error);
+            color: #(theme.colors.onError);
+            border: 1.5px solid #(theme.colors.error);
+        }
+
+        .success {
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            background-color: #(theme.colors.success);
+            color: #(theme.colors.onSuccess);
+            border: 1.5px solid #(theme.colors.success);
+        }
+
+        .flex-column {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .flex-column > label {
+            color: #(theme.colors.onSurface);
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .inputForm {
+            border: 1.5px solid #(theme.colors.outline);
+            border-radius: 10px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            padding-left: 10px;
+            transition: 0.2s ease-in-out;
+            background-color: #(theme.colors.surface);
+        }
+
+        .inputForm svg {
+            flex-shrink: 0;
+            opacity: 0.6;
+        }
+
+        .inputForm svg path {
+            fill: #(theme.colors.onSurface);
+        }
+
+        .input {
+            margin-left: 10px;
+            border-radius: 10px;
+            border: none;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            color: #(theme.colors.onSurface);
+            font-size: 15px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        .input:focus {
+            outline: none;
+        }
+
+        .input::placeholder {
+            color: #(theme.colors.onSurfaceVariant);
+            opacity: 0.6;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        .inputForm:focus-within {
+            border: 1.5px solid #(theme.colors.primary);
+        }
+
+        .button-submit {
+            margin: 20px 0 10px 0;
+            background-color: #(theme.colors.primary);
+            border: none;
+            color: #(theme.colors.onPrimary);
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 10px;
+            height: 50px;
+            width: 100%;
+            cursor: pointer;
+            transition: 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        .button-submit:hover {
+            filter: brightness(1.16);
+        }
+
+        .button-submit:active {
+            filter: brightness(0.82);
+        }
+
+        .button-submit svg path {
+            fill: #(theme.colors.onPrimary);
+        }
+
+        @media (max-width: 480px) {
+            .form {
+                padding: 25px 20px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <form class="form" id="passkey-form" method="POST">
+        <h1>Create Passkey</h1>
+        <p class="subtitle">Register a passkey to sign in securely without a password using Face ID, Touch ID, or your device PIN.</p>
+
+        #if(params.error):
+        <div class="error">#(params.error)</div>
+        #endif
+
+        #if(params.success):
+        <div class="success">#(params.success)</div>
+        #endif
+
+        <div id="status" class="error" style="display:none"></div>
+        <div id="status-success" class="success" style="display:none"></div>
+
+        <!-- Email/Phone/Username Input -->
+        #if(params.byEmail):
+        <div class="flex-column">
+            <label>Email</label>
+        </div>
+        <div class="inputForm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" viewBox="0 0 32 32" height="20">
+                <g data-name="Layer 3" id="Layer_3">
+                    <path d="m30.853 13.87a15 15 0 0 0 -29.729 4.082 15.1 15.1 0 0 0 12.876 12.918 15.6 15.6 0 0 0 2.016.13 14.85 14.85 0 0 0 7.715-2.145 1 1 0 1 0 -1.031-1.711 13.007 13.007 0 1 1 5.458-6.529 2.149 2.149 0 0 1 -4.158-.759v-10.856a1 1 0 0 0 -2 0v1.726a8 8 0 1 0 .2 10.325 4.135 4.135 0 0 0 7.83.274 15.2 15.2 0 0 0 .823-7.455zm-14.853 8.13a6 6 0 1 1 6-6 6.006 6.006 0 0 1 -6 6z"></path>
+                </g>
+            </svg>
+            <input
+                placeholder="Enter your Email"
+                class="input"
+                type="email"
+                id="email"
+                name="email"
+                required
+                autocomplete="email webauthn"
+            >
+        </div>
+        #elseif(params.byPhone):
+        <div class="flex-column">
+            <label>Phone Number</label>
+        </div>
+        <div class="inputForm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" viewBox="0 0 24 24" height="20">
+                <path d="M6.62,10.79C8.06,13.62 10.38,15.94 13.21,17.38L15.41,15.18C15.69,14.9 16.08,14.82 16.43,14.93C17.55,15.3 18.75,15.5 20,15.5A1,1 0 0,1 21,16.5V20A1,1 0 0,1 20,21A17,17 0 0,1 3,4A1,1 0 0,1 4,3H7.5A1,1 0 0,1 8.5,4C8.5,5.25 8.7,6.45 9.07,7.57C9.18,7.92 9.1,8.31 8.82,8.59L6.62,10.79Z"></path>
+            </svg>
+            <input
+                placeholder="Enter your Phone Number"
+                class="input"
+                type="tel"
+                id="phone"
+                name="phone"
+                required
+                autocomplete="tel webauthn"
+            >
+        </div>
+        #elseif(params.byUsername):
+        <div class="flex-column">
+            <label>Username</label>
+        </div>
+        <div class="inputForm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" viewBox="0 0 24 24" height="20">
+                <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"></path>
+            </svg>
+            <input
+                placeholder="Enter your Username"
+                class="input"
+                type="text"
+                id="username"
+                name="username"
+                required
+                autocomplete="username webauthn"
+            >
+        </div>
+        #endif
+
+        <!-- Display Name Input -->
+        <div class="flex-column">
+            <label>Display Name</label>
+        </div>
+        <div class="inputForm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" viewBox="0 0 24 24" height="20">
+                <path d="M21,6H3A1,1 0 0,0 2,7V17A1,1 0 0,0 3,18H21A1,1 0 0,0 22,17V7A1,1 0 0,0 21,6M11,14.5V13.5C11,12.67 9.67,12 8,12C6.33,12 5,12.67 5,13.5V14.5H11M8,11A1.5,1.5 0 0,0 9.5,9.5A1.5,1.5 0 0,0 8,8A1.5,1.5 0 0,0 6.5,9.5A1.5,1.5 0 0,0 8,11M13,10H19V9H13V10M13,12H19V11H13V12M13,14H17V13H13V14Z"></path>
+            </svg>
+            <input
+                placeholder="Enter a name for this passkey"
+                class="input"
+                type="text"
+                id="displayName"
+                name="displayName"
+                required
+                autocomplete="name"
+            >
+        </div>
+
+        <button type="submit" class="button-submit">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+                <path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,7A3,3 0 0,1 15,10A3,3 0 0,1 12,13A3,3 0 0,1 9,10A3,3 0 0,1 12,7M17.13,17C15.92,18.85 14.11,20.24 12,20.92C9.89,20.24 8.08,18.85 6.87,17C6.53,16.5 6.24,16 6,15.47C6,13.82 8.71,12.47 12,12.47C15.29,12.47 18,13.79 18,15.47C17.76,16 17.47,16.5 17.13,17Z"></path>
+            </svg>
+            Create Passkey
+        </button>
+    </form>
+
+    <script>
+    (function () {
+        const form = document.getElementById('passkey-form');
+        const errorBox = document.getElementById('status');
+        const successBox = document.getElementById('status-success');
+        const beginURL = "#(params.signupBeginURL)";
+        const finishURL = "#(params.signupFinishURL)";
+
+        function showError(message) {
+            errorBox.textContent = message;
+            errorBox.style.display = 'block';
+            successBox.style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            successBox.textContent = message;
+            successBox.style.display = 'block';
+            errorBox.style.display = 'none';
+        }
+
+        function clearStatus() {
+            errorBox.style.display = 'none';
+            successBox.style.display = 'none';
+        }
+
+        // base64url <-> Uint8Array helpers.
+        function base64urlToBytes(input) {
+            const pad = input.length % 4 === 0 ? '' : '='.repeat(4 - (input.length % 4));
+            const b64 = (input + pad).replace(/-/g, '+').replace(/_/g, '/');
+            const bin = atob(b64);
+            const bytes = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+            return bytes;
+        }
+
+        function bytesToBase64url(buffer) {
+            const bytes = new Uint8Array(buffer);
+            let bin = '';
+            for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+            return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+
+        function decodeCreationOptions(options) {
+            options.challenge = base64urlToBytes(options.challenge);
+            options.user.id = base64urlToBytes(options.user.id);
+            if (Array.isArray(options.excludeCredentials)) {
+                options.excludeCredentials = options.excludeCredentials.map(function (c) {
+                    return Object.assign({}, c, { id: base64urlToBytes(c.id) });
+                });
+            }
+            return options;
+        }
+
+        function encodeAttestation(credential) {
+            const r = credential.response;
+            const transports = typeof r.getTransports === 'function' ? r.getTransports() : undefined;
+            return {
+                id: credential.id,
+                rawId: bytesToBase64url(credential.rawId),
+                type: credential.type,
+                response: {
+                    clientDataJSON: bytesToBase64url(r.clientDataJSON),
+                    attestationObject: bytesToBase64url(r.attestationObject),
+                    transports: transports || []
+                },
+                clientExtensionResults: typeof credential.getClientExtensionResults === 'function'
+                    ? credential.getClientExtensionResults()
+                    : {}
+            };
+        }
+
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            clearStatus();
+
+            if (!window.PublicKeyCredential || !navigator.credentials || !navigator.credentials.create) {
+                showError('This browser does not support passkeys.');
+                return;
+            }
+
+            try {
+                const beginResponse = await fetch(beginURL, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    credentials: 'same-origin',
+                    body: new URLSearchParams(new FormData(form)).toString()
+                });
+
+                if (!beginResponse.ok) {
+                    const text = await beginResponse.text();
+                    showError('Failed to start registration: ' + (text || beginResponse.statusText));
+                    return;
+                }
+
+                const options = decodeCreationOptions(await beginResponse.json());
+
+                const credential = await navigator.credentials.create({ publicKey: options });
+                if (!credential) {
+                    showError('No credential was created.');
+                    return;
+                }
+
+                const finishResponse = await fetch(finishURL, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify(encodeAttestation(credential))
+                });
+
+                if (!finishResponse.ok) {
+                    const text = await finishResponse.text();
+                    showError('Failed to finish registration: ' + (text || finishResponse.statusText));
+                    return;
+                }
+
+                showSuccess('Passkey registered successfully.');
+            } catch (err) {
+                showError(err && err.message ? err.message : 'Passkey registration failed.');
+            }
+        });
+    })();
+    </script>
+</body>
+</html>

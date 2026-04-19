@@ -13,6 +13,8 @@ public extension Passage.Configuration {
         let magicLinkVerify: MagicLinkVerifyView?
         let linkAccountSelect: LinkAccountSelectView?
         let linkAccountVerify: LinkAccountVerifyView?
+        let passkeySignup: PasskeySignupView?
+        let passkeyAuthenticate: PasskeyAuthenticateView?
 
         public init(
             register: RegisterView? = nil,
@@ -22,7 +24,9 @@ public extension Passage.Configuration {
             magicLinkRequest: MagicLinkRequestView? = nil,
             magicLinkVerify: MagicLinkVerifyView? = nil,
             linkAccountSelect: LinkAccountSelectView? = nil,
-            linkAccountVerify: LinkAccountVerifyView? = nil
+            linkAccountVerify: LinkAccountVerifyView? = nil,
+            passkeySignup: PasskeySignupView? = nil,
+            passkeyAuthenticate: PasskeyAuthenticateView? = nil,
         ) {
             self.register = register
             self.login = login
@@ -32,6 +36,8 @@ public extension Passage.Configuration {
             self.magicLinkVerify = magicLinkVerify
             self.linkAccountSelect = linkAccountSelect
             self.linkAccountVerify = linkAccountVerify
+            self.passkeySignup = passkeySignup
+            self.passkeyAuthenticate = passkeyAuthenticate
         }
     }
 }
@@ -48,7 +54,9 @@ extension Passage.Configuration.Views {
         magicLinkRequest != nil ||
         magicLinkVerify != nil ||
         linkAccountSelect != nil ||
-        linkAccountVerify != nil
+        linkAccountVerify != nil ||
+        passkeySignup != nil ||
+        passkeyAuthenticate != nil
     }
 }
 
@@ -262,3 +270,47 @@ public extension Passage.Configuration.Views {
     }
 
 }
+
+// MARK: - Passkey Views
+
+public extension Passage.Configuration.Views {
+
+    struct PasskeySignupView: Sendable, View {
+        let name: String = "passkey-signup"
+        let style: Passage.Views.Style
+        let theme: Passage.Views.Theme
+        let redirect: Redirect
+        let identifier: Identifier.Kind
+
+        public init(
+            style: Passage.Views.Style,
+            theme: Passage.Views.Theme,
+            redirect: Redirect = .init(),
+            identifier: Identifier.Kind,
+        ) {
+            self.style = style
+            self.theme = theme
+            self.redirect = redirect
+            self.identifier = identifier
+        }
+    }
+
+    struct PasskeyAuthenticateView: Sendable, View {
+        let name: String = "passkey-authenticate"
+        let style: Passage.Views.Style
+        let theme: Passage.Views.Theme
+        let redirect: Redirect
+
+        public init(
+            style: Passage.Views.Style,
+            theme: Passage.Views.Theme,
+            redirect: Redirect = .init(),
+        ) {
+            self.style = style
+            self.theme = theme
+            self.redirect = redirect
+        }
+    }
+
+}
+

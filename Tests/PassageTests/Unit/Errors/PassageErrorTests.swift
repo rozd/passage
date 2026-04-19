@@ -13,6 +13,9 @@ struct PassageErrorTests {
         (PassageError.jwksNotConfigured, HTTPResponseStatus.internalServerError),
         (PassageError.emailDeliveryNotConfigured, HTTPResponseStatus.internalServerError),
         (PassageError.phoneDeliveryNotConfigured, HTTPResponseStatus.internalServerError),
+        (PassageError.emailMagicLinkNotConfigured, HTTPResponseStatus.internalServerError),
+        (PassageError.passkeyNotConfigured, HTTPResponseStatus.internalServerError),
+        (PassageError.passkeyServiceNotAvailable, HTTPResponseStatus.internalServerError),
         (PassageError.missingEnvironmentVariable(name: "TEST"), HTTPResponseStatus.internalServerError),
         (PassageError.unexpected(message: "test"), HTTPResponseStatus.internalServerError)
     ])
@@ -56,6 +59,24 @@ struct PassageErrorTests {
     func missingEnvironmentVariableReason() {
         let error = PassageError.missingEnvironmentVariable(name: "JWKS_FILE_PATH")
         #expect(error.reason == "Missing environment variable: JWKS_FILE_PATH")
+    }
+
+    @Test("PassageError emailMagicLinkNotConfigured reason")
+    func emailMagicLinkNotConfiguredReason() {
+        let error = PassageError.emailMagicLinkNotConfigured
+        #expect(error.reason == "Email magic link is not configured. Provide emailMagicLink in passwordless configuration.")
+    }
+
+    @Test("PassageError passkeyNotConfigured reason")
+    func passkeyNotConfiguredReason() {
+        let error = PassageError.passkeyNotConfigured
+        #expect(error.reason == "Passkey is not configured. Provide passkey in app.passage.configure().")
+    }
+
+    @Test("PassageError passkeyServiceNotAvailable reason")
+    func passkeyServiceNotAvailableReason() {
+        let error = PassageError.passkeyServiceNotAvailable
+        #expect(error.reason == "Passkey service is not available. Please ensure you have integrated a passkey service implementation.")
     }
 
     @Test("PassageError unexpected reason with custom message")
@@ -141,6 +162,9 @@ struct PassageErrorTests {
     func conformsToSendable() {
         assertSendable(PassageError.notConfigured)
         assertSendable(PassageError.storeNotConfigured)
+        assertSendable(PassageError.emailMagicLinkNotConfigured)
+        assertSendable(PassageError.passkeyNotConfigured)
+        assertSendable(PassageError.passkeyServiceNotAvailable)
         assertSendable(PassageError.missingEnvironmentVariable(name: "TEST"))
         assertSendable(PassageError.unexpected(message: "test"))
     }

@@ -11,8 +11,20 @@ public extension Passage {
         var restorationCodes: any RestorationCodeStore { get }
         var magicLinkTokens: any MagicLinkTokenStore { get }
         var exchangeTokens: any ExchangeTokenStore { get }
+        var passkeyCredentials: (any PasskeyCredentialStore)? { get }
+        var passkeyChallenges: (any PasskeyChallengeStore)? { get }
     }
 
+}
+
+// MARK: - Store Default Implementations
+
+/// Default-nil implementations for the opt-in passkey sub-stores. This preserves
+/// source compatibility for existing `Store` conformances (e.g. third-party
+/// stores and `PassageFluent.DatabaseStore`) that predate passkey support.
+public extension Passage.Store {
+    var passkeyCredentials: (any Passage.PasskeyCredentialStore)? { nil }
+    var passkeyChallenges: (any Passage.PasskeyChallengeStore)? { nil }
 }
 
 // MARK: - User Store
@@ -260,6 +272,76 @@ public extension Passage {
         /// Clean up expired exchange tokens
         /// - Parameter date: Remove tokens expired before this date
         func cleanupExpiredTokens(before date: Date) async throws
+    }
+
+}
+
+// MARK: - Passkey Credential Store
+
+public extension Passage {
+
+    protocol PasskeyCredentialStore: Sendable {
+
+        /// Persist a newly-registered credential for a user.
+        @discardableResult
+        func createPasskeyCredential(
+            for user: any User,
+            from credential: PasskeyCredential
+        ) async throws -> any StoredPasskeyCredential
+
+        /// Look up a credential by its W3C `id` (base64url string).
+        /// Used both during authentication and for the
+        /// `confirmCredentialIDNotRegisteredYet:` uniqueness check at registration.
+        func find(byCredentialID credentialID: String) async throws -> (any StoredPasskeyCredential)?
+
+        /// List all credentials owned by a user (for device-management UIs).
+        func listPasskeyCredentials(forUser user: any User) async throws -> [any StoredPasskeyCredential]
+
+        /// Update sign count and backup state after a successful authentication.
+        /// Sign-count monotonicity is an anti-cloning heuristic, not a hard gate —
+        /// the caller decides whether a regression warrants rejection.
+        func updatePasskeyCredentialAfterAuthentication(
+            forCredentialID credentialID: String,
+            newSignCount: UInt32,
+            isBackedUp: Bool
+        ) async throws
+
+        /// Remove a credential (user-initiated device removal).
+        func deletePasskeyCredential(byCredentialID credentialID: String) async throws
+    }
+
+}
+
+// MARK: - Passkey Challenge Store
+
+public extension Passage {
+
+    protocol PasskeyChallengeStore: Sendable {
+
+        /// Persist a challenge that was just issued to the client.
+        /// Implementations SHA-256 the raw `challenge.bytes` before writing —
+        /// only the hash is persisted (see ``StoredPasskeyChallenge/challengeHash``).
+        /// - Parameters:
+        ///   - user: The user this challenge was issued for, or nil for a
+        ///     discoverable-authentication challenge.
+        ///   - challenge: Freshly-issued challenge DTO from the ``PasskeyService``.
+        @discardableResult
+        func createPasskeyChallenge(
+            for user: (any User)?,
+            from challenge: PasskeyChallenge
+        ) async throws -> any StoredPasskeyChallenge
+
+        /// Look up a stored challenge by the raw bytes the authenticator echoed
+        /// back in `clientDataJSON`. Implementations SHA-256 and index internally
+        /// — callers never see the hash. Used in `finishRegistration` /
+        /// `finishAuthentication` to prove freshness.
+        func find(passkeyChallengeMatching bytes: Data) async throws -> (any StoredPasskeyChallenge)?
+
+        /// Mark a challenge as consumed (one-shot enforcement).
+        func consume(passkeyChallenge: any StoredPasskeyChallenge) async throws
+
+        /// Remove challenges that expired before the given date.
+        func cleanupExpiredPasskeyChallenges(before date: Date) async throws
     }
 
 }

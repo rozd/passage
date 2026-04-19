@@ -1,6 +1,7 @@
 import Testing
 import Vapor
 import JWTKit
+import Foundation
 @testable import Passage
 @testable import PassageOnlyForTest
 
@@ -277,6 +278,86 @@ struct AccountMethodsTests {
     func loginPasswordIsNotSetHasCorrectReason() async throws {
         let error = AuthenticationError.passwordIsNotSet
         #expect(error.reason == "Password is not set for this account.")
+    }
+
+    // MARK: - user(withId:) Tests
+
+    @Test("user(withId:) returns user when ID exists")
+    func userWithIdReturnsUser() async throws {
+        let app = try await Application.make(.testing)
+        defer { Task { try await app.asyncShutdown() } }
+        try await configure(app)
+
+        let user = try await createTestUser(app: app, email: "byid@example.com")
+        let userId = try user.requiredIdAsString
+
+        let request = Request(application: app, on: app.eventLoopGroup.next())
+        let account = Passage.Account(request: request)
+
+        let found = try await account.user(withId: userId)
+        #expect((try found.requiredIdAsString) == userId)
+    }
+
+    @Test("user(withId:) throws userNotFound when ID does not exist")
+    func userWithIdThrowsWhenNotFound() async throws {
+        let app = try await Application.make(.testing)
+        defer { Task { try await app.asyncShutdown() } }
+        try await configure(app)
+
+        let request = Request(application: app, on: app.eventLoopGroup.next())
+        let account = Passage.Account(request: request)
+
+        await #expect(throws: AuthenticationError.self) {
+            _ = try await account.user(withId: "nonexistent-id")
+        }
+    }
+
+    // MARK: - user(for:) Tests
+
+    @Test("user(for:) returns user matching access token subject")
+    func userForAccessTokenReturnsMatchingUser() async throws {
+        let app = try await Application.make(.testing)
+        defer { Task { try await app.asyncShutdown() } }
+        try await configure(app)
+
+        let user = try await createTestUser(app: app, email: "tokenuser@example.com")
+        let userId = try user.requiredIdAsString
+
+        let request = Request(application: app, on: app.eventLoopGroup.next())
+        let account = Passage.Account(request: request)
+
+        let accessToken = AccessToken(
+            userId: userId,
+            expiresAt: Date().addingTimeInterval(3600),
+            issuer: "test-issuer",
+            audience: nil,
+            scope: nil
+        )
+
+        let found = try await account.user(for: accessToken)
+        #expect((try found.requiredIdAsString) == userId)
+    }
+
+    @Test("user(for:) throws userNotFound for unknown subject")
+    func userForUnknownSubjectThrows() async throws {
+        let app = try await Application.make(.testing)
+        defer { Task { try await app.asyncShutdown() } }
+        try await configure(app)
+
+        let request = Request(application: app, on: app.eventLoopGroup.next())
+        let account = Passage.Account(request: request)
+
+        let accessToken = AccessToken(
+            userId: "no-such-user",
+            expiresAt: Date().addingTimeInterval(3600),
+            issuer: "test-issuer",
+            audience: nil,
+            scope: nil
+        )
+
+        await #expect(throws: AuthenticationError.self) {
+            _ = try await account.user(for: accessToken)
+        }
     }
 }
 

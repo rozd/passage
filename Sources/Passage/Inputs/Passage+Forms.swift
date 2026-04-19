@@ -193,7 +193,7 @@ extension Passage {
 
 }
 
-//
+// MARK: - Account Linking Forms
 
 extension Passage {
 
@@ -219,4 +219,24 @@ extension Passage {
         let verificationCode: String?
     }
 
+}
+
+// MARK: - Passkey Default Forms
+
+extension Passage {
+
+    struct DefaultPasskeySignupForm: PasskeySignupForm {
+        static func validations(_ validations: inout Validations) {
+            validations.add("email", as: String?.self, is: .email || .nil, required: false)
+        }
+
+        let email: String?
+        let phone: String?
+        let username: String?
+        let displayName: String
+
+        func validate() throws {
+            // No additional validation needed for signup form
+        }
+    }
 }

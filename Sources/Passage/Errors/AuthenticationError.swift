@@ -53,6 +53,11 @@ public enum AuthenticationError: Error {
     // Federated account errors
     case federatedAccountAlreadyLinked
     case federatedLoginFailed
+
+    // Passkey errors
+    case invalidPasskeyChallenge
+    case unknownPasskey
+    case discoverableLoginDisabled
 }
 
 extension AuthenticationError: AbortError {
@@ -100,6 +105,12 @@ extension AuthenticationError: AbortError {
             return .conflict
         case .federatedLoginFailed:
             return .unauthorized
+        case .invalidPasskeyChallenge:
+            return .unauthorized
+        case .unknownPasskey:
+            return .unauthorized
+        case .discoverableLoginDisabled:
+            return .badRequest
         }
     }
 
@@ -171,6 +182,12 @@ extension AuthenticationError: AbortError {
             return "This federated account is already linked to another user."
         case .federatedLoginFailed:
             return "Federated login failed."
+        case .invalidPasskeyChallenge:
+            return "Invalid or expired passkey challenge."
+        case .unknownPasskey:
+            return "Passkey is not registered."
+        case .discoverableLoginDisabled:
+            return "Discoverable passkey login is disabled by server policy."
         }
     }
 }

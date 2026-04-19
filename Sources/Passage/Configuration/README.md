@@ -28,6 +28,7 @@ try await app.passage.configure(
 | `restoration` | `Configuration+Restoration.swift` | Password reset |
 | `passwordless` | `Configuration+Passwordless.swift` | Magic links |
 | `federatedLogin` | `Configuration+FederatedLogin.swift` | OAuth providers |
+| `passkey` | `Configuration+Passkey.swift` | WebAuthn / FIDO2 passkeys (default `.init()`) |
 | `views` | `Configuration+Views.swift` | Server-rendered UI |
 
 ## Required Parameters
@@ -83,4 +84,5 @@ Each configuration section is documented in its feature README:
 - [Restoration](../Features/Restoration/README.md) - Password reset config
 - [Passwordless](../Features/Passwordless/README.md) - Magic link config
 - [Federated Login](../Features/FederatedLogin/README.md) - OAuth config
+- [Passkey](../Features/Passkey/README.md) - WebAuthn config (RP, challenge TTL, policy)
 - [Views](../Features/Views/README.md) - UI config

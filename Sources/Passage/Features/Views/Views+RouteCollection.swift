@@ -4,12 +4,13 @@ extension Passage.Views {
 
     struct RouteCollection: Vapor.RouteCollection, Sendable {
 
+        let group: [PathComponent]
         let config: Passage.Configuration.Views
         let routes: Passage.Configuration.Routes
         let restoration: Passage.Configuration.Restoration
         let passwordless: Passage.Configuration.Passwordless
         let federatedLogin: Passage.Configuration.FederatedLogin
-        let group: [PathComponent]
+        let passkey: Passage.Configuration.Passkey?
 
         func boot(routes builder: any RoutesBuilder) throws {
             let grouped = group.isEmpty ? builder : builder.grouped(group)
@@ -71,6 +72,21 @@ extension Passage.Views {
             if let _ = config.linkAccountVerify {
                 grouped.get(federatedLogin.linkAccountVerifyPath) { req in
                     try await req.views.renderLinkAccountVerifyView()
+                }
+            }
+
+            if let routes = passkey?.routes {
+                grouped.group(routes.group) { group in
+                    if config.passkeySignup != nil {
+                        group.get(routes.signupBegin.path) { req in
+                            try await req.views.renderPasskeySignupView()
+                        }
+                    }
+                    if config.passkeyAuthenticate != nil {
+                        group.get(routes.authenticateBegin.path) { req in
+                            try await req.views.renderPasskeyAuthenticateView()
+                        }
+                    }
                 }
             }
         }

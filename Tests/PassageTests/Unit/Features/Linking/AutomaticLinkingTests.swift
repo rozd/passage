@@ -295,6 +295,38 @@ struct AutomaticLinkingTests {
         }
     }
 
+    @Test("Automatic linking returns skipped on ambiguous match with ignoreAndCreateNew resolution")
+    func returnsSkippedWithIgnoreAndCreateNew() async throws {
+        try await withApp(configure: { app in
+            try await configureWithAutomaticLinking(app)
+        }) { app in
+            let user1 = try await createTestUser(app: app, email: "a@example.com", isEmailVerified: true)
+            let user2 = try await createTestUser(app: app, email: "b@example.com", isEmailVerified: true)
+
+            let identity = FederatedIdentity(
+                identifier: .federated(.google, userId: "multi-match"),
+                provider: .google,
+                verifiedEmails: [user1.email!, user2.email!],
+                verifiedPhoneNumbers: [],
+                displayName: nil,
+                profilePictureURL: nil
+            )
+
+            let request = Request(application: app, on: app.eventLoopGroup.any())
+            let result = try await request.linking.automatic.perform(
+                for: identity,
+                withAllowedIdentifiers: [.email],
+                onAmbiguousMatch: .ignoreAndCreateNew
+            )
+
+            if case .skipped = result {
+                #expect(Bool(true))
+            } else {
+                Issue.record("Expected .skipped when ignoreAndCreateNew resolves ambiguity")
+            }
+        }
+    }
+
     // MARK: - Identifier Type Tests
 
     @Test("Automatic linking only checks allowed identifier types")

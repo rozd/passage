@@ -10,32 +10,37 @@ public extension Passage {
         let emailDelivery: (any EmailDelivery)?
         let phoneDelivery: (any PhoneDelivery)?
         let federatedLogin: (any FederatedLoginService)?
+        let passkey: (any PasskeyService)?
 
         public init(
             store: any Store,
             random: any RandomGenerator,
             emailDelivery: (any EmailDelivery)?,
             phoneDelivery: (any PhoneDelivery)?,
-            federatedLogin: (any FederatedLoginService)? = nil
+            federatedLogin: (any FederatedLoginService)? = nil,
+            passkey: (any PasskeyService)? = nil,
         ) {
             self.store = store
             self.random = random
             self.emailDelivery = emailDelivery
             self.phoneDelivery = phoneDelivery
             self.federatedLogin = federatedLogin
+            self.passkey = passkey
         }
 
         public init(
             store: any Store,
             emailDelivery: (any EmailDelivery)?,
             phoneDelivery: (any PhoneDelivery)?,
-            federatedLogin: (any FederatedLoginService)? = nil
+            federatedLogin: (any FederatedLoginService)? = nil,
+            passkey: (any PasskeyService)? = nil,
         ) {
             self.store = store
             self.random = DefaultRandomGenerator()
             self.emailDelivery = emailDelivery
             self.phoneDelivery = phoneDelivery
             self.federatedLogin = federatedLogin
+            self.passkey = passkey
         }
     }
 }
@@ -73,5 +78,9 @@ extension Passage {
 
     var federatedLogin: (any FederatedLoginService)? {
         services.federatedLogin
+    }
+
+    var passkey: (any PasskeyService)? {
+        services.passkey
     }
 }
