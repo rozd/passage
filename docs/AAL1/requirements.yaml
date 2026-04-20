@@ -397,8 +397,9 @@ requirements:
     section: "5.1.1.2 Memorized Secret Verifiers"
     tags: [memorizedSecret, authenticator]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/PasswordHintTests.swift::noUnauthenticatedHintEndpoint
     excluded_reason: null
     requirement: |
       Memorized secret verifiers SHALL NOT permit the subscriber to store a "hint" that is accessible to an unauthenticated claimant.
