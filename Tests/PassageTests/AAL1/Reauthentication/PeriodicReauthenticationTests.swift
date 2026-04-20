@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 @testable import Passage
 
@@ -35,5 +36,21 @@ struct PeriodicReauthenticationTests {
                 "refresh-token TTL must be finite to enforce reauthentication")
         #expect(tokens.accessToken.timeToLive < tokens.refreshToken.timeToLive,
                 "access-token TTL must be shorter than refresh-token TTL")
+    }
+
+    @Test(
+        "§4.1.3-b: Default refresh token TTL is at most 30 days (AAL1 SHOULD ceiling)",
+        .tags(.aal1, .reauthentication, .authenticator, .unit, .should)
+    )
+    func refreshTokenTTLWithin30DayCeiling() async throws {
+        // AAL1 SHOULD reauthenticate at least once per 30 days during an
+        // extended usage session, regardless of user activity. Passage's
+        // refresh-token TTL is the upper bound on how long a session can
+        // survive without reauthentication, so the default MUST NOT exceed
+        // 30 days.
+        let thirtyDays: TimeInterval = 30 * 24 * 3600
+        let tokens = Passage.Configuration.Tokens()
+        #expect(tokens.refreshToken.timeToLive <= thirtyDays,
+                "default refresh-token TTL must be <= 30 days to satisfy AAL1 §4.1.3-b")
     }
 }

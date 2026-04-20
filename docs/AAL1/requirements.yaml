@@ -104,8 +104,9 @@ requirements:
     section: "4.1.3 Reauthentication"
     tags: [reauthentication, authenticator]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/Reauthentication/PeriodicReauthenticationTests.swift::refreshTokenTTLWithin30DayCeiling
     excluded_reason: null
     requirement: |
       At AAL1, reauthentication of the subscriber SHOULD be repeated at least once per 30 days during an extended usage session, regardless of user activity.
