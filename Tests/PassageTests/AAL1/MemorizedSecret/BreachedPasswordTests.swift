@@ -129,4 +129,33 @@ struct BreachedPasswordTests {
             })
         }
     }
+
+    private struct VaporErrorBody: Content {
+        let error: Bool
+        let reason: String
+    }
+
+    @Test(
+        "§5.1.1.2-m: Rejection response advises the subscriber to select a different secret",
+        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall)
+    )
+    func rejectionAdvisesSelectingDifferentSecret() async throws {
+        try await withApp(configure: configureWithBlocklist) { app in
+            try await app.testing().test(.POST, "auth/register", beforeRequest: { req in
+                try req.content.encode([
+                    "username": "advisory-user",
+                    "password": "password123456",
+                    "confirmPassword": "password123456"
+                ])
+            }, afterResponse: { res async throws in
+                #expect(res.status == .badRequest)
+
+                // Vapor renders AbortError as { "error": true, "reason": "..." }
+                let body = try res.content.decode(VaporErrorBody.self)
+                let lowerReason = body.reason.lowercased()
+                #expect(lowerReason.contains("different") || lowerReason.contains("choose") || lowerReason.contains("try"),
+                        "rejection reason must advise subscriber to choose a different secret per §5.1.1.2-m — got: \(body.reason)")
+            })
+        }
+    }
 }
