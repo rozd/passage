@@ -93,8 +93,9 @@ requirements:
     section: "4.1.3 Reauthentication"
     tags: [reauthentication, authenticator]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/Reauthentication/PeriodicReauthenticationTests.swift::refreshTokenTTLIsFinite
     excluded_reason: null
     requirement: |
       Periodic reauthentication of subscriber sessions SHALL be performed as described in Section 7.2.
