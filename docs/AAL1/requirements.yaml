@@ -275,8 +275,9 @@ requirements:
     section: "5.1.1.1 Memorized Secret Authenticators"
     tags: [memorizedSecret, authenticator]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/BreachedPasswordTests.swift::blocklistedSecretForcesSubscriberToChooseAnother
     excluded_reason: null
     requirement: |
       If the CSP or verifier disallows a chosen memorized secret based on its appearance on a blacklist of compromised values, the subscriber SHALL be required to choose a different memorized secret.
