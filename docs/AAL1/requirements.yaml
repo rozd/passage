@@ -499,8 +499,9 @@ requirements:
     section: "5.1.1.2 Memorized Secret Verifiers"
     tags: [memorizedSecret, authenticator]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/PasswordRotationTests.swift::noPasswordRotationPolicyField
     excluded_reason: null
     requirement: |
       Verifiers SHOULD NOT require memorized secrets to be changed arbitrarily (e.g., periodically).
