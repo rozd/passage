@@ -254,8 +254,9 @@ requirements:
     section: "5.1.1.1 Memorized Secret Authenticators"
     tags: [memorizedSecret, authenticator]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/MinimumLengthTests.swift::subscriberChosenSecretBelow8CharsIsRejected
     excluded_reason: null
     requirement: |
       Memorized secrets SHALL be at least 8 characters in length if chosen by the subscriber.
