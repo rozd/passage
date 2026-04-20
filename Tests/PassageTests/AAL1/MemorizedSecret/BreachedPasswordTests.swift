@@ -87,4 +87,46 @@ struct BreachedPasswordTests {
             })
         }
     }
+
+    @Test(
+        "§5.1.1.2-l: Verifier compares prospective secret against the blocklist at password change",
+        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall)
+    )
+    func verifierChecksBlocklistAtPasswordChange() async throws {
+        try await withApp(configure: configureWithBlocklist) { app in
+            // Seed a verified email user so the reset flow has a target.
+            let store = app.passage.storage.services.store
+            _ = try await store.users.create(
+                identifier: .email("change@example.com"),
+                with: .password("$2b$12$initial-hash-placeholder-value")
+            )
+            let user = try #require(
+                try await store.users.find(byIdentifier: .email("change@example.com"))
+            )
+            try await store.users.markEmailVerified(for: user)
+
+            // Request reset code (we do not need to submit the real code —
+            // the verifier MUST reject the blocklisted password before any
+            // code check could succeed).
+            try await app.testing().test(.POST, "/auth/password/reset/email", beforeRequest: { req in
+                try req.content.encode(["email": "change@example.com"])
+            }, afterResponse: { res async in
+                #expect(res.status == .ok)
+            })
+
+            // §5.1.1.2-l applies to both "establish" and "change" — here we
+            // exercise change. Submitting the blocklisted value as the new
+            // password MUST be rejected by the verifier.
+            try await app.testing().test(.POST, "/auth/password/reset/email/verify", beforeRequest: { req in
+                try req.content.encode([
+                    "email": "change@example.com",
+                    "code": "ANY-CODE",
+                    "newPassword": "password123456"
+                ])
+            }, afterResponse: { res async in
+                #expect(res.status == .badRequest,
+                        "the verifier must compare the new password against the blocklist per §5.1.1.2-l")
+            })
+        }
+    }
 }
