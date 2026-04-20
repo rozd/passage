@@ -344,8 +344,9 @@ requirements:
     section: "5.1.1.2 Memorized Secret Verifiers"
     tags: [memorizedSecret, authenticator]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/TruncationTests.swift::truncatedPrefixMustNotAuthenticate
     excluded_reason: null
     requirement: |
       Truncation of the secret SHALL NOT be performed.
