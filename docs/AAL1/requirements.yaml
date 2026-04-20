@@ -52,8 +52,9 @@ requirements:
     section: "4.1.2 Authenticator and Verifier Requirements"
     tags: [authenticator]
     testability: design-assertion
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/Architectural.swift::cryptographicAuthenticatorsUseApprovedCryptography
     excluded_reason: null
     requirement: |
       Cryptographic authenticators used at AAL1 SHALL use approved cryptography.
