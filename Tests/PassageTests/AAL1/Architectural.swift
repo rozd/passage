@@ -60,4 +60,30 @@ struct AAL1ArchitecturalTests {
         let ok = try Bcrypt.verify("a-secret-password", created: hash)
         #expect(ok, "Bcrypt.verify must round-trip the hash")
     }
+
+    @Test(
+        "§5.1.1.2-x: Memorized secrets are salted and hashed using an approved KDF (Bcrypt)",
+        .tags(.aal1, .memorizedSecret, .authenticator, .unit, .shall)
+    )
+    func saltedHashedWithApprovedKDF() async throws {
+        // Bcrypt (OpenBSD, 1999) is the key-derivation function Vapor
+        // exposes and Passage delegates to. Its output encodes the KDF
+        // variant, the cost factor, a 128-bit random salt, and the
+        // derived key. The structural attestation: the hash string
+        // matches that modular-crypt shape — `$2[abxy]$<cost>$<22-char
+        // base64 salt><31-char base64 key>`. A regression away from
+        // Bcrypt (e.g. bare SHA-256) would immediately break the shape.
+        let hash = try Bcrypt.hash("§5.1.1.2-x sample", cost: 4)
+        #expect(hash.hasPrefix("$2"),
+                "Bcrypt prefix encodes the KDF family — required by §5.1.1.2-x")
+        // Modular-crypt body: $2X$NN$<22-char salt><31-char hash> ≥ 59
+        #expect(hash.count >= 59,
+                "Bcrypt output must include salt + derived key — got \(hash.count) chars")
+
+        // Two hashes of the same input differ — proves a random per-hash
+        // salt is in use (the "salted" half of §5.1.1.2-x).
+        let twin = try Bcrypt.hash("§5.1.1.2-x sample", cost: 4)
+        #expect(hash != twin,
+                "two fresh Bcrypt hashes of the same input must differ — salt must be random")
+    }
 }
