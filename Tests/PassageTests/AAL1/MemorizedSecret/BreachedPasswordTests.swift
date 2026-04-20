@@ -158,4 +158,29 @@ struct BreachedPasswordTests {
             })
         }
     }
+
+    @Test(
+        "§5.1.1.2-n: Rejection response provides a non-empty reason identifying the password as the rejected input",
+        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall)
+    )
+    func rejectionProvidesReason() async throws {
+        try await withApp(configure: configureWithBlocklist) { app in
+            try await app.testing().test(.POST, "auth/register", beforeRequest: { req in
+                try req.content.encode([
+                    "username": "reason-user",
+                    "password": "password123456",
+                    "confirmPassword": "password123456"
+                ])
+            }, afterResponse: { res async throws in
+                #expect(res.status == .badRequest)
+
+                let body = try res.content.decode(VaporErrorBody.self)
+                #expect(body.error == true, "response must signal an error")
+                #expect(!body.reason.isEmpty,
+                        "rejection must carry a non-empty reason per §5.1.1.2-n")
+                #expect(body.reason.lowercased().contains("password"),
+                        "reason must identify the password as the rejected input — got: \(body.reason)")
+            })
+        }
+    }
 }
