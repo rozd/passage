@@ -80,4 +80,38 @@ struct CharacterAcceptanceTests {
             })
         }
     }
+
+    @Test(
+        "§5.1.1.2-d: Verifier accepts a password containing Unicode characters",
+        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .should)
+    )
+    func unicodeCharactersAreAccepted() async throws {
+        // Mix Latin, Cyrillic, CJK, and a supplementary-plane emoji to
+        // cover BMP + non-BMP. Any verifier that rejected non-ASCII would
+        // fail on at least one of these.
+        let password = "Pässwörd-пароль-密码-🔐"
+
+        try await withApp(configure: configure) { app in
+            try await app.testing().test(.POST, "auth/register", beforeRequest: { req in
+                try req.content.encode([
+                    "username": "unicode-user",
+                    "password": password,
+                    "confirmPassword": password
+                ])
+            }, afterResponse: { res async in
+                #expect(res.status == .ok,
+                        "Unicode memorized secrets must be accepted per §5.1.1.2-d")
+            })
+
+            try await app.testing().test(.POST, "auth/login", beforeRequest: { req in
+                try req.content.encode([
+                    "username": "unicode-user",
+                    "password": password
+                ])
+            }, afterResponse: { res async in
+                #expect(res.status == .ok,
+                        "Unicode login must round-trip the full byte sequence")
+            })
+        }
+    }
 }

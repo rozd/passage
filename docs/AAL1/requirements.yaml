@@ -333,8 +333,9 @@ requirements:
     section: "5.1.1.2 Memorized Secret Verifiers"
     tags: [memorizedSecret, authenticator]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/CharacterAcceptanceTests.swift::unicodeCharactersAreAccepted
     excluded_reason: null
     requirement: |
       Unicode [ISO/ISC 10646] characters SHOULD be accepted as well.
