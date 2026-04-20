@@ -286,8 +286,9 @@ requirements:
     section: "5.1.1.1 Memorized Secret Authenticators"
     tags: [memorizedSecret, authenticator]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/ComplexityTests.swift::lengthCompliantLowercasePasswordIsAccepted
     excluded_reason: null
     requirement: |
       No other complexity requirements for memorized secrets SHOULD be imposed. A rationale for this is presented in Appendix A Strength of Memorized Secrets.
