@@ -183,4 +183,42 @@ struct BreachedPasswordTests {
             })
         }
     }
+
+    @Test(
+        "§5.1.1.2-o: After a blocklist rejection the subscriber can register successfully with a different secret",
+        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall)
+    )
+    func rejectedSubscriberCanRetryWithDifferentSecret() async throws {
+        try await withApp(configure: configureWithBlocklist) { app in
+            // First attempt — blocklisted.
+            try await app.testing().test(.POST, "auth/register", beforeRequest: { req in
+                try req.content.encode([
+                    "username": "retry-user",
+                    "password": "password123456",
+                    "confirmPassword": "password123456"
+                ])
+            }, afterResponse: { res async in
+                #expect(res.status == .badRequest)
+            })
+
+            // No account should have been persisted by the failed attempt —
+            // if the partial user were kept, §5.1.1.2-o's retry could not
+            // use the same identifier.
+            let store = app.passage.storage.services.store
+            let afterRejection = try await store.users.find(byIdentifier: .username("retry-user"))
+            #expect(afterRejection == nil, "rejected registration must not leave a partial user record")
+
+            // Retry with a different value — SHALL succeed.
+            try await app.testing().test(.POST, "auth/register", beforeRequest: { req in
+                try req.content.encode([
+                    "username": "retry-user",
+                    "password": "fresh-secret-9f",
+                    "confirmPassword": "fresh-secret-9f"
+                ])
+            }, afterResponse: { res async in
+                #expect(res.status == .ok,
+                        "a different (non-blocklisted) secret must be accepted per §5.1.1.2-o")
+            })
+        }
+    }
 }

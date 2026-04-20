@@ -456,8 +456,9 @@ requirements:
     section: "5.1.1.2 Memorized Secret Verifiers"
     tags: [memorizedSecret, authenticator]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/BreachedPasswordTests.swift::rejectedSubscriberCanRetryWithDifferentSecret
     excluded_reason: null
     requirement: |
       [If the chosen secret is found in the list, the CSP or verifier] SHALL require the subscriber to choose a different value.
