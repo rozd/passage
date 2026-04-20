@@ -69,4 +69,44 @@ struct MinimumLengthTests {
             })
         }
     }
+
+    @Test(
+        "§5.1.1.2-a: Verifier rejects a password-reset submission whose new secret is shorter than 8 characters",
+        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall)
+    )
+    func verifierRejectsShortNewPasswordAtReset() async throws {
+        try await withApp(configure: configure) { app in
+            // Seed a verified email user so the reset flow has a user to act
+            // on — bypasses the registration/verify mails in a single create.
+            let store = app.passage.storage.services.store
+            _ = try await store.users.create(
+                identifier: .email("verifier@example.com"),
+                with: .password("$2b$12$valid-initial-hash")
+            )
+            try await store.users.markEmailVerified(for: try #require(
+                try await store.users.find(byIdentifier: .email("verifier@example.com"))
+            ))
+
+            // Request a reset code so we have a valid code in hand.
+            try await app.testing().test(.POST, "/auth/password/reset/email", beforeRequest: { req in
+                try req.content.encode(["email": "verifier@example.com"])
+            }, afterResponse: { res async in
+                #expect(res.status == .ok)
+            })
+
+            // Submit a new password that is one character below the §5.1.1.2-a
+            // verifier floor. The code doesn't need to be valid — the verifier
+            // SHALL reject the password independently of code validity.
+            try await app.testing().test(.POST, "/auth/password/reset/email/verify", beforeRequest: { req in
+                try req.content.encode([
+                    "email": "verifier@example.com",
+                    "code": "ANY-CODE",
+                    "newPassword": "short-7"
+                ])
+            }, afterResponse: { res async in
+                #expect(res.status == .badRequest,
+                        "verifier must reject a 7-char new password at reset to satisfy §5.1.1.2-a")
+            })
+        }
+    }
 }

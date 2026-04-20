@@ -300,8 +300,9 @@ requirements:
     section: "5.1.1.2 Memorized Secret Verifiers"
     tags: [memorizedSecret, authenticator]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/MinimumLengthTests.swift::verifierRejectsShortNewPasswordAtReset
     excluded_reason: null
     requirement: |
       Verifiers SHALL require subscriber-chosen memorized secrets to be at least 8 characters in length.
