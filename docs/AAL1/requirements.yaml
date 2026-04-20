@@ -623,8 +623,9 @@ requirements:
     section: "5.2.2 Rate Limiting (Throttling)"
     tags: [throttling, authenticator]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/Throttling/OnlineGuessingTests.swift::loginThrottlesSprayAttacks
     excluded_reason: null
     requirement: |
       When required by the authenticator type descriptions in Section 5.1, the verifier SHALL implement controls to protect against online guessing attacks.
