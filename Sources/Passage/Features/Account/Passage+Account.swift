@@ -45,7 +45,12 @@ extension Passage.Account {
 extension Passage.Account {
 
     func register(form: any RegisterForm) async throws {
-        let hash = try await request.password.async.hash(form.password)
+        let policy = request.configuration.passwordPolicy
+
+        let password = form.password
+        try policy.validate(password: password)
+
+        let hash = try await request.password.async.hash(password)
 
         let identifier = try form.asIdentifier()
 

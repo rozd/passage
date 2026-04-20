@@ -71,26 +71,26 @@ extension Passage.Restoration {
         }
     }
 
-    /// Verify reset code and set new password
-    func verifyAndResetPassword(
-        identifier: Identifier,
-        code: String,
-        newPasswordHash: String
-    ) async throws {
-        // Hash the code for comparison
-        let codeHash = random.hashOpaqueToken(token: code)
+    func verifyReset(form: any PasswordResetVerifyForm) async throws {
+        let policy = request.configuration.passwordPolicy
 
-        // Find and validate the code based on identifier type
-        switch identifier.kind {
+        let newPassword = form.newPassword
+        try policy.validate(password: newPassword)
+
+        let newPasswordHash = try await request.password.async.hash(newPassword)
+
+        let codeHash = random.hashOpaqueToken(token: form.code)
+
+        switch form.identifier.kind {
         case .email:
             try await verifyPasswordResetCode(
-                sentToEmail: identifier.value,
+                sentToEmail: form.identifier.value,
                 codeHash: codeHash,
                 newPasswordHash: newPasswordHash
             )
         case .phone:
             try await verifyPasswordResetCode(
-                sentToPhone: identifier.value,
+                sentToPhone: form.identifier.value,
                 codeHash: codeHash,
                 newPasswordHash: newPasswordHash
             )

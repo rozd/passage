@@ -11,6 +11,7 @@ extension Passage {
         let tokens: Tokens
         let sessions: Sessions
         let jwt: JWT
+        let passwordPolicy: PasswordPolicy
         let passwordless: Passwordless
         let verification: Verification
         let restoration: Restoration
@@ -24,6 +25,7 @@ extension Passage {
             tokens: Tokens = .init(),
             sessions: Sessions = .init(),
             jwt: JWT? = nil,
+            passwordPolicy: PasswordPolicy = .relaxed(),
             passwordless: Passwordless = .init(),
             verification: Verification = .init(),
             restoration: Restoration = .init(),
@@ -36,6 +38,7 @@ extension Passage {
             self.tokens = tokens
             self.sessions = sessions
             self.jwt = try jwt ?? JWT(jwks: try .fileFromEnvironment())
+            self.passwordPolicy = passwordPolicy
             self.passwordless = passwordless
             self.verification = verification
             self.restoration = restoration

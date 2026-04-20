@@ -40,7 +40,7 @@ struct BreachedPasswordTests {
 
         // Expected future API — see commit message for the implementation
         // gap this pins.
-        let policy = Passage.Configuration.PasswordPolicy(
+        let policy = Passage.Configuration.PasswordPolicy.relaxed(
             minLength: 8,
             breachedPasswordBlocklist: ["password123456"]
         )

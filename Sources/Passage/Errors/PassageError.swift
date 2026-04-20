@@ -12,6 +12,13 @@ public enum PassageError: Error {
     case unexpected(message: String)
     case passkeyServiceNotAvailable
 
+    case passwordTooShort(minLength: Int)
+    case passwordTooLong(maxLength: Int)
+    case passwordRequiresUppercase
+    case passwordRequiresLowercase
+    case passwordRequiresDigit
+    case passwordRequiresSpecialCharacter
+    case passwordBreached
 }
 
 extension PassageError: AbortError {
@@ -21,6 +28,8 @@ extension PassageError: AbortError {
             return .internalServerError
         case .missingEnvironmentVariable(name: _):
             return .internalServerError
+        case .passwordTooShort(minLength: _), .passwordTooLong(maxLength: _), .passwordRequiresUppercase, .passwordRequiresLowercase, .passwordBreached, .passwordRequiresSpecialCharacter, .passwordRequiresDigit:
+            return .badRequest
         }
     }
 
@@ -46,6 +55,20 @@ extension PassageError: AbortError {
             return "Missing environment variable: \(name)"
         case .passkeyServiceNotAvailable:
             return "Passkey service is not available. Please ensure you have integrated a passkey service implementation."
+        case .passwordTooShort(minLength: let minLength):
+            return "Password must be at least \(minLength) characters long."
+        case .passwordTooLong(maxLength: let maxLength):
+            return "Password must be no more than \(maxLength) characters long."
+        case .passwordRequiresUppercase:
+            return "Password must contain at least one uppercase letter."
+        case .passwordRequiresDigit:
+            return "Password must contain at least one digit."
+        case .passwordRequiresLowercase:
+            return "Password must contain at least one lowercase letter."
+        case .passwordRequiresSpecialCharacter:
+            return "Password must contain at least one special character."
+        case .passwordBreached:
+            return "Password has been previously used. Please try a different password."
         }
     }
 }
