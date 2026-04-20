@@ -543,8 +543,9 @@ requirements:
     section: "5.1.1.2 Memorized Secret Verifiers"
     tags: [memorizedSecret, authenticator]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/HashingTests.swift::storedHashIsNotPlaintext
     excluded_reason: null
     requirement: |
       Verifiers SHALL store memorized secrets in a form that is resistant to offline attacks.
