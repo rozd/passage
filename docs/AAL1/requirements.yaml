@@ -488,8 +488,9 @@ requirements:
     section: "5.1.1.2 Memorized Secret Verifiers"
     tags: [memorizedSecret, authenticator]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/ComplexityTests.swift::repeatedCharacterPasswordIsAccepted
     excluded_reason: null
     requirement: |
       Verifiers SHOULD NOT impose other composition rules (e.g., requiring mixtures of different character types or prohibiting consecutively repeated characters) for memorized secrets.

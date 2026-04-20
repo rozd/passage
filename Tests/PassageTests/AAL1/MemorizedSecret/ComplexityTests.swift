@@ -71,4 +71,30 @@ struct ComplexityTests {
             })
         }
     }
+
+    @Test(
+        "§5.1.1.2-r: Verifier accepts a repeated-character password without prohibiting consecutive duplicates",
+        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .should)
+    )
+    func repeatedCharacterPasswordIsAccepted() async throws {
+        try await withApp(configure: configure) { app in
+            // §5.1.1.2-r specifically calls out "prohibiting consecutively
+            // repeated characters" as an anti-pattern. This 8-char
+            // all-"a" password would be rejected by any composition rule
+            // that tried to ban runs; it MUST be accepted on length alone.
+            let password = "aaaaaaaa"
+            #expect(password.count == 8)
+
+            try await app.testing().test(.POST, "auth/register", beforeRequest: { req in
+                try req.content.encode([
+                    "username": "repeat-chars",
+                    "password": password,
+                    "confirmPassword": password
+                ])
+            }, afterResponse: { res async in
+                #expect(res.status == .ok,
+                        "repeated-character password must be accepted per §5.1.1.2-r — no composition rule may ban runs")
+            })
+        }
+    }
 }
