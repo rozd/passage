@@ -81,4 +81,48 @@ struct HashingTests {
             #expect(verified, "stored hash must still verify the original plaintext")
         }
     }
+
+    @Test(
+        "§5.1.1.2-y: Two users with the same password have distinct salts and hashes stored",
+        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall)
+    )
+    func distinctSaltsAcrossUsers() async throws {
+        let sharedPassword = "shared-memorized-secret"
+
+        try await withApp(configure: configure) { app in
+            for username in ["alice-shared", "bob-shared"] {
+                try await app.testing().test(.POST, "auth/register", beforeRequest: { req in
+                    try req.content.encode([
+                        "username": username,
+                        "password": sharedPassword,
+                        "confirmPassword": sharedPassword
+                    ])
+                }, afterResponse: { res async in
+                    #expect(res.status == .ok)
+                })
+            }
+
+            let store = app.passage.storage.services.store
+            let alice = try #require(try await store.users.find(byIdentifier: .username("alice-shared")))
+            let bob = try #require(try await store.users.find(byIdentifier: .username("bob-shared")))
+            let aliceHash = try #require(alice.passwordHash)
+            let bobHash = try #require(bob.passwordHash)
+
+            // If Alice and Bob — who chose the same password — have
+            // identical stored hashes, the salt is either reused or
+            // missing. Bcrypt's 128-bit salt makes a collision here
+            // astronomically improbable. §5.1.1.2-y says the salt MUST
+            // be arbitrary and ≥32 bits; a collision in a two-sample set
+            // is a near-certain smoking gun for a missing salt.
+            #expect(aliceHash != bobHash,
+                    "distinct users with the same password must have distinct hashes — §5.1.1.2-y")
+
+            // The salt is embedded in the Bcrypt modular-crypt output
+            // (positions 7–28). Both hashes MUST carry this segment —
+            // otherwise the salt is not "stored for each subscriber"
+            // alongside the hash.
+            #expect(aliceHash.count >= 29 && bobHash.count >= 29,
+                    "Bcrypt format must carry the salt segment alongside the hash")
+        }
+    }
 }
