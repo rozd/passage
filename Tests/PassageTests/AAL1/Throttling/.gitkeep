@@ -1,0 +1,4 @@
+# AAL1 throttling tests — SP 800-63B §5.2.2
+#
+# Tests covering rate limiting on failed authentication attempts.
+# Populated by /aal1-add. See docs/AAL1/README.md.

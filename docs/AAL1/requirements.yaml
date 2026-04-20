@@ -1,0 +1,28 @@
+# AAL1 requirements ledger — the single source of truth for the Ralph workflow.
+#
+# Each record is one normative clause from the source document below. The Ralph
+# workflow reads this file to determine the next pending clause and writes back
+# the `status` and `tests` fields as tests land.
+#
+# Do not hand-edit the `status` or `tests` fields — let `/aal1-add` update them
+# so validation in `.scripts/aal1-lint.sh` stays consistent.
+
+meta:
+  source: "NIST SP 800-63B rev 3 (2017, updated 2020)"
+  source_url: "https://pages.nist.gov/800-63-3/sp800-63b.html"
+  source_sha256: null            # filled at /aal1-decompose time
+  retrieved: null                # ISO-8601 date filled at /aal1-decompose time
+  passage_version_claimed: null  # filled when CLAIM.md is cut
+
+# Schema reference (see docs/AAL1/README.md for rationale):
+#   id            — clause identifier, e.g. "5.1.1.2-a". Also the §-prefix in tests.
+#   normative     — SHALL | SHALL_NOT | SHOULD | MAY
+#   section       — human label copied from the source document section heading
+#   tags          — Swift Testing tag names (mirror spec structure; see §5 of the plan)
+#   testability   — testable | design-assertion | excluded
+#   status        — pending | has_test | excluded
+#   tests         — array of "AAL1/<Module>/<File>.swift::<functionName>"
+#   excluded_reason — string; required when testability or status is `excluded`
+#   requirement   — verbatim clause text
+
+requirements: []
