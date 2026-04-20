@@ -510,8 +510,9 @@ requirements:
     section: "5.1.1.2 Memorized Secret Verifiers"
     tags: [memorizedSecret, authenticator]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/PasswordRotationTests.swift::adminForcedRotationInvalidatesOldSecret
     excluded_reason: null
     requirement: |
       However, verifiers SHALL force a change if there is evidence of compromise of the authenticator.
