@@ -86,4 +86,29 @@ struct AAL1ArchitecturalTests {
         #expect(hash != twin,
                 "two fresh Bcrypt hashes of the same input must differ — salt must be random")
     }
+
+    @Test(
+        "§5.1.1.2-z: Default KDF cost factor is high enough to deter brute-force (Bcrypt cost ≥ 10)",
+        .tags(.aal1, .memorizedSecret, .authenticator, .unit, .should)
+    )
+    func kdfCostFactorIsHigh() async throws {
+        // §5.1.1.2-z targets PBKDF2's iteration count (≥10,000). Passage
+        // delegates to Vapor's Bcrypt, whose cost factor is encoded as a
+        // two-digit exponent in the output: `$2b$12$...` means 2¹² =
+        // 4,096 iterations. Comparing algorithms directly is apples-to-
+        // oranges, but the *intent* — a cost factor that makes each
+        // guess expensive — is the same. Vapor's default cost is 12;
+        // we accept cost ≥ 10 as adequately "large" for AAL1 (2¹⁰ =
+        // 1,024 block operations of Blowfish-based KDF, ~100 ms on
+        // commodity hardware).
+        let hash = try Bcrypt.hash("§5.1.1.2-z default")
+        // Format: $2b$NN$... — slice out the NN.
+        let segments = hash.split(separator: "$")
+        try #require(segments.count >= 3, "Bcrypt output must have ≥ 3 $-separated segments — got \(hash)")
+        let costString = String(segments[1])
+        let cost = try #require(Int(costString),
+                                "cost segment must parse as an integer — got \(costString)")
+        #expect(cost >= 10,
+                "Bcrypt default cost factor must be ≥ 10 to satisfy §5.1.1.2-z's intent — got \(cost)")
+    }
 }
