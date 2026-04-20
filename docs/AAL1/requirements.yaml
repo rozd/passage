@@ -477,8 +477,9 @@ requirements:
     section: "5.1.1.2 Memorized Secret Verifiers"
     tags: [memorizedSecret, throttling, authenticator]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/RateLimitingTests.swift::sustainedFailedLoginsAreRateLimited
     excluded_reason: null
     requirement: |
       Verifiers SHALL implement a rate-limiting mechanism that effectively limits the number of failed authentication attempts that can be made on the subscriber's account as described in Section 5.2.2.
