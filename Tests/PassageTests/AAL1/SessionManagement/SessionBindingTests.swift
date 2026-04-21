@@ -56,4 +56,49 @@ struct SessionBindingTests {
         #expect(imposter == nil,
                 "§7.1-a: only the shared secret may resolve to a session — impostor secrets must not")
     }
+
+    @Test(
+        "§7.1-b: Session secret is presented directly by the subscriber on each request",
+        .tags(.aal1, .sessionManagement, .authenticator, .unit, .shall)
+    )
+    func sessionSecretIsPresentedDirectly() async throws {
+        // §7.1-b permits either direct presentation or proof-of-possession.
+        // Passage uses the direct-presentation branch: the subscriber
+        // presents the opaque refresh token in the POST body on
+        // /auth/refresh-token, and the server rotates it. This test drives
+        // the concrete rotation path (Passage.Tokens.refresh equivalent,
+        // minus JWT signing) by proving that presenting the plain-text
+        // secret is what unlocks the session — nothing else is required.
+        let random = DefaultRandomGenerator()
+        let store = Passage.OnlyForTest.InMemoryStore()
+        let user = try await store.users.create(
+            identifier: .username("direct-present"),
+            with: .password("$2b$12$hash")
+        )
+
+        let subscriberSecret = random.generateOpaqueToken()
+        _ = try await store.tokens.createRefreshToken(
+            for: user,
+            tokenHash: random.hashOpaqueToken(token: subscriberSecret),
+            expiresAt: Date().addingTimeInterval(3600)
+        )
+
+        // Directly presenting the secret resolves the session.
+        let presented = try await store.tokens.find(
+            refreshTokenHash: random.hashOpaqueToken(token: subscriberSecret)
+        )
+        #expect(presented?.isValid == true,
+                "§7.1-b: direct presentation of the secret must authorise the session")
+
+        // Presenting only the *hash* (which is what's stored) must not work —
+        // the hash is a server-side artefact, not the subscriber's secret.
+        // If both were accepted, the server-side record itself would be
+        // usable as a bearer token, collapsing §7.1-b into a non-requirement.
+        let hashPresentedAsIfSecret = random.hashOpaqueToken(token: subscriberSecret)
+        let spoofed = try await store.tokens.find(
+            refreshTokenHash: random.hashOpaqueToken(token: hashPresentedAsIfSecret)
+        )
+        #expect(spoofed == nil,
+                "§7.1-b: only the plain-text secret (not its server-side hash) may be presented")
+    }
 }

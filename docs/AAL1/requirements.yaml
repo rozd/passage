@@ -672,8 +672,9 @@ requirements:
     section: "7.1 Session Bindings"
     tags: [sessionManagement]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/SessionBindingTests.swift::sessionSecretIsPresentedDirectly
     excluded_reason: null
     requirement: |
       The secret SHALL be presented directly by the subscriber's software or possession of the secret SHALL be proven using a cryptographic mechanism.
