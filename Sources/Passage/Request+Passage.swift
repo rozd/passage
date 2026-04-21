@@ -42,4 +42,8 @@ extension Request {
         application.passage.random
     }
 
+    var throttle: any Passage.Throttle.Service {
+        application.passage.throttle
+    }
+
 }

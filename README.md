@@ -11,6 +11,7 @@ A comprehensive identity management and authentication framework for Vapor appli
 ## Features
 
 - 🔐 **User Registration & Login** - Complete authentication flow with secure password hashing
+- 🚦 **Rate Limiting** - Throttling of failed login attempts per account and per source
 - 📧 **Email Authentication** - Email-based identifier with verification codes
 - 📱 **Phone Authentication** - Phone number identifier with SMS verification (requires custom implementation of `PhoneDelivery` service)
 - 👤 **Username & Password** - Traditional username/password authentication
@@ -199,6 +200,18 @@ The default generator emits 32-byte base64 opaque tokens, hex-encoded SHA-256 ha
 See [DEVELOPER_NOTES.md#random-generator](./DEVELOPER_NOTES.md#random-generator) for the protocol surface and a numeric-only override example.
 </details>
 
+<details>
+<summary><h3>🚦 Throttle</h3> (Optional) — rate-limits failed authentication attempts per account and per source, per NIST SP 800-63B §5.2.2.</summary>
+
+#### Recommended implementation:
+`Passage.Throttle.InMemoryService` ships with Passage and is used unless you override it. It's a sliding-window counter implemented as a Swift `actor` — safe under concurrent login traffic on a single instance. For deployments that run multiple app instances behind a load balancer, supply a shared backend (e.g. Redis-backed) so counters aren't fragmented across nodes; otherwise an attacker can spread attempts across replicas to sidestep per-node caps.
+
+`Passage.Throttle.Service` has three methods: `check(bucket:against:at:)` decides allowed vs. throttled, `penalize(bucket:at:)` records a failed attempt, and `reset(bucket:)` clears a bucket on successful authentication. Buckets key by `(scope, dimension, enabled)` where `dimension` is either `.identifier(kind:value:)` (per-account) or `.source(String)` (per IP / forwarded address).
+
+#### Implementation guide:
+See [`Sources/Passage/Services/Passage+Throttle.swift`](./Sources/Passage/Services/Passage+Throttle.swift) for the protocol surface and [`Sources/Passage/LoginThrottleMiddleware.swift`](./Sources/Passage/LoginThrottleMiddleware.swift) for how it's wired into the login route.
+</details>
+
 ## Feature Discovery
 
 Each feature maps to a directory under [`Sources/Passage/Features/`](./Sources/Passage/Features/) and is activated independently by supplying the relevant service (where required) and configuration. Expand a section to see what to wire and where to find a working example.
@@ -225,6 +238,37 @@ See [`Sources/Passage/Features/Account/README.md`](./Sources/Passage/Features/Ac
 
 #### Example
 See [PassageExample in passage-example](https://github.com/rozd/passage-example#passageexample-1).
+</details>
+
+<details>
+<summary><h3>🚦 Throttling</h3> — rate-limits failed login attempts per account and per source, per NIST SP 800-63B §5.2.2.</summary>
+
+#### Service setup
+Uses `Passage.Throttle.Service`. The default `Passage.Throttle.InMemoryService` is provided automatically — no setup required for single-instance deployments. See the [Services chapter](#services-to-implement) for how to override with a shared backend (Redis, DB) when running multiple app instances.
+
+#### Configuration
+```swift
+Passage.Configuration(
+    // ... other config ...
+    throttle: .init(
+        login: .init(
+            perIdentifier: .init(maxFailures: 10, window: 15 * 60),   // 10 failures / 15 min per account
+            perSource: .init(maxFailures: 20, window: 15 * 60),       // 20 failures / 15 min per IP
+            enabled: true
+        )
+    )
+)
+```
+
+Over-limit requests return **`429 Too Many Requests`** with a `Retry-After` header (seconds until the oldest in-window attempt ages out). A successful login clears both counters for that account and source (§5.2.2-c). Form-validation failures (e.g. missing password) count toward the per-source bucket — the throttle middleware runs ahead of form decoding so malformed requests can't sidestep the counter.
+
+**Per-identifier** (account) protects against sustained guessing on one account. **Per-source** protects against credential-stuffing sprays across many accounts. The defaults trip well before §5.2.2-b's 100-attempt ceiling while leaving honest users plenty of room for typos.
+
+#### Feature guide
+Configuration: [`Sources/Passage/Configuration/Configuration+Throttle.swift`](./Sources/Passage/Configuration/Configuration+Throttle.swift). Middleware: [`Sources/Passage/LoginThrottleMiddleware.swift`](./Sources/Passage/LoginThrottleMiddleware.swift). Per-identifier enforcement lives in the login service at [`Sources/Passage/Features/Account/Passage+Account.swift`](./Sources/Passage/Features/Account/Passage+Account.swift).
+
+#### Example
+_No dedicated example yet — see [rozd/passage-example](https://github.com/rozd/passage-example) for the canonical walkthrough._
 </details>
 
 <details>

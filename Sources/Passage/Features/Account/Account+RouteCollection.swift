@@ -13,7 +13,9 @@ extension Passage.Account {
         func boot(routes builder: any RoutesBuilder) throws {
             let grouped = routes.group.isEmpty ? builder : builder.grouped(routes.group)
             grouped.post(routes.register.path, use: self.register)
-            grouped.post(routes.login.path, use: self.login)
+            grouped
+                .grouped(LoginThrottleMiddleware())
+                .post(routes.login.path, use: self.login)
 
             grouped
                 .grouped(PassageSessionAuthenticator())

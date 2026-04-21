@@ -1,6 +1,6 @@
 import Vapor
 
-public enum AuthenticationError: Error {
+public enum AuthenticationError: Error, Equatable {
     // Registration errors
     case identifierNotSpecified
     case emailAlreadyRegistered
@@ -58,6 +58,8 @@ public enum AuthenticationError: Error {
     case invalidPasskeyChallenge
     case unknownPasskey
     case discoverableLoginDisabled
+
+    case tooManyLoginAttempts(retryAfter: TimeInterval)
 }
 
 extension AuthenticationError: AbortError {
@@ -111,6 +113,8 @@ extension AuthenticationError: AbortError {
             return .unauthorized
         case .discoverableLoginDisabled:
             return .badRequest
+        case .tooManyLoginAttempts:
+            return .tooManyRequests
         }
     }
 
@@ -188,6 +192,19 @@ extension AuthenticationError: AbortError {
             return "Passkey is not registered."
         case .discoverableLoginDisabled:
             return "Discoverable passkey login is disabled by server policy."
+        case .tooManyLoginAttempts:
+            return "Too many failed login attempts. Please try again later."
+        }
+    }
+
+    public var headers: HTTPHeaders {
+        switch self {
+        case .tooManyLoginAttempts(let retryAfter):
+            var headers = HTTPHeaders()
+            headers.replaceOrAdd(name: .retryAfter, value: String(Int(retryAfter.rounded(.up))))
+            return headers
+        default:
+            return [:]
         }
     }
 }
