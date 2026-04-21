@@ -1,6 +1,6 @@
-import Foundation
-import Crypto
-import Vapor
+public import Foundation
+public import Crypto
+public import Vapor
 
 public struct BCryptSHA256PasswordHasher: PasswordHasher {
     public let pepper: SymmetricKey

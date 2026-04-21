@@ -4,9 +4,10 @@
 [![License](https://img.shields.io/github/license/vapor-community/passage)](LICENSE)
 [![codecov](https://codecov.io/gh/vapor-community/passage/branch/main/graph/badge.svg)](https://codecov.io/gh/vapor-community/passage)
 
-A comprehensive identity management and authentication framework for Vapor applications built with Swift. Passage provides secure authentication with minimal configuration while remaining highly extensible through protocol-based architecture. **Not yet production-ready.**
+A comprehensive identity management and authentication framework for Vapor applications built with Swift. Passage provides secure authentication with minimal configuration while remaining highly extensible through protocol-based architecture.
 
-## Status: Developer Preview
+## Status: Alpha
+Use with caution. The library is functional, but the API is subject to change before the stable release.
 
 ## Features
 
