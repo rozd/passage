@@ -875,8 +875,9 @@ requirements:
     section: "7.2 Reauthentication"
     tags: [sessionManagement, reauthentication]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/ContinuityTests.swift::continuityRequiresValidSessionSecret
     excluded_reason: null
     requirement: |
       Continuity of authenticated sessions SHALL be based upon the possession of a session secret issued by the verifier at the time of authentication and optionally refreshed during the session.
