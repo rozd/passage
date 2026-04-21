@@ -28,6 +28,10 @@ Use with caution. The library is functional, but the API is subject to change be
 - 🔧 **Protocol-Based Services** - Pluggable storage, email, phone, and OAuth providers
 - 🎨 **Fully Customizable** - Configure routes, tokens, templates, and behavior
 
+## Standards Compliance
+
+Passage targets **NIST SP 800-63B Authenticator Assurance Level 1 (AAL1)**, and ships an executable compliance suite at [`Tests/PassageTests/AAL1/`](./Tests/PassageTests/AAL1/) that pins behavior to specific spec clauses. Coverage spans memorized secrets (§5.1.1), session management (§7.1), reauthentication (§4.1.3 / §7.2), and online-guessing throttling (§5.2.2) — every test name cites the clause it asserts, so the suite doubles as a machine-checked compliance ledger.
+
 ## Getting Started
 
 ### Installation
