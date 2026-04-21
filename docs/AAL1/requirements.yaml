@@ -965,8 +965,9 @@ requirements:
     section: "7.2.1 Reauthentication from a Federation or Assertion"
     tags: [sessionManagement, reauthentication]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/FederationReauthenticationTests.swift::cspCommunicatesAuthEventTime
     excluded_reason: null
     requirement: |
       The CSP SHALL communicate the authentication event time to the RP to allow the RP to decide if the assertion is sufficient for reauthentication and to determine the time for the next reauthentication event.

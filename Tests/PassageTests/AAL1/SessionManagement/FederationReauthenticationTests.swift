@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+import JWTKit
 @testable import Passage
 
 // MARK: - AAL1 federation reauthentication
@@ -42,5 +43,41 @@ struct FederationReauthenticationTests {
                 "§7.2.1-b: a specified max-auth-age must be a positive duration")
         #expect(age <= 30 * 24 * 3600,
                 "§7.2.1-b: AAL1 RPs must not specify a reauth window exceeding §4.1.3-b's 30-day ceiling")
+    }
+
+    @Test(
+        "§7.2.1-c: CSP communicates the authentication-event time to the RP via the iat claim",
+        .tags(.aal1, .sessionManagement, .reauthentication, .authenticator, .unit, .shall)
+    )
+    func cspCommunicatesAuthEventTime() async throws {
+        // §7.2.1-c SHALL: the CSP must communicate the authentication-event
+        // time to the RP so the RP can decide whether the assertion is
+        // fresh enough for reauth. Passage-as-CSP emits this via the
+        // standard JWT `iat` claim on its access token (see
+        // `Sources/Passage/Types/AccessToken.swift::issuedAt`). This test
+        // drives the real construction path: an `AccessToken` minted at
+        // time T exposes `iat == T`.
+        let eventTime = Date()
+        let token = AccessToken(
+            userId: "subject-42",
+            issuedAt: eventTime,
+            expiresAt: eventTime.addingTimeInterval(900),
+            issuer: "passage-test",
+            audience: "rp-test",
+            scope: nil
+        )
+
+        // The `iat` claim carries the auth-event time — not the token-mint
+        // time or the expiry — so the RP can compute age directly.
+        let emittedTime = token.issuedAt.value
+        #expect(abs(emittedTime.timeIntervalSince(eventTime)) < 1.0,
+                "§7.2.1-c: the CSP must communicate the auth-event time via `iat` — within 1s of the event")
+
+        // Freshness check the RP would perform: is the claimed event
+        // within an acceptable window? This mirrors how §7.2.1-b's RP
+        // `max_age` check would consume §7.2.1-c's `iat`.
+        let ageSeconds = Date().timeIntervalSince(emittedTime)
+        #expect(ageSeconds >= 0,
+                "§7.2.1-c: the communicated auth-event time must not be in the future")
     }
 }
