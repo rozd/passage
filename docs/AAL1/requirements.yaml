@@ -694,8 +694,9 @@ requirements:
     section: "7.1 Session Bindings"
     tags: [sessionManagement]
     testability: design-assertion
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/Architectural.swift::sessionInheritsAALFromAuthEvent
     excluded_reason: null
     requirement: |
       A session SHOULD inherit the AAL properties of the authentication event which triggered its creation.

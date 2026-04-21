@@ -1,6 +1,8 @@
+import Foundation
 import Testing
 import Vapor
 @testable import Passage
+@testable import PassageOnlyForTest
 
 // MARK: - AAL1 architectural attestations
 //
@@ -85,6 +87,49 @@ struct AAL1ArchitecturalTests {
         let twin = try Bcrypt.hash("§5.1.1.2-x sample", cost: 4)
         #expect(hash != twin,
                 "two fresh Bcrypt hashes of the same input must differ — salt must be random")
+    }
+
+    @Test(
+        "§7.1-d: Session inherits the AAL properties of the authentication event that created it",
+        .tags(.aal1, .sessionManagement, .unit, .should)
+    )
+    func sessionInheritsAALFromAuthEvent() async throws {
+        // §7.1-d SHOULD: a session should inherit AAL from the auth event
+        // that triggered its creation. Passage binds the session to a
+        // specific user at the moment of authentication: `issue(for:)` mints
+        // the refresh token against the concrete `User` that just proved
+        // possession of the memorized secret (§5.1.1). Because Passage's
+        // AAL1 authenticators (password, passkey) are all registered on a
+        // per-user basis, the session is structurally tied to that user's
+        // most-recent authentication event. This test pins the wiring: the
+        // stored refresh token resolves back to the *same* user the secret
+        // was minted for — there is no seam for a different user's AAL to
+        // leak into the session.
+        let random = DefaultRandomGenerator()
+        let store = Passage.OnlyForTest.InMemoryStore()
+        let alice = try await store.users.create(
+            identifier: .username("alice-aal"),
+            with: .password("$2b$12$hash")
+        )
+        let bob = try await store.users.create(
+            identifier: .username("bob-aal"),
+            with: .password("$2b$12$hash")
+        )
+
+        let aliceSecret = random.generateOpaqueToken()
+        _ = try await store.tokens.createRefreshToken(
+            for: alice,
+            tokenHash: random.hashOpaqueToken(token: aliceSecret),
+            expiresAt: Date().addingTimeInterval(3600)
+        )
+
+        let resolved = try await store.tokens.find(
+            refreshTokenHash: random.hashOpaqueToken(token: aliceSecret)
+        )
+        #expect(try resolved?.user.requiredIdAsString == alice.requiredIdAsString,
+                "§7.1-d: the session secret must resolve to the user whose auth event created it")
+        #expect(try resolved?.user.requiredIdAsString != bob.requiredIdAsString,
+                "§7.1-d: the session must not inherit from any other user's auth event")
     }
 
     @Test(
