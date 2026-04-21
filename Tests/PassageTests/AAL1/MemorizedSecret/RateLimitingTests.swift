@@ -4,6 +4,8 @@ import Vapor
 import VaporTesting
 import JWTKit
 import XCTQueues
+import JWT
+import Queues
 @testable import Passage
 @testable import PassageOnlyForTest
 

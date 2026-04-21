@@ -3,6 +3,8 @@ import Testing
 import Vapor
 import VaporTesting
 import JWTKit
+import JWT
+import Queues
 import XCTQueues
 @testable import Passage
 @testable import PassageOnlyForTest

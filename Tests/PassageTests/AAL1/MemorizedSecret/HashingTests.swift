@@ -6,6 +6,8 @@ import JWTKit
 import XCTQueues
 @testable import Passage
 @testable import PassageOnlyForTest
+import JWT
+import Queues
 
 // MARK: - AAL1 hashed-at-rest memorized secret storage
 //

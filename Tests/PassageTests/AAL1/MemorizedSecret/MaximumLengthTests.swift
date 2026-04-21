@@ -6,6 +6,8 @@ import JWTKit
 import XCTQueues
 @testable import Passage
 @testable import PassageOnlyForTest
+import Queues
+import JWT
 
 // MARK: - AAL1 maximum-length permissiveness
 //

@@ -1,0 +1,30 @@
+{
+  "configurations" : [
+    {
+      "id" : "5B1BBC35-12A8-4C5D-B0E3-1485C2C492E0",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "selectedTags" : {
+        "mode" : "or",
+        "tags" : [
+          ".aal1"
+        ]
+      },
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "PassageTests",
+        "name" : "PassageTests"
+      }
+    }
+  ],
+  "version" : 1
+}
