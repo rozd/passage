@@ -76,8 +76,9 @@ extension Passage.Restoration {
 
         let newPassword = form.newPassword
         try policy.validate(password: newPassword)
+        let newPasswordNormalized = policy.normalize(password: newPassword)
 
-        let newPasswordHash = try await request.password.async.hash(newPassword)
+        let newPasswordHash = try await request.password.async.hash(newPasswordNormalized)
 
         let codeHash = random.hashOpaqueToken(token: form.code)
 

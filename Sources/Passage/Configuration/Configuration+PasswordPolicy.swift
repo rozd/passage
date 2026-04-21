@@ -65,11 +65,19 @@ public extension Passage.Configuration.PasswordPolicy {
 
 extension Passage.Configuration.PasswordPolicy {
 
+    // NIST SP 800-63B §5.1.1.2-g: apply NFKC before hashing so canonically-
+    // equivalent forms (e.g. NFC `é` vs NFD `e` + combining acute) authenticate
+    // interchangeably regardless of which keyboard or IME produced them.
+    func normalize(password: String) -> String {
+        password.precomposedStringWithCompatibilityMapping
+    }
+
     func validate(password: String) throws {
-        if password.count < minLength {
+        let codePointCount = password.unicodeScalars.count
+        if codePointCount < minLength {
             throw PassageError.passwordTooShort(minLength: minLength)
         }
-        if password.count > maxLength {
+        if codePointCount > maxLength {
             throw PassageError.passwordTooLong(maxLength: maxLength)
         }
         if requireUppercase && !password.contains(where: \.isUppercase) {

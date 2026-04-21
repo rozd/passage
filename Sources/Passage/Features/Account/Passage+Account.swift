@@ -50,7 +50,7 @@ extension Passage.Account {
         let password = form.password
         try policy.validate(password: password)
 
-        let hash = try await request.password.async.hash(password)
+        let hash = try await request.password.async.hash(policy.normalize(password: password))
 
         let identifier = try form.asIdentifier()
 
@@ -98,7 +98,10 @@ extension Passage.Account {
 
         try user.check(identifier: identifier)
 
-        guard try await request.password.async.verify(form.password, created: userPasswordHash) else {
+        let policy = request.configuration.passwordPolicy
+        let passwordNormalized = policy.normalize(password: form.password)
+
+        guard try await request.password.async.verify(passwordNormalized, created: userPasswordHash) else {
             await request.throttle.penalize(bucket: idBucket, at: now)
             throw identifier.errorWhenIdentifierIsInvalid
         }

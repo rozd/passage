@@ -56,8 +56,12 @@ struct UnicodeNormalizationTests {
         let nfc = "caf\u{00E9}1234"
         #expect(nfd.precomposedStringWithCanonicalMapping == nfc,
                 "precondition: the two strings are canonical equivalents")
-        #expect(nfd != nfc,
-                "precondition: but not byte-equal prior to normalization")
+        // Swift's `String ==` compares under Unicode canonical equivalence, so
+        // the NFD and NFC forms compare equal. Drop to UTF-8 bytes to assert
+        // the encodings actually differ — that is what the verifier would see
+        // if it hashed the raw input without normalizing first.
+        #expect(Array(nfd.utf8) != Array(nfc.utf8),
+                "precondition: byte encodings differ prior to normalization")
 
         try await withApp(configure: configure) { app in
             // Register with the NFD form.
