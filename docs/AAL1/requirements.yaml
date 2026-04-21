@@ -907,8 +907,9 @@ requirements:
     section: "7.2 Reauthentication"
     tags: [sessionManagement, reauthentication]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/ContinuityTests.swift::secretPresentationCannotExtendPastCeiling
     excluded_reason: null
     requirement: |
       A session SHALL NOT be extended past the guidelines in Sections 4.1.3, 4.2.3, and 4.3.3 (depending on AAL) based on presentation of the session secret alone.
