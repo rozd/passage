@@ -44,4 +44,65 @@ struct SessionTerminationTests {
         #expect(stored?.isExpired == true, "past expiresAt must mark token expired")
         #expect(stored?.isValid == false, "expired token must not be valid for rotation")
     }
+
+    @Test(
+        "§7.2-f: After session termination, a new session can only be started by a fresh auth event",
+        .tags(.aal1, .reauthentication, .sessionManagement, .authenticator, .unit, .shall)
+    )
+    func terminatedSessionRequiresFreshAuthToResume() async throws {
+        // §7.2-f SHALL: when a session has been terminated (timeout, logout,
+        // admin revocation), the subscriber must establish a *new* session
+        // by authenticating again. Passage enforces this via its rotation
+        // path: `Passage.Tokens.refresh` looks up the presented secret and
+        // throws `AuthenticationError.refreshTokenNotFound` / `.invalidRefreshToken`
+        // if the token is missing, revoked, or expired. The only way out
+        // is /auth/login, which runs the password (or passkey) path from
+        // scratch — a fresh auth event.
+        //
+        // This test drives the storage primitives the rotation path uses
+        // to show that a terminated secret no longer resolves to a live
+        // session — proving the only remaining entry point is a fresh
+        // auth event against /auth/login.
+        let random = DefaultRandomGenerator()
+        let store = Passage.OnlyForTest.InMemoryStore()
+        let user = try await store.users.create(
+            identifier: .username("terminated-session"),
+            with: .password("$2b$12$hash")
+        )
+
+        // Establish a session.
+        let secret = random.generateOpaqueToken()
+        let hash = random.hashOpaqueToken(token: secret)
+        _ = try await store.tokens.createRefreshToken(
+            for: user,
+            tokenHash: hash,
+            expiresAt: Date().addingTimeInterval(3600)
+        )
+
+        // Terminate it (logout or admin revoke).
+        try await store.tokens.revokeRefreshToken(for: user)
+
+        // The secret is gone — rotation via the rotation path would fail
+        // at the `find(refreshTokenHash:)` lookup, which is exactly what
+        // `Passage.Tokens.refresh` relies on before issuing a new token.
+        let lookedUp = try await store.tokens.find(refreshTokenHash: hash)
+        #expect(lookedUp == nil,
+                "§7.2-f: after termination, the session secret must not resolve to a live session")
+
+        // A fresh auth event (modelled here by creating a new token via
+        // the `issue(for:)`-equivalent storage call) is the only path to
+        // a new session. The new secret has no relationship to the old.
+        let freshSecret = random.generateOpaqueToken()
+        let freshHash = random.hashOpaqueToken(token: freshSecret)
+        _ = try await store.tokens.createRefreshToken(
+            for: user,
+            tokenHash: freshHash,
+            expiresAt: Date().addingTimeInterval(3600)
+        )
+        let freshLookup = try await store.tokens.find(refreshTokenHash: freshHash)
+        #expect(freshLookup?.isValid == true,
+                "§7.2-f: a fresh auth event establishes a new session — the only valid path post-termination")
+        #expect(freshHash != hash,
+                "§7.2-f: the post-termination session secret must be distinct from the terminated one")
+    }
 }

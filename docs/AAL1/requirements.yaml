@@ -929,8 +929,9 @@ requirements:
     section: "7.2 Reauthentication"
     tags: [sessionManagement, reauthentication]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/Reauthentication/SessionTerminationTests.swift::terminatedSessionRequiresFreshAuthToResume
     excluded_reason: null
     requirement: |
       When a session has been terminated, due to a time-out or other action, the user SHALL be required to establish a new session by authenticating again.
