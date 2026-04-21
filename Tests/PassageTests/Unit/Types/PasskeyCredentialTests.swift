@@ -8,11 +8,11 @@ import Foundation
 /// pin down the field surface, optional-field handling (AAGUID / attestation
 /// format can be `nil` because `swift-webauthn` doesn't expose them), and
 /// Sendable conformance.
-@Suite("PasskeyCredential DTO Tests", .tags(.unit))
-struct PasskeyCredentialTests {
+@Suite(.tags(.unit))
+struct `PasskeyCredential DTO Tests` {
 
-    @Test("Initialization with every field populated")
-    func initializationFull() {
+    @Test
+    func `Initialization with every field populated`() {
         let credential = PasskeyCredential(
             credentialID: "AAEC",
             publicKey: Data([0xA0, 0xA1]),
@@ -36,8 +36,8 @@ struct PasskeyCredentialTests {
         #expect(credential.attestationFormat == "packed")
     }
 
-    @Test("Initialization with nil AAGUID + attestationFormat (swift-webauthn default)")
-    func initializationWithNilOptionalFields() {
+    @Test
+    func `Initialization with nil AAGUID + attestationFormat (swift-webauthn default)`() {
         // The default backend currently returns nil for both — the type must
         // accept that without special-casing.
         let credential = PasskeyCredential(
@@ -56,8 +56,8 @@ struct PasskeyCredentialTests {
         #expect(credential.attestationFormat == nil)
     }
 
-    @Test("Empty transports are preserved as empty array")
-    func emptyTransports() {
+    @Test
+    func `Empty transports are preserved as empty array`() {
         let credential = PasskeyCredential(
             credentialID: "id",
             publicKey: Data(),
@@ -72,8 +72,8 @@ struct PasskeyCredentialTests {
         #expect(credential.transports.isEmpty)
     }
 
-    @Test("Unusual signCount values (0, UInt32.max) are preserved")
-    func signCountEdgeValues() {
+    @Test
+    func `Unusual signCount values (0, UInt32.max) are preserved`() {
         let zero = PasskeyCredential(
             credentialID: "a",
             publicKey: Data(),
@@ -100,8 +100,8 @@ struct PasskeyCredentialTests {
         #expect(max.signCount == UInt32.max)
     }
 
-    @Test("Backup flags are orthogonal (BE + BS can vary independently)")
-    func backupFlagsAreOrthogonal() {
+    @Test
+    func `Backup flags are orthogonal (BE + BS can vary independently)`() {
         let cases: [(Bool, Bool)] = [
             (false, false), (true, false), (true, true), (false, true),
         ]
@@ -122,8 +122,8 @@ struct PasskeyCredentialTests {
         }
     }
 
-    @Test("PasskeyCredential is Sendable")
-    func isSendable() {
+    @Test
+    func `PasskeyCredential is Sendable`() {
         let _: any Sendable = PasskeyCredential(
             credentialID: "",
             publicKey: Data(),

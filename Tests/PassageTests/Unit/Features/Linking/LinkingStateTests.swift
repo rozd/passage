@@ -2,8 +2,8 @@ import Testing
 import Foundation
 @testable import Passage
 
-@Suite("Linking State Tests", .tags(.unit, .federatedLogin))
-struct LinkingStateTests {
+@Suite(.tags(.unit, .federatedLogin))
+struct `Linking State Tests` {
 
     // MARK: - Type Aliases for Convenience
 
@@ -12,8 +12,8 @@ struct LinkingStateTests {
 
     // MARK: - Candidate Tests
 
-    @Test("Candidate stores all properties correctly")
-    func candidateStoresProperties() {
+    @Test
+    func `Candidate stores all properties correctly`() {
         let candidate = Candidate(
             userId: "user-123",
             email: "test@example.com",
@@ -31,8 +31,8 @@ struct LinkingStateTests {
         #expect(candidate.isPhoneVerified == false)
     }
 
-    @Test("Candidate with nil email and phone")
-    func candidateWithNilEmailAndPhone() {
+    @Test
+    func `Candidate with nil email and phone`() {
         let candidate = Candidate(
             userId: "user-456",
             email: nil,
@@ -46,8 +46,8 @@ struct LinkingStateTests {
         #expect(candidate.phone == nil)
     }
 
-    @Test("Candidate is Codable")
-    func candidateIsCodable() throws {
+    @Test
+    func `Candidate is Codable`() throws {
         let candidate = Candidate(
             userId: "user-789",
             email: "codable@example.com",
@@ -65,8 +65,8 @@ struct LinkingStateTests {
         #expect(decoded.hasPassword == candidate.hasPassword)
     }
 
-    @Test("Candidate is Sendable")
-    func candidateIsSendable() {
+    @Test
+    func `Candidate is Sendable`() {
         let candidate: any Sendable = Candidate(
             userId: "user-1",
             email: nil,
@@ -81,8 +81,8 @@ struct LinkingStateTests {
 
     // MARK: - LinkingState Initialization Tests
 
-    @Test("LinkingState initializes with correct properties")
-    func linkingStateInitialization() {
+    @Test
+    func `LinkingState initializes with correct properties`() {
         let identifier = Identifier.federated(.google, userId: "123")
         let candidates = [
             Candidate(userId: "u1", email: "a@example.com", phone: nil, hasPassword: true, isEmailVerified: true, isPhoneVerified: false)
@@ -103,8 +103,8 @@ struct LinkingStateTests {
         #expect(state.sentPhoneCode == nil)
     }
 
-    @Test("LinkingState sets createdAt to current date")
-    func linkingStateCreatedAt() {
+    @Test
+    func `LinkingState sets createdAt to current date`() {
         let before = Date()
 
         let state = LinkingState(
@@ -120,8 +120,8 @@ struct LinkingStateTests {
         #expect(state.createdAt <= after)
     }
 
-    @Test("LinkingState sets expiresAt based on TTL")
-    func linkingStateExpiresAt() {
+    @Test
+    func `LinkingState sets expiresAt based on TTL`() {
         let ttl: TimeInterval = 300 // 5 minutes
         let before = Date().addingTimeInterval(ttl)
 
@@ -140,8 +140,8 @@ struct LinkingStateTests {
 
     // MARK: - isExpired Tests
 
-    @Test("LinkingState isExpired returns false when not expired")
-    func isExpiredReturnsFalseWhenValid() {
+    @Test
+    func `LinkingState isExpired returns false when not expired`() {
         let state = LinkingState(
             federatedIdentifier: .federated(.google, userId: "123"),
             candidates: [],
@@ -152,8 +152,8 @@ struct LinkingStateTests {
         #expect(state.isExpired == false)
     }
 
-    @Test("LinkingState isExpired returns true when expired")
-    func isExpiredReturnsTrueWhenExpired() {
+    @Test
+    func `LinkingState isExpired returns true when expired`() {
         let state = LinkingState(
             federatedIdentifier: .federated(.google, userId: "123"),
             candidates: [],
@@ -166,8 +166,8 @@ struct LinkingStateTests {
 
     // MARK: - Immutable Update Methods Tests
 
-    @Test("withSelectedUser returns new state with selected user")
-    func withSelectedUser() {
+    @Test
+    func `withSelectedUser returns new state with selected user`() {
         let state = LinkingState(
             federatedIdentifier: .federated(.google, userId: "123"),
             candidates: [],
@@ -188,8 +188,8 @@ struct LinkingStateTests {
         #expect(updatedState.provider == state.provider)
     }
 
-    @Test("withEmailCode returns new state with email code")
-    func withEmailCode() {
+    @Test
+    func `withEmailCode returns new state with email code`() {
         let state = LinkingState(
             federatedIdentifier: .federated(.google, userId: "123"),
             candidates: [],
@@ -209,8 +209,8 @@ struct LinkingStateTests {
         #expect(updatedState.federatedIdentifier.value == state.federatedIdentifier.value)
     }
 
-    @Test("withPhoneCode returns new state with phone code")
-    func withPhoneCode() {
+    @Test
+    func `withPhoneCode returns new state with phone code`() {
         let state = LinkingState(
             federatedIdentifier: .federated(.google, userId: "123"),
             candidates: [],
@@ -227,8 +227,8 @@ struct LinkingStateTests {
         #expect(updatedState.sentPhoneCode == "XYZ789")
     }
 
-    @Test("Chaining update methods")
-    func chainingUpdateMethods() {
+    @Test
+    func `Chaining update methods`() {
         let state = LinkingState(
             federatedIdentifier: .federated(.google, userId: "123"),
             candidates: [],
@@ -247,8 +247,8 @@ struct LinkingStateTests {
 
     // MARK: - Codable Tests
 
-    @Test("LinkingState is Codable")
-    func linkingStateIsCodable() throws {
+    @Test
+    func `LinkingState is Codable`() throws {
         let candidates = [
             Candidate(userId: "u1", email: "a@example.com", phone: nil, hasPassword: true, isEmailVerified: true, isPhoneVerified: false),
             Candidate(userId: "u2", email: nil, phone: "+123", hasPassword: false, isEmailVerified: false, isPhoneVerified: true)
@@ -274,8 +274,8 @@ struct LinkingStateTests {
         #expect(decoded.sentPhoneCode == nil)
     }
 
-    @Test("LinkingState preserves dates through encoding")
-    func linkingStatePreservesDates() throws {
+    @Test
+    func `LinkingState preserves dates through encoding`() throws {
         let state = LinkingState(
             federatedIdentifier: .federated(.google, userId: "123"),
             candidates: [],
@@ -293,8 +293,8 @@ struct LinkingStateTests {
 
     // MARK: - Sendable Tests
 
-    @Test("LinkingState is Sendable")
-    func linkingStateIsSendable() {
+    @Test
+    func `LinkingState is Sendable`() {
         let state: any Sendable = LinkingState(
             federatedIdentifier: .federated(.google, userId: "123"),
             candidates: [],
@@ -307,8 +307,8 @@ struct LinkingStateTests {
 
     // MARK: - Multiple Candidates Tests
 
-    @Test("LinkingState with multiple candidates")
-    func linkingStateWithMultipleCandidates() {
+    @Test
+    func `LinkingState with multiple candidates`() {
         let candidates = [
             Candidate(userId: "user-1", email: "a@example.com", phone: nil, hasPassword: true, isEmailVerified: true, isPhoneVerified: false),
             Candidate(userId: "user-2", email: "b@example.com", phone: nil, hasPassword: true, isEmailVerified: true, isPhoneVerified: false),
@@ -328,8 +328,8 @@ struct LinkingStateTests {
         #expect(state.candidates[2].userId == "user-3")
     }
 
-    @Test("LinkingState with empty candidates")
-    func linkingStateWithEmptyCandidates() {
+    @Test
+    func `LinkingState with empty candidates`() {
         let state = LinkingState(
             federatedIdentifier: .federated(.google, userId: "empty"),
             candidates: [],
@@ -342,8 +342,8 @@ struct LinkingStateTests {
 
     // MARK: - TTL Variations
 
-    @Test("LinkingState with short TTL (1 minute)")
-    func linkingStateWithShortTTL() {
+    @Test
+    func `LinkingState with short TTL (1 minute)`() {
         let state = LinkingState(
             federatedIdentifier: .federated(.google, userId: "123"),
             candidates: [],
@@ -356,8 +356,8 @@ struct LinkingStateTests {
         #expect(abs(state.expiresAt.timeIntervalSince(expectedExpiration)) < 1)
     }
 
-    @Test("LinkingState with long TTL (1 hour)")
-    func linkingStateWithLongTTL() {
+    @Test
+    func `LinkingState with long TTL (1 hour)`() {
         let state = LinkingState(
             federatedIdentifier: .federated(.google, userId: "123"),
             candidates: [],

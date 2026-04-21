@@ -2,13 +2,13 @@ import Testing
 import Foundation
 @testable import Passage
 
-@Suite("FederatedIdentity Tests", .tags(.unit))
-struct FederatedIdentityTests {
+@Suite(.tags(.unit))
+struct `FederatedIdentity Tests` {
 
     // MARK: - Initialization Tests
 
-    @Test("FederatedIdentity can be initialized with all properties")
-    func initializationWithAllProperties() {
+    @Test
+    func `FederatedIdentity can be initialized with all properties`() {
         let identity = FederatedIdentity(
             identifier: .federated(.google, userId: "123456"),
             provider: .google,
@@ -25,8 +25,8 @@ struct FederatedIdentityTests {
         #expect(identity.profilePictureURL == "https://example.com/photo.jpg")
     }
 
-    @Test("FederatedIdentity can be initialized with minimal properties")
-    func initializationWithMinimalProperties() {
+    @Test
+    func `FederatedIdentity can be initialized with minimal properties`() {
         let identity = FederatedIdentity(
             identifier: .federated(.github, userId: "abc123"),
             provider: .github,
@@ -43,8 +43,8 @@ struct FederatedIdentityTests {
         #expect(identity.profilePictureURL == nil)
     }
 
-    @Test("FederatedIdentity can have multiple verified emails")
-    func multipleVerifiedEmails() {
+    @Test
+    func `FederatedIdentity can have multiple verified emails`() {
         let emails = ["primary@example.com", "secondary@example.com", "work@company.com"]
         let identity = FederatedIdentity(
             identifier: .federated(.google, userId: "user123"),
@@ -59,8 +59,8 @@ struct FederatedIdentityTests {
         #expect(identity.verifiedEmails == emails)
     }
 
-    @Test("FederatedIdentity can have multiple verified phone numbers")
-    func multipleVerifiedPhones() {
+    @Test
+    func `FederatedIdentity can have multiple verified phone numbers`() {
         let phones = ["+1234567890", "+0987654321"]
         let identity = FederatedIdentity(
             identifier: .federated(.named("auth0"), userId: "user456"),
@@ -77,8 +77,8 @@ struct FederatedIdentityTests {
 
     // MARK: - Identifier Tests
 
-    @Test("FederatedIdentity stores federated identifier correctly")
-    func federatedIdentifierStorage() {
+    @Test
+    func `FederatedIdentity stores federated identifier correctly`() {
         let identifier = Identifier.federated(.google, userId: "unique-subject-id")
         let identity = FederatedIdentity(
             identifier: identifier,
@@ -96,8 +96,8 @@ struct FederatedIdentityTests {
 
     // MARK: - UserInfo Conformance Tests
 
-    @Test("FederatedIdentity email returns first verified email")
-    func emailReturnsFirstVerifiedEmail() {
+    @Test
+    func `FederatedIdentity email returns first verified email`() {
         let identity = FederatedIdentity(
             identifier: .federated(.google, userId: "123"),
             provider: .google,
@@ -110,8 +110,8 @@ struct FederatedIdentityTests {
         #expect(identity.email == "first@example.com")
     }
 
-    @Test("FederatedIdentity email returns nil when no verified emails")
-    func emailReturnsNilWhenEmpty() {
+    @Test
+    func `FederatedIdentity email returns nil when no verified emails`() {
         let identity = FederatedIdentity(
             identifier: .federated(.google, userId: "123"),
             provider: .google,
@@ -124,8 +124,8 @@ struct FederatedIdentityTests {
         #expect(identity.email == nil)
     }
 
-    @Test("FederatedIdentity phone returns first verified phone")
-    func phoneReturnsFirstVerifiedPhone() {
+    @Test
+    func `FederatedIdentity phone returns first verified phone`() {
         let identity = FederatedIdentity(
             identifier: .federated(.google, userId: "123"),
             provider: .google,
@@ -138,8 +138,8 @@ struct FederatedIdentityTests {
         #expect(identity.phone == "+1111111111")
     }
 
-    @Test("FederatedIdentity phone returns nil when no verified phones")
-    func phoneReturnsNilWhenEmpty() {
+    @Test
+    func `FederatedIdentity phone returns nil when no verified phones`() {
         let identity = FederatedIdentity(
             identifier: .federated(.google, userId: "123"),
             provider: .google,
@@ -152,8 +152,8 @@ struct FederatedIdentityTests {
         #expect(identity.phone == nil)
     }
 
-    @Test("FederatedIdentity conforms to UserInfo protocol")
-    func conformsToUserInfoProtocol() {
+    @Test
+    func `FederatedIdentity conforms to UserInfo protocol`() {
         let identity = FederatedIdentity(
             identifier: .federated(.google, userId: "123"),
             provider: .google,
@@ -168,8 +168,8 @@ struct FederatedIdentityTests {
         #expect(userInfo.phone == "+1234567890")
     }
 
-    @Test("FederatedIdentity userInfo accessor returns self")
-    func userInfoAccessorReturnsSelf() {
+    @Test
+    func `FederatedIdentity userInfo accessor returns self`() {
         let identity = FederatedIdentity(
             identifier: .federated(.google, userId: "123"),
             provider: .google,
@@ -186,8 +186,8 @@ struct FederatedIdentityTests {
 
     // MARK: - Sendable Conformance Tests
 
-    @Test("FederatedIdentity conforms to Sendable")
-    func conformsToSendable() {
+    @Test
+    func `FederatedIdentity conforms to Sendable`() {
         let identity: any Sendable = FederatedIdentity(
             identifier: .federated(.google, userId: "123"),
             provider: .google,
@@ -202,8 +202,8 @@ struct FederatedIdentityTests {
 
     // MARK: - Provider Specific Tests
 
-    @Test("FederatedIdentity works with Google provider")
-    func googleProvider() {
+    @Test
+    func `FederatedIdentity works with Google provider`() {
         let identity = FederatedIdentity(
             identifier: .federated(.google, userId: "google-user-id"),
             provider: .google,
@@ -217,8 +217,8 @@ struct FederatedIdentityTests {
         #expect(identity.identifier.value == "google-user-id")
     }
 
-    @Test("FederatedIdentity works with GitHub provider")
-    func githubProvider() {
+    @Test
+    func `FederatedIdentity works with GitHub provider`() {
         let identity = FederatedIdentity(
             identifier: .federated(.github, userId: "12345678"),
             provider: .github,
@@ -232,8 +232,8 @@ struct FederatedIdentityTests {
         #expect(identity.identifier.value == "12345678")
     }
 
-    @Test("FederatedIdentity works with Apple provider")
-    func appleProvider() {
+    @Test
+    func `FederatedIdentity works with Apple provider`() {
         let identity = FederatedIdentity(
             identifier: .federated(.named("apple"), userId: "000123.abc456.789"),
             provider: .named("apple"),
@@ -249,8 +249,8 @@ struct FederatedIdentityTests {
 
     // MARK: - Edge Cases
 
-    @Test("FederatedIdentity handles empty display name")
-    func emptyDisplayName() {
+    @Test
+    func `FederatedIdentity handles empty display name`() {
         let identity = FederatedIdentity(
             identifier: .federated(.google, userId: "123"),
             provider: .google,
@@ -263,8 +263,8 @@ struct FederatedIdentityTests {
         #expect(identity.displayName == nil)
     }
 
-    @Test("FederatedIdentity handles empty profile picture URL")
-    func emptyProfilePictureURL() {
+    @Test
+    func `FederatedIdentity handles empty profile picture URL`() {
         let identity = FederatedIdentity(
             identifier: .federated(.google, userId: "123"),
             provider: .google,
@@ -277,8 +277,8 @@ struct FederatedIdentityTests {
         #expect(identity.profilePictureURL == nil)
     }
 
-    @Test("FederatedIdentity preserves order of verified emails")
-    func emailOrderPreserved() {
+    @Test
+    func `FederatedIdentity preserves order of verified emails`() {
         let emails = ["z@example.com", "a@example.com", "m@example.com"]
         let identity = FederatedIdentity(
             identifier: .federated(.google, userId: "123"),
@@ -296,8 +296,8 @@ struct FederatedIdentityTests {
         #expect(identity.verifiedEmails[2] == "m@example.com")
     }
 
-    @Test("FederatedIdentity preserves order of verified phones")
-    func phoneOrderPreserved() {
+    @Test
+    func `FederatedIdentity preserves order of verified phones`() {
         let phones = ["+3333333333", "+1111111111", "+2222222222"]
         let identity = FederatedIdentity(
             identifier: .federated(.google, userId: "123"),

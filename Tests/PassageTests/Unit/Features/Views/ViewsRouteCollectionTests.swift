@@ -2,13 +2,13 @@ import Testing
 import Vapor
 @testable import Passage
 
-@Suite("Views Route Collection Tests")
-struct ViewsRouteCollectionTests {
+@Suite
+struct `Views Route Collection Tests` {
 
     // MARK: - Initialization Tests
 
-    @Test("Passage.Views.RouteCollection initialization")
-    func routeCollectionInitialization() {
+    @Test
+    func `Passage.Views.RouteCollection initialization`() {
         let theme = Passage.Views.Theme(colors: .defaultLight)
         let loginView = Passage.Configuration.Views.LoginView(
             style: .neobrutalism,
@@ -39,8 +39,8 @@ struct ViewsRouteCollectionTests {
         #expect(collection.group.isEmpty)
     }
 
-    @Test("Passage.Views.RouteCollection initialization with custom group")
-    func routeCollectionWithCustomGroup() {
+    @Test
+    func `Passage.Views.RouteCollection initialization with custom group`() {
         let theme = Passage.Views.Theme(colors: .defaultLight)
         let loginView = Passage.Configuration.Views.LoginView(
             style: .neobrutalism,
@@ -74,8 +74,8 @@ struct ViewsRouteCollectionTests {
         #expect(collection.group[1] == PathComponent.constant("views"))
     }
 
-    @Test("Passage.Views.RouteCollection stores configuration references")
-    func routeCollectionStoresConfig() {
+    @Test
+    func `Passage.Views.RouteCollection stores configuration references`() {
         let theme = Passage.Views.Theme(colors: .defaultLight)
         let registerView = Passage.Configuration.Views.RegisterView(
             style: .minimalism,
@@ -109,8 +109,8 @@ struct ViewsRouteCollectionTests {
         #expect(collection.routes.register.path.count == 2)
     }
 
-    @Test("Passage.Views.RouteCollection with all view types configured")
-    func routeCollectionWithAllViews() {
+    @Test
+    func `Passage.Views.RouteCollection with all view types configured`() {
         let theme = Passage.Views.Theme(colors: .oceanLight)
         let loginView = Passage.Configuration.Views.LoginView(
             style: .neobrutalism,
@@ -158,8 +158,8 @@ struct ViewsRouteCollectionTests {
         #expect(collection.config.passwordResetConfirm != nil)
     }
 
-    @Test("Passage.Views.RouteCollection with no views configured")
-    func routeCollectionWithNoViews() {
+    @Test
+    func `Passage.Views.RouteCollection with no views configured`() {
         let viewsConfig = Passage.Configuration.Views(
             register: nil,
             login: nil,
@@ -189,8 +189,8 @@ struct ViewsRouteCollectionTests {
 
     // MARK: - Protocol Conformance Tests
 
-    @Test("Passage.Views.RouteCollection conforms to RouteCollection")
-    func routeCollectionConformsToProtocol() {
+    @Test
+    func `Passage.Views.RouteCollection conforms to RouteCollection`() {
         let theme = Passage.Views.Theme(colors: .defaultLight)
         let loginView = Passage.Configuration.Views.LoginView(
             style: .neobrutalism,
@@ -223,8 +223,8 @@ struct ViewsRouteCollectionTests {
 
     // MARK: - Configuration Integration Tests
 
-    @Test("Passage.Views.RouteCollection with custom restoration routes")
-    func routeCollectionWithCustomRestorationRoutes() {
+    @Test
+    func `Passage.Views.RouteCollection with custom restoration routes`() {
         let theme = Passage.Views.Theme(colors: .forestLight)
         let resetRequestView = Passage.Configuration.Views.PasswordResetRequestView(
             style: .material,
@@ -301,8 +301,8 @@ struct ViewsRouteCollectionTests {
     /// Helper function that requires Sendable conformance.
     private func assertSendable<T: Sendable>(_ value: T) {}
 
-    @Test("Views.RouteCollection conforms to Sendable")
-    func conformsToSendable() {
+    @Test
+    func `Views.RouteCollection conforms to Sendable`() {
         let config = Passage.Configuration.Views()
         let routes = Passage.Configuration.Routes()
         let restoration = Passage.Configuration.Restoration()

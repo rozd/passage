@@ -7,13 +7,13 @@ import Vapor
 /// handler consumes before calling the service. These tests pin down the
 /// identifier-extraction rules that drive the shape of the
 /// `PublicKeyCredentialUserEntity` passed into `PasskeyService.beginRegistration`.
-@Suite("Passkey Signup Form Tests", .tags(.unit, .passkey))
-struct PasskeySignupFormTests {
+@Suite(.tags(.unit, .passkey))
+struct `Passkey Signup Form Tests` {
 
     // MARK: - asIdentifier priority
 
-    @Test("asIdentifier returns email when only email is set")
-    func asIdentifierEmail() throws {
+    @Test
+    func `asIdentifier returns email when only email is set`() throws {
         let form = Passage.DefaultPasskeySignupForm(
             email: "alice@example.com",
             phone: nil,
@@ -27,8 +27,8 @@ struct PasskeySignupFormTests {
         #expect(identifier.value == "alice@example.com")
     }
 
-    @Test("asIdentifier returns phone when only phone is set")
-    func asIdentifierPhone() throws {
+    @Test
+    func `asIdentifier returns phone when only phone is set`() throws {
         let form = Passage.DefaultPasskeySignupForm(
             email: nil,
             phone: "+15551234567",
@@ -42,8 +42,8 @@ struct PasskeySignupFormTests {
         #expect(identifier.value == "+15551234567")
     }
 
-    @Test("asIdentifier returns username when only username is set")
-    func asIdentifierUsername() throws {
+    @Test
+    func `asIdentifier returns username when only username is set`() throws {
         let form = Passage.DefaultPasskeySignupForm(
             email: nil,
             phone: nil,
@@ -57,8 +57,8 @@ struct PasskeySignupFormTests {
         #expect(identifier.value == "alice")
     }
 
-    @Test("asIdentifier prefers email when multiple identifiers are present")
-    func asIdentifierPriority() throws {
+    @Test
+    func `asIdentifier prefers email when multiple identifiers are present`() throws {
         // email > phone > username: begin-registration should never be
         // ambiguous when the client accidentally submits two identifiers.
         let form = Passage.DefaultPasskeySignupForm(
@@ -74,8 +74,8 @@ struct PasskeySignupFormTests {
         #expect(identifier.value == "alice@example.com")
     }
 
-    @Test("asIdentifier throws identifierNotSpecified when all are nil")
-    func asIdentifierThrowsWhenAllNil() throws {
+    @Test
+    func `asIdentifier throws identifierNotSpecified when all are nil`() throws {
         let form = Passage.DefaultPasskeySignupForm(
             email: nil,
             phone: nil,
@@ -100,8 +100,8 @@ struct PasskeySignupFormTests {
 
     // MARK: - Content decoding
 
-    @Test("DefaultPasskeySignupForm decodes from url-encoded form body")
-    func decodeFromFormBody() throws {
+    @Test
+    func `DefaultPasskeySignupForm decodes from url-encoded form body`() throws {
         // Validate the Content wiring that the Begin-Registration route uses:
         // a url-encoded POST body must decode into the default form with the
         // optional identifier fields untouched.
@@ -117,8 +117,8 @@ struct PasskeySignupFormTests {
         #expect(form.username == nil)
     }
 
-    @Test("Form validation rejects a malformed email value")
-    func emailValidationRejectsGarbage() throws {
+    @Test
+    func `Form validation rejects a malformed email value`() throws {
         var validations = Validations()
         Passage.DefaultPasskeySignupForm.validations(&validations)
 
@@ -130,8 +130,8 @@ struct PasskeySignupFormTests {
         #expect(result.error != nil)
     }
 
-    @Test("Form validation accepts a nil email when using phone or username")
-    func emailValidationAllowsNil() throws {
+    @Test
+    func `Form validation accepts a nil email when using phone or username`() throws {
         var validations = Validations()
         Passage.DefaultPasskeySignupForm.validations(&validations)
 
@@ -150,11 +150,11 @@ struct PasskeySignupFormTests {
 /// Passage uses — especially the `provider:value` shape for federated IDs and
 /// the SHA-256-derived, stable-per-identifier `id` used when a signup user
 /// doesn't exist yet.
-@Suite("PublicKeyCredentialUserEntity Tests", .tags(.unit, .passkey))
-struct PublicKeyCredentialUserEntityTests {
+@Suite(.tags(.unit, .passkey))
+struct `PublicKeyCredentialUserEntity Tests` {
 
-    @Test("Email identifier becomes user.name verbatim")
-    func emailName() {
+    @Test
+    func `Email identifier becomes user.name verbatim`() {
         let entity = PublicKeyCredentialUserEntity(
             for: .email("alice@example.com"),
             displayName: "Alice"
@@ -163,8 +163,8 @@ struct PublicKeyCredentialUserEntityTests {
         #expect(entity.displayName == "Alice")
     }
 
-    @Test("Phone identifier becomes user.name verbatim")
-    func phoneName() {
+    @Test
+    func `Phone identifier becomes user.name verbatim`() {
         let entity = PublicKeyCredentialUserEntity(
             for: .phone("+15551234567"),
             displayName: "Alice"
@@ -173,8 +173,8 @@ struct PublicKeyCredentialUserEntityTests {
         #expect(entity.displayName == "Alice")
     }
 
-    @Test("Username identifier becomes user.name verbatim")
-    func usernameName() {
+    @Test
+    func `Username identifier becomes user.name verbatim`() {
         let entity = PublicKeyCredentialUserEntity(
             for: .username("alice"),
             displayName: "Alice A."
@@ -183,8 +183,8 @@ struct PublicKeyCredentialUserEntityTests {
         #expect(entity.displayName == "Alice A.")
     }
 
-    @Test("Federated identifier name is formatted as \"provider:value\"")
-    func federatedName() {
+    @Test
+    func `Federated identifier name is formatted as "provider:value"`() {
         let entity = PublicKeyCredentialUserEntity(
             for: .federated(.google, userId: "user-123"),
             displayName: "Alice"
@@ -194,8 +194,8 @@ struct PublicKeyCredentialUserEntityTests {
         #expect(entity.name == "google:user-123")
     }
 
-    @Test("user.id is a 32-byte SHA-256 digest")
-    func idIsSHA256SizedBlob() {
+    @Test
+    func `user.id is a 32-byte SHA-256 digest`() {
         let entity = PublicKeyCredentialUserEntity(
             for: .email("a@example.com"),
             displayName: "A"
@@ -203,8 +203,8 @@ struct PublicKeyCredentialUserEntityTests {
         #expect(entity.id.count == 32)
     }
 
-    @Test("user.id is stable across calls for the same identifier")
-    func idIsStable() {
+    @Test
+    func `user.id is stable across calls for the same identifier`() {
         let a = PublicKeyCredentialUserEntity(for: .email("x@example.com"), displayName: "X")
         let b = PublicKeyCredentialUserEntity(for: .email("x@example.com"), displayName: "X")
         // Same input, same user handle — authenticators dedupe credentials by
@@ -213,8 +213,8 @@ struct PublicKeyCredentialUserEntityTests {
         #expect(a.id == b.id)
     }
 
-    @Test("user.id differs across identifier kinds with the same value")
-    func idNamespacedByKind() {
+    @Test
+    func `user.id differs across identifier kinds with the same value`() {
         let email = PublicKeyCredentialUserEntity(for: .email("alice"), displayName: "A")
         let username = PublicKeyCredentialUserEntity(for: .username("alice"), displayName: "A")
         #expect(email.id != username.id)

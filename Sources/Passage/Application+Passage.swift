@@ -1,4 +1,4 @@
-import Vapor
+public import Vapor
 
 // MARK: - Storage
 

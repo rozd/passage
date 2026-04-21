@@ -339,7 +339,7 @@ extension Passage.Views {
         case let error as ValidationsError:
             errorMessage = "Validation error: \(error.description)"
             break
-        case let error as AbortError:
+        case let error as any AbortError:
             errorMessage = error.reason
             break
         default:
@@ -496,7 +496,7 @@ extension Passage.Views {
 extension Passage.Views {
 
     func redirect(
-        view: Passage.Configuration.Views.View,
+        view: any Passage.Configuration.Views.View,
         at path: [PathComponent],
         withParams params: [String: String?] = [:],
         withSuccessMessage success: String?,
@@ -514,10 +514,10 @@ extension Passage.Views {
     }
 
     func redirect(
-        view: Passage.Configuration.Views.View,
+        view: any Passage.Configuration.Views.View,
         at path: [PathComponent],
         withParams params: [String: String?] = [:],
-        withError error: Error,
+        withError error: any Error,
         withDefaultMessage message: String = "An unexpected error occurred. Please try again.",
     ) -> Response {
         let errorMessage: String
@@ -525,7 +525,7 @@ extension Passage.Views {
         case let error as ValidationsError:
             errorMessage = "Validation error: \(error.description)"
             break
-        case let error as AbortError:
+        case let error as any AbortError:
             errorMessage = error.reason
             break
         default:

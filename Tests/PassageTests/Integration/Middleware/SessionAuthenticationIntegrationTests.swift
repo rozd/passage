@@ -1,16 +1,17 @@
+import JWT
+@testable import Passage
+@testable import PassageOnlyForTest
+import Queues
 import Testing
 import Vapor
 import VaporTesting
-import JWTKit
-@testable import Passage
-@testable import PassageOnlyForTest
 
 extension Tag {
     @Tag static var session: Self
 }
 
-@Suite("Sessions Authentication Integration Tests", .tags(.integration, .session))
-struct SessionAuthenticationIntegrationTests {
+@Suite(.tags(.integration, .session))
+struct `Sessions Authentication Integration Tests` {
 
     // MARK: - Configuration Helper
 
@@ -162,8 +163,8 @@ struct SessionAuthenticationIntegrationTests {
 
     // MARK: - Login with Sessions Tests
 
-    @Test("Login with session enabled sets session cookie")
-    func loginSetsSessionCookie() async throws {
+    @Test
+    func `Login with session enabled sets session cookie`() async throws {
         try await withApp(configure: configureWithSession) { app in
             try await createTestUser(app: app)
 
@@ -182,8 +183,8 @@ struct SessionAuthenticationIntegrationTests {
         }
     }
 
-    @Test("Login with session disabled does not set session cookie")
-    func loginWithoutSessionDoesNotSetCookie() async throws {
+    @Test
+    func `Login with session disabled does not set session cookie`() async throws {
         try await withApp(configure: configureWithoutSession) { app in
             try await createTestUser(app: app)
 
@@ -207,8 +208,8 @@ struct SessionAuthenticationIntegrationTests {
 
     // MARK: - Sessions Authentication Tests
 
-    @Test("Sessions authenticator authenticates user from session cookie")
-    func sessionAuthenticatorAuthenticatesFromCookie() async throws {
+    @Test
+    func `Sessions authenticator authenticates user from session cookie`() async throws {
         try await withApp(configure: configureWithSession) { app in
             try await createTestUser(app: app)
 
@@ -248,8 +249,8 @@ struct SessionAuthenticationIntegrationTests {
         }
     }
 
-    @Test("Sessions authenticator with no session returns not authenticated")
-    func sessionAuthenticatorWithNoSessionReturnsNotAuthenticated() async throws {
+    @Test
+    func `Sessions authenticator with no session returns not authenticated`() async throws {
         try await withApp(configure: configureWithSession) { app in
             try await createTestUser(app: app)
 
@@ -264,8 +265,8 @@ struct SessionAuthenticationIntegrationTests {
 
     // MARK: - Logout with Sessions Tests
 
-    @Test("Logout clears session when session is enabled")
-    func logoutClearsSession() async throws {
+    @Test
+    func `Logout clears session when session is enabled`() async throws {
         try await withApp(configure: configureWithSession) { app in
             try await createTestUser(app: app)
 
@@ -323,8 +324,8 @@ struct SessionAuthenticationIntegrationTests {
 
     // MARK: - Current User with Sessions Tests
 
-    @Test("Current user endpoint works with session authentication")
-    func currentUserWorksWithSession() async throws {
+    @Test
+    func `Current user endpoint works with session authentication`() async throws {
         try await withApp(configure: configureWithSession) { app in
             try await createTestUser(app: app)
 
@@ -365,8 +366,8 @@ struct SessionAuthenticationIntegrationTests {
 
     // MARK: - Combined Auth Tests
 
-    @Test("Bearer token takes precedence when both session and bearer are provided")
-    func bearerTokenTakesPrecedence() async throws {
+    @Test
+    func `Bearer token takes precedence when both session and bearer are provided`() async throws {
         try await withApp(configure: configureWithSession) { app in
             // Create two users
             try await createTestUser(app: app, email: "user1@example.com")
@@ -427,8 +428,8 @@ struct SessionAuthenticationIntegrationTests {
 
     // MARK: - PassageGuard with Session Tests
 
-    @Test("PassageGuard works with session authenticated user")
-    func passageGuardWorksWithSession() async throws {
+    @Test
+    func `PassageGuard works with session authenticated user`() async throws {
         try await withApp(configure: configureWithSession) { app in
             try await createTestUser(app: app)
 
@@ -466,8 +467,8 @@ struct SessionAuthenticationIntegrationTests {
         }
     }
 
-    @Test("PassageGuard rejects unauthenticated request")
-    func passageGuardRejectsUnauthenticated() async throws {
+    @Test
+    func `PassageGuard rejects unauthenticated request`() async throws {
         try await withApp(configure: configureWithSession) { app in
             try await createTestUser(app: app)
 

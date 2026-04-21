@@ -1,12 +1,13 @@
+import JWT
+@testable import Passage
+@testable import PassageOnlyForTest
+import Queues
 import Testing
 import Vapor
 import VaporTesting
-import JWTKit
-@testable import Passage
-@testable import PassageOnlyForTest
 
-@Suite("PassageContext Integration Tests", .tags(.integration))
-struct PassageContextIntegrationTests {
+@Suite(.tags(.integration))
+struct `PassageContext Integration Tests` {
 
     // MARK: - Configuration Helper
 
@@ -114,8 +115,8 @@ struct PassageContextIntegrationTests {
 
     // MARK: - hasUser Tests
 
-    @Test("request.passage.hasUser returns true when authenticated")
-    func hasUserReturnsTrueWhenAuthenticated() async throws {
+    @Test
+    func `request.passage.hasUser returns true when authenticated`() async throws {
         try await withApp(configure: configure) { app in
             let userId = try await createTestUser(app: app)
             let token = try await createAccessToken(app: app, userId: userId)
@@ -130,8 +131,8 @@ struct PassageContextIntegrationTests {
         }
     }
 
-    @Test("request.passage.hasUser returns false when not authenticated")
-    func hasUserReturnsFalseWhenNotAuthenticated() async throws {
+    @Test
+    func `request.passage.hasUser returns false when not authenticated`() async throws {
         try await withApp(configure: configure) { app in
             try await app.testing().test(.GET, "test-has-user", afterResponse: { res async in
                 #expect(res.status == .ok)
@@ -143,8 +144,8 @@ struct PassageContextIntegrationTests {
 
     // MARK: - user Property Tests
 
-    @Test("request.passage.user returns authenticated user")
-    func userReturnsAuthenticatedUser() async throws {
+    @Test
+    func `request.passage.user returns authenticated user`() async throws {
         try await withApp(configure: configure) { app in
             let userId = try await createTestUser(app: app)
             let token = try await createAccessToken(app: app, userId: userId)
@@ -159,8 +160,8 @@ struct PassageContextIntegrationTests {
         }
     }
 
-    @Test("request.passage.user throws when no user authenticated")
-    func userThrowsWhenNotAuthenticated() async throws {
+    @Test
+    func `request.passage.user throws when no user authenticated`() async throws {
         try await withApp(configure: configure) { app in
             try await app.testing().test(.GET, "test-get-user", afterResponse: { res async in
                 #expect(res.status == .ok)
@@ -172,8 +173,8 @@ struct PassageContextIntegrationTests {
 
     // MARK: - Context Access Tests
 
-    @Test("PassageContext is accessible via request.passage extension")
-    func contextAccessibleViaRequestExtension() async throws {
+    @Test
+    func `PassageContext is accessible via request.passage extension`() async throws {
         try await withApp(configure: configure) { app in
             // Just verify the route works - the route handler itself uses request.passage
             try await app.testing().test(.GET, "test-has-user", afterResponse: { res async in

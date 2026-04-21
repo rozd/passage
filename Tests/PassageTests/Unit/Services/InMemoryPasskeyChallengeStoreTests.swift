@@ -3,8 +3,8 @@ import Foundation
 @testable import Passage
 import PassageOnlyForTest
 
-@Suite("InMemoryPasskeyChallengeStore Tests", .tags(.unit))
-struct InMemoryPasskeyChallengeStoreTests {
+@Suite(.tags(.unit))
+struct `InMemoryPasskeyChallengeStore Tests` {
 
     // MARK: - Mock User
 
@@ -59,8 +59,8 @@ struct InMemoryPasskeyChallengeStoreTests {
 
     // MARK: - Create & Find
 
-    @Test("create then find roundtrips all fields")
-    func createThenFind() async throws {
+    @Test
+    func `create then find roundtrips all fields`() async throws {
         let store = makeStore()
         let user = makeUser()
         let bytes = Data("reg-bytes-1".utf8)
@@ -80,8 +80,8 @@ struct InMemoryPasskeyChallengeStoreTests {
         #expect(found.isValid == true)
     }
 
-    @Test("create with nil user stores discoverable challenge")
-    func createWithNilUser() async throws {
+    @Test
+    func `create with nil user stores discoverable challenge`() async throws {
         let store = makeStore()
         let bytes = Data("disc-bytes".utf8)
         let expiresAt = Date().addingTimeInterval(60)
@@ -96,8 +96,8 @@ struct InMemoryPasskeyChallengeStoreTests {
         #expect(found.kind == .authentication)
     }
 
-    @Test("find returns nil for unknown bytes")
-    func findReturnsNilForUnknown() async throws {
+    @Test
+    func `find returns nil for unknown bytes`() async throws {
         let store = makeStore()
 
         let result = try await store.find(passkeyChallengeMatching: Data("never-stored".utf8))
@@ -107,8 +107,8 @@ struct InMemoryPasskeyChallengeStoreTests {
 
     // MARK: - Consume
 
-    @Test("consume marks the challenge as consumed and invalid")
-    func consumeMarksConsumed() async throws {
+    @Test
+    func `consume marks the challenge as consumed and invalid`() async throws {
         let store = makeStore()
         let user = makeUser()
         let bytes = Data("consume-bytes".utf8)
@@ -126,8 +126,8 @@ struct InMemoryPasskeyChallengeStoreTests {
         #expect(found.isValid == false)
     }
 
-    @Test("consuming one challenge leaves others unaffected")
-    func consumeIsolatesChallenges() async throws {
+    @Test
+    func `consuming one challenge leaves others unaffected`() async throws {
         let store = makeStore()
         let user = makeUser()
         let firstBytes = Data("first".utf8)
@@ -151,8 +151,8 @@ struct InMemoryPasskeyChallengeStoreTests {
 
     // MARK: - Cleanup
 
-    @Test("cleanupExpired removes expired challenges but keeps fresh ones")
-    func cleanupRemovesExpired() async throws {
+    @Test
+    func `cleanupExpired removes expired challenges but keeps fresh ones`() async throws {
         let store = makeStore()
         let user = makeUser()
         let expired1 = Data("expired-1".utf8)
@@ -179,8 +179,8 @@ struct InMemoryPasskeyChallengeStoreTests {
         #expect(try await store.find(passkeyChallengeMatching: fresh) != nil)
     }
 
-    @Test("cleanupExpired on empty store is a no-op")
-    func cleanupEmptyStoreIsNoop() async throws {
+    @Test
+    func `cleanupExpired on empty store is a no-op`() async throws {
         let store = makeStore()
 
         try await store.cleanupExpiredPasskeyChallenges(before: Date())
@@ -190,8 +190,8 @@ struct InMemoryPasskeyChallengeStoreTests {
 
     // MARK: - Helper property behaviour through the stored type
 
-    @Test("isExpired reflects past expiresAt")
-    func isExpiredForPastChallenge() async throws {
+    @Test
+    func `isExpired reflects past expiresAt`() async throws {
         let store = makeStore()
         let user = makeUser()
         let bytes = Data("past".utf8)

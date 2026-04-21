@@ -1,13 +1,13 @@
 import Testing
 @testable import Passage
 
-@Suite("Tokens Struct Tests", .tags(.unit))
-struct TokensStructTests {
+@Suite(.tags(.unit))
+struct `Tokens Struct Tests` {
 
     // MARK: - Structure Tests
 
-    @Test("Tokens struct is properly namespaced in Passage")
-    func tokensStructIsProperlyNamespaced() {
+    @Test
+    func `Tokens struct is properly namespaced in Passage`() {
         // Verify the Tokens struct type name
         let typeName = String(describing: Passage.Tokens.self)
         #expect(typeName == "Tokens")
@@ -15,8 +15,8 @@ struct TokensStructTests {
 
     // MARK: - Feature Organization Tests
 
-    @Test("Tokens feature is properly namespaced")
-    func tokensFeatureNamespace() {
+    @Test
+    func `Tokens feature is properly namespaced`() {
         // Verify Tokens is correctly nested within Passage namespace
         let typeName = String(reflecting: Passage.Tokens.self)
         #expect(typeName.contains("Passage.Tokens"))

@@ -3,20 +3,20 @@ import Foundation
 import Vapor
 @testable import Passage
 
-@Suite("Routes Configuration Tests")
-struct RoutesConfigurationTests {
+@Suite
+struct `Routes Configuration Tests` {
 
     // MARK: - Register Route Tests
 
-    @Test("Register route default path")
-    func registerRouteDefault() {
+    @Test
+    func `Register route default path`() {
         let route = Passage.Configuration.Routes.Register.default
         #expect(route.path.count == 1)
         #expect(route.path[0].description == "register")
     }
 
-    @Test("Register route custom path")
-    func registerRouteCustom() {
+    @Test
+    func `Register route custom path`() {
         let route = Passage.Configuration.Routes.Register(path: "api", "v1", "signup")
         #expect(route.path.count == 3)
         #expect(route.path[0].description == "api")
@@ -26,15 +26,15 @@ struct RoutesConfigurationTests {
 
     // MARK: - Login Route Tests
 
-    @Test("Login route default path")
-    func loginRouteDefault() {
+    @Test
+    func `Login route default path`() {
         let route = Passage.Configuration.Routes.Login.default
         #expect(route.path.count == 1)
         #expect(route.path[0].description == "login")
     }
 
-    @Test("Login route custom path")
-    func loginRouteCustom() {
+    @Test
+    func `Login route custom path`() {
         let route = Passage.Configuration.Routes.Login(path: "signin")
         #expect(route.path.count == 1)
         #expect(route.path[0].description == "signin")
@@ -42,15 +42,15 @@ struct RoutesConfigurationTests {
 
     // MARK: - Logout Route Tests
 
-    @Test("Logout route default path")
-    func logoutRouteDefault() {
+    @Test
+    func `Logout route default path`() {
         let route = Passage.Configuration.Routes.Logout.default
         #expect(route.path.count == 1)
         #expect(route.path[0].description == "logout")
     }
 
-    @Test("Logout route custom path")
-    func logoutRouteCustom() {
+    @Test
+    func `Logout route custom path`() {
         let route = Passage.Configuration.Routes.Logout(path: "signout")
         #expect(route.path.count == 1)
         #expect(route.path[0].description == "signout")
@@ -58,15 +58,15 @@ struct RoutesConfigurationTests {
 
     // MARK: - RefreshToken Route Tests
 
-    @Test("Refresh token route default path")
-    func refreshTokenRouteDefault() {
+    @Test
+    func `Refresh token route default path`() {
         let route = Passage.Configuration.Routes.RefreshToken.default
         #expect(route.path.count == 1)
         #expect(route.path[0].description == "refresh-token")
     }
 
-    @Test("Refresh token route custom path")
-    func refreshTokenRouteCustom() {
+    @Test
+    func `Refresh token route custom path`() {
         let route = Passage.Configuration.Routes.RefreshToken(path: "token", "refresh")
         #expect(route.path.count == 2)
         #expect(route.path[0].description == "token")
@@ -75,15 +75,15 @@ struct RoutesConfigurationTests {
 
     // MARK: - CurrentUser Route Tests
 
-    @Test("Current user route default path")
-    func currentUserRouteDefault() {
+    @Test
+    func `Current user route default path`() {
         let route = Passage.Configuration.Routes.CurrentUser.default
         #expect(route.path.count == 1)
         #expect(route.path[0].description == "me")
     }
 
-    @Test("Current user route custom path")
-    func currentUserRouteCustom() {
+    @Test
+    func `Current user route custom path`() {
         let route = Passage.Configuration.Routes.CurrentUser(path: "user", "profile")
         #expect(route.path.count == 2)
         #expect(route.path[0].description == "user")
@@ -92,8 +92,8 @@ struct RoutesConfigurationTests {
 
     // MARK: - Routes Configuration Tests
 
-    @Test("Routes default configuration")
-    func routesDefaultConfiguration() {
+    @Test
+    func `Routes default configuration`() {
         let routes = Passage.Configuration.Routes()
 
         #expect(routes.group.count == 1)
@@ -105,8 +105,8 @@ struct RoutesConfigurationTests {
         #expect(routes.currentUser.path[0].description == "me")
     }
 
-    @Test("Routes with custom group")
-    func routesWithCustomGroup() {
+    @Test
+    func `Routes with custom group`() {
         let routes = Passage.Configuration.Routes(group: "api", "v1")
 
         #expect(routes.group.count == 2)
@@ -114,8 +114,8 @@ struct RoutesConfigurationTests {
         #expect(routes.group[1].description == "v1")
     }
 
-    @Test("Routes with custom paths")
-    func routesWithCustomPaths() {
+    @Test
+    func `Routes with custom paths`() {
         let routes = Passage.Configuration.Routes(
             register: .init(path: "signup"),
             login: .init(path: "signin"),
@@ -132,8 +132,8 @@ struct RoutesConfigurationTests {
         #expect(routes.currentUser.path[0].description == "profile")
     }
 
-    @Test("Routes with custom group and paths")
-    func routesWithCustomGroupAndPaths() {
+    @Test
+    func `Routes with custom group and paths`() {
         let routes = Passage.Configuration.Routes(
             group: "api", "auth",
             register: .init(path: "signup"),
@@ -147,8 +147,8 @@ struct RoutesConfigurationTests {
         #expect(routes.login.path[0].description == "signin")
     }
 
-    @Test("Routes Sendable conformance")
-    func routesSendableConformance() {
+    @Test
+    func `Routes Sendable conformance`() {
         let routes: Passage.Configuration.Routes = .init()
 
         let _: any Sendable = routes

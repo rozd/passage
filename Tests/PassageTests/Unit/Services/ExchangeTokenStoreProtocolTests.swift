@@ -2,8 +2,8 @@ import Testing
 import Foundation
 @testable import Passage
 
-@Suite("ExchangeTokenStore Protocol Tests", .tags(.unit))
-struct ExchangeTokenStoreProtocolTests {
+@Suite(.tags(.unit))
+struct `ExchangeTokenStore Protocol Tests` {
 
     // MARK: - Mock Implementations
 
@@ -87,22 +87,22 @@ struct ExchangeTokenStoreProtocolTests {
 
     // MARK: - Protocol Conformance Tests
 
-    @Test("ExchangeTokenStore protocol can be implemented")
-    func exchangeTokenStoreProtocolImplementation() {
+    @Test
+    func `ExchangeTokenStore protocol can be implemented`() {
         let store: any Passage.ExchangeTokenStore = MockExchangeTokenStore()
         #expect(store is MockExchangeTokenStore)
     }
 
-    @Test("ExchangeTokenStore protocol conforms to Sendable")
-    func exchangeTokenStoreProtocolIsSendable() {
+    @Test
+    func `ExchangeTokenStore protocol conforms to Sendable`() {
         let store: any Sendable = MockExchangeTokenStore()
         #expect(store is MockExchangeTokenStore)
     }
 
     // MARK: - Method Signature Tests
 
-    @Test("createExchangeToken returns ExchangeToken")
-    func createExchangeTokenReturnsToken() async throws {
+    @Test
+    func `createExchangeToken returns ExchangeToken`() async throws {
         let store = MockExchangeTokenStore()
         let user = createMockUser()
 
@@ -116,8 +116,8 @@ struct ExchangeTokenStoreProtocolTests {
         #expect(token.tokenHash == "test-hash")
     }
 
-    @Test("createExchangeToken sets correct user")
-    func createExchangeTokenSetsUser() async throws {
+    @Test
+    func `createExchangeToken sets correct user`() async throws {
         let store = MockExchangeTokenStore()
         let user = createMockUser()
 
@@ -130,8 +130,8 @@ struct ExchangeTokenStoreProtocolTests {
         #expect(token.user.id?.description == user.id?.description)
     }
 
-    @Test("createExchangeToken sets correct expiration")
-    func createExchangeTokenSetsExpiration() async throws {
+    @Test
+    func `createExchangeToken sets correct expiration`() async throws {
         let store = MockExchangeTokenStore()
         let user = createMockUser()
         let expiresAt = Date().addingTimeInterval(60)
@@ -145,8 +145,8 @@ struct ExchangeTokenStoreProtocolTests {
         #expect(token.expiresAt == expiresAt)
     }
 
-    @Test("createExchangeToken creates unconsumed token")
-    func createExchangeTokenUnconsumed() async throws {
+    @Test
+    func `createExchangeToken creates unconsumed token`() async throws {
         let store = MockExchangeTokenStore()
         let user = createMockUser()
 
@@ -160,8 +160,8 @@ struct ExchangeTokenStoreProtocolTests {
         #expect(token.isConsumed == false)
     }
 
-    @Test("createExchangeToken creates valid token")
-    func createExchangeTokenCreatesValidToken() async throws {
+    @Test
+    func `createExchangeToken creates valid token`() async throws {
         let store = MockExchangeTokenStore()
         let user = createMockUser()
 
@@ -174,8 +174,8 @@ struct ExchangeTokenStoreProtocolTests {
         #expect(token.isValid == true)
     }
 
-    @Test("find returns nil for non-existent hash")
-    func findReturnsNilForNonExistentHash() async throws {
+    @Test
+    func `find returns nil for non-existent hash`() async throws {
         let store = MockExchangeTokenStore()
 
         let token = try await store.find(exchangeTokenHash: "non-existent-hash")
@@ -185,8 +185,8 @@ struct ExchangeTokenStoreProtocolTests {
 
     // MARK: - Discardable Result Test
 
-    @Test("createExchangeToken is discardable")
-    func createExchangeTokenIsDiscardable() async throws {
+    @Test
+    func `createExchangeToken is discardable`() async throws {
         let store = MockExchangeTokenStore()
         let user = createMockUser()
 
@@ -203,8 +203,8 @@ struct ExchangeTokenStoreProtocolTests {
 
     // MARK: - Integration with Store Protocol
 
-    @Test("Store protocol includes exchangeTokens property")
-    func storeProtocolIncludesExchangeTokens() {
+    @Test
+    func `Store protocol includes exchangeTokens property`() {
         // This is a compile-time test - if Store protocol doesn't include
         // exchangeTokens, this code won't compile
         struct TestStore: Passage.Store {

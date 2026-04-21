@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 /// Passage's representation of a W3C [credential record](https://www.w3.org/TR/webauthn-3/#credential-record)
 /// — the Relying Party's database entry for a registered passkey. Produced by

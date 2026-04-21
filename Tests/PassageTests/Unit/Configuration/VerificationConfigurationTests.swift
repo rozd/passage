@@ -3,29 +3,29 @@ import Foundation
 import Vapor
 @testable import Passage
 
-@Suite("Verification Configuration Tests")
-struct VerificationConfigurationTests {
+@Suite
+struct `Verification Configuration Tests` {
 
     // MARK: - Email Verification Route Tests
 
-    @Test("Email verification verify route default")
-    func emailVerifyRouteDefault() {
+    @Test
+    func `Email verification verify route default`() {
         let route = Passage.Configuration.Verification.Email.Routes.Verify.default
         #expect(route.path.count == 2)
         #expect(route.path[0].description == "email")
         #expect(route.path[1].description == "verify")
     }
 
-    @Test("Email verification resend route default")
-    func emailResendRouteDefault() {
+    @Test
+    func `Email verification resend route default`() {
         let route = Passage.Configuration.Verification.Email.Routes.Resend.default
         #expect(route.path.count == 2)
         #expect(route.path[0].description == "email")
         #expect(route.path[1].description == "resend")
     }
 
-    @Test("Email verification routes custom paths")
-    func emailRoutesCustomPaths() {
+    @Test
+    func `Email verification routes custom paths`() {
         let routes = Passage.Configuration.Verification.Email.Routes(
             verify: .init(path: "v", "email"),
             resend: .init(path: "r", "email")
@@ -39,8 +39,8 @@ struct VerificationConfigurationTests {
 
     // MARK: - Email Verification Configuration Tests
 
-    @Test("Email verification default configuration")
-    func emailVerificationDefault() {
+    @Test
+    func `Email verification default configuration`() {
         let email = Passage.Configuration.Verification.Email()
 
         #expect(email.codeLength == 6)
@@ -48,8 +48,8 @@ struct VerificationConfigurationTests {
         #expect(email.maxAttempts == 3)
     }
 
-    @Test("Email verification custom configuration")
-    func emailVerificationCustom() {
+    @Test
+    func `Email verification custom configuration`() {
         let email = Passage.Configuration.Verification.Email(
             routes: .init(),
             codeLength: 8,
@@ -64,32 +64,32 @@ struct VerificationConfigurationTests {
 
     // MARK: - Phone Verification Route Tests
 
-    @Test("Phone verification send code route default")
-    func phoneSendCodeRouteDefault() {
+    @Test
+    func `Phone verification send code route default`() {
         let route = Passage.Configuration.Verification.Phone.Routes.SendCode.default
         #expect(route.path.count == 2)
         #expect(route.path[0].description == "phone")
         #expect(route.path[1].description == "send-code")
     }
 
-    @Test("Phone verification verify route default")
-    func phoneVerifyRouteDefault() {
+    @Test
+    func `Phone verification verify route default`() {
         let route = Passage.Configuration.Verification.Phone.Routes.Verify.default
         #expect(route.path.count == 2)
         #expect(route.path[0].description == "phone")
         #expect(route.path[1].description == "verify")
     }
 
-    @Test("Phone verification resend route default")
-    func phoneResendRouteDefault() {
+    @Test
+    func `Phone verification resend route default`() {
         let route = Passage.Configuration.Verification.Phone.Routes.Resend.default
         #expect(route.path.count == 2)
         #expect(route.path[0].description == "phone")
         #expect(route.path[1].description == "resend")
     }
 
-    @Test("Phone verification routes custom paths")
-    func phoneRoutesCustomPaths() {
+    @Test
+    func `Phone verification routes custom paths`() {
         let routes = Passage.Configuration.Verification.Phone.Routes(
             sendCode: .init(path: "sms", "send"),
             verify: .init(path: "sms", "verify"),
@@ -103,8 +103,8 @@ struct VerificationConfigurationTests {
 
     // MARK: - Phone Verification Configuration Tests
 
-    @Test("Phone verification default configuration")
-    func phoneVerificationDefault() {
+    @Test
+    func `Phone verification default configuration`() {
         let phone = Passage.Configuration.Verification.Phone()
 
         #expect(phone.codeLength == 6)
@@ -112,8 +112,8 @@ struct VerificationConfigurationTests {
         #expect(phone.maxAttempts == 3)
     }
 
-    @Test("Phone verification custom configuration")
-    func phoneVerificationCustom() {
+    @Test
+    func `Phone verification custom configuration`() {
         let phone = Passage.Configuration.Verification.Phone(
             routes: .init(),
             codeLength: 4,
@@ -128,8 +128,8 @@ struct VerificationConfigurationTests {
 
     // MARK: - Verification Configuration Tests
 
-    @Test("Verification default configuration")
-    func verificationDefault() {
+    @Test
+    func `Verification default configuration`() {
         let verification = Passage.Configuration.Verification()
 
         #expect(verification.useQueues == false)
@@ -137,15 +137,15 @@ struct VerificationConfigurationTests {
         #expect(verification.phone.codeLength == 6)
     }
 
-    @Test("Verification with queues enabled")
-    func verificationWithQueues() {
+    @Test
+    func `Verification with queues enabled`() {
         let verification = Passage.Configuration.Verification(useQueues: true)
 
         #expect(verification.useQueues == true)
     }
 
-    @Test("Verification with custom email and phone")
-    func verificationCustom() {
+    @Test
+    func `Verification with custom email and phone`() {
         let verification = Passage.Configuration.Verification(
             email: .init(codeLength: 8),
             phone: .init(codeLength: 4),
@@ -157,8 +157,8 @@ struct VerificationConfigurationTests {
         #expect(verification.useQueues == true)
     }
 
-    @Test("Verification Sendable conformance")
-    func verificationSendableConformance() {
+    @Test
+    func `Verification Sendable conformance`() {
         let verification: Passage.Configuration.Verification = .init()
 
         let _: any Sendable = verification
@@ -168,8 +168,8 @@ struct VerificationConfigurationTests {
 
     // MARK: - Verification URL Tests
 
-    @Test("Email verification URL construction")
-    func emailVerificationURL() throws {
+    @Test
+    func `Email verification URL construction`() throws {
         let config = try Passage.Configuration(
             origin: URL(string: "https://example.com")!,
             jwt: .init(jwks: .init(json: "{}"))
@@ -180,8 +180,8 @@ struct VerificationConfigurationTests {
         #expect(url.absoluteString == "https://example.com/auth/email/verify")
     }
 
-    @Test("Email verification URL with custom routes")
-    func emailVerificationURLCustomRoutes() throws {
+    @Test
+    func `Email verification URL with custom routes`() throws {
         let config = try Passage.Configuration(
             origin: URL(string: "https://example.com")!,
             routes: .init(
@@ -199,8 +199,8 @@ struct VerificationConfigurationTests {
         #expect(url.absoluteString == "https://example.com/api/v")
     }
 
-    @Test("Phone verification URL construction")
-    func phoneVerificationURL() throws {
+    @Test
+    func `Phone verification URL construction`() throws {
         let config = try Passage.Configuration(
             origin: URL(string: "https://example.com")!,
             jwt: .init(jwks: .init(json: "{}"))

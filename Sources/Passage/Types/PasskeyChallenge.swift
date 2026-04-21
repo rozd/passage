@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 /// A freshly-issued passkey challenge at the service → store boundary.
 ///

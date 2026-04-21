@@ -1,4 +1,4 @@
-import Vapor
+public import Vapor
 
 /// Optional JSON body for `POST /auth/passkey/register/begin`. The authenticated
 /// user is resolved from the session/bearer, so the body only carries

@@ -7,16 +7,16 @@ import NIOCore
 /// without requiring Leaf template rendering
 final class CapturingViewRenderer: ViewRenderer, @unchecked Sendable {
     var shouldCache = false
-    var eventLoop: EventLoop
+    var eventLoop: any EventLoop
 
-    private(set) var capturedContext: Encodable?
+    private(set) var capturedContext: (any Encodable)?
     private(set) var templatePath: String?
 
-    init(eventLoop: EventLoop) {
+    init(eventLoop: any EventLoop) {
         self.eventLoop = eventLoop
     }
 
-    func `for`(_ request: Request) -> ViewRenderer {
+    func `for`(_ request: Request) -> any ViewRenderer {
         return self
     }
 

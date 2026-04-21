@@ -1,27 +1,27 @@
 import Testing
 @testable import Passage
 
-@Suite("Sessions Configuration Tests")
-struct SessionConfigurationTests {
+@Suite
+struct `Sessions Configuration Tests` {
 
     // MARK: - Initialization Tests
 
-    @Test("Sessions configuration initializes with default values")
-    func initializesWithDefaultValues() {
+    @Test
+    func `Sessions configuration initializes with default values`() {
         let session = Passage.Configuration.Sessions()
 
         #expect(session.enabled == false)
     }
 
-    @Test("Sessions configuration initializes with enabled true")
-    func initializesWithEnabledTrue() {
+    @Test
+    func `Sessions configuration initializes with enabled true`() {
         let session = Passage.Configuration.Sessions(enabled: true)
 
         #expect(session.enabled == true)
     }
 
-    @Test("Sessions configuration initializes with enabled false")
-    func initializesWithEnabledFalse() {
+    @Test
+    func `Sessions configuration initializes with enabled false`() {
         let session = Passage.Configuration.Sessions(enabled: false)
 
         #expect(session.enabled == false)
@@ -29,16 +29,16 @@ struct SessionConfigurationTests {
 
     // MARK: - Protocol Conformance Tests
 
-    @Test("Sessions configuration conforms to Sendable")
-    func conformsToSendable() {
+    @Test
+    func `Sessions configuration conforms to Sendable`() {
         func acceptsSendable<T: Sendable>(_ type: T.Type) {}
         acceptsSendable(Passage.Configuration.Sessions.self)
     }
 
     // MARK: - Type Tests
 
-    @Test("Sessions configuration type name is correct")
-    func typeNameIsCorrect() {
+    @Test
+    func `Sessions configuration type name is correct`() {
         let typeName = String(describing: Passage.Configuration.Sessions.self)
         #expect(typeName == "Sessions")
     }

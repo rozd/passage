@@ -8,40 +8,40 @@ import Vapor
 /// `POST /passkey/register/finish`. The JSON shape is load-bearing: the
 /// browser-side JavaScript in `passkey-signup-minimalism.leaf` relies on
 /// the `credentialID` field name.
-@Suite("PasskeyRegistrationResponse Tests", .tags(.unit))
-struct PasskeyRegistrationResponseTests {
+@Suite(.tags(.unit))
+struct `PasskeyRegistrationResponse Tests` {
 
-    @Test("Initialization preserves credentialID")
-    func initialization() {
+    @Test
+    func `Initialization preserves credentialID`() {
         let response = PasskeyRegistrationResponse(credentialID: "abc-123")
         #expect(response.credentialID == "abc-123")
     }
 
-    @Test("JSON encoding uses the `credentialID` key")
-    func jsonEncodingKey() throws {
+    @Test
+    func `JSON encoding uses the 'credentialID' key`() throws {
         let response = PasskeyRegistrationResponse(credentialID: "xyz")
         let data = try JSONEncoder().encode(response)
         let json = try #require(try JSONSerialization.jsonObject(with: data) as? [String: Any])
         #expect(json["credentialID"] as? String == "xyz")
     }
 
-    @Test("Codable round-trip preserves credentialID")
-    func codableRoundTrip() throws {
+    @Test
+    func `Codable round-trip preserves credentialID`() throws {
         let original = PasskeyRegistrationResponse(credentialID: "roundtrip-id")
         let data = try JSONEncoder().encode(original)
         let decoded = try JSONDecoder().decode(PasskeyRegistrationResponse.self, from: data)
         #expect(decoded.credentialID == original.credentialID)
     }
 
-    @Test("Conforms to Vapor Content (Codable + Sendable + encoders)")
-    func conformsToContent() {
+    @Test
+    func `Conforms to Vapor Content (Codable + Sendable + encoders)`() {
         let _: any Content = PasskeyRegistrationResponse(credentialID: "c")
         let _: any Sendable = PasskeyRegistrationResponse(credentialID: "c")
         #expect(Bool(true))
     }
 
-    @Test("Empty credentialID is permitted at the type layer")
-    func emptyCredentialIDAllowed() {
+    @Test
+    func `Empty credentialID is permitted at the type layer`() {
         // The type itself doesn't validate. Higher-level layers are responsible
         // for ensuring a real ID is present.
         let response = PasskeyRegistrationResponse(credentialID: "")

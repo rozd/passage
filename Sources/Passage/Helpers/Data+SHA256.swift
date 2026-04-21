@@ -1,5 +1,5 @@
-import Foundation
-import CryptoKit
+public import Foundation
+import Crypto
 
 public extension Data {
     /// SHA-256 digest of the data as a lowercase hex string.

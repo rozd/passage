@@ -2,13 +2,13 @@ import Testing
 import Foundation
 @testable import Passage
 
-@Suite("Passkey View Params Tests", .tags(.unit, .passkey))
-struct PasskeyViewParamsTests {
+@Suite(.tags(.unit, .passkey))
+struct `Passkey View Params Tests` {
 
     // MARK: - PasskeySignupViewParams
 
-    @Test("PasskeySignupViewParams copyWith overrides individual fields")
-    func signupCopyWithOverridesFields() {
+    @Test
+    func `PasskeySignupViewParams copyWith overrides individual fields`() {
         let original = Passage.Views.PasskeySignupViewParams(
             byEmail: false,
             byPhone: false,
@@ -38,8 +38,8 @@ struct PasskeyViewParamsTests {
         #expect(updated.signupFinishURL == "/finish")
     }
 
-    @Test("PasskeySignupViewParams copyWith preserves unspecified fields")
-    func signupCopyWithPreservesOriginalValues() {
+    @Test
+    func `PasskeySignupViewParams copyWith preserves unspecified fields`() {
         let original = Passage.Views.PasskeySignupViewParams(
             byEmail: true,
             byPhone: false,
@@ -61,8 +61,8 @@ struct PasskeyViewParamsTests {
         #expect(updated.signupFinishURL == "/auth/passkey/signup/finish")
     }
 
-    @Test("PasskeySignupViewParams copyWith with only error set preserves other fields")
-    func signupCopyWithOnlyError() {
+    @Test
+    func `PasskeySignupViewParams copyWith with only error set preserves other fields`() {
         let original = Passage.Views.PasskeySignupViewParams(
             byEmail: true,
             byPhone: false,
@@ -84,8 +84,8 @@ struct PasskeyViewParamsTests {
         #expect(updated.signupFinishURL == "/finish")
     }
 
-    @Test("PasskeySignupViewParams copyWith with only success set preserves other fields")
-    func signupCopyWithOnlySuccess() {
+    @Test
+    func `PasskeySignupViewParams copyWith with only success set preserves other fields`() {
         let original = Passage.Views.PasskeySignupViewParams(
             byEmail: false,
             byPhone: false,
@@ -106,8 +106,8 @@ struct PasskeyViewParamsTests {
 
     // MARK: - PasskeyAuthenticateViewParams
 
-    @Test("PasskeyAuthenticateViewParams copyWith overrides all fields")
-    func authenticateCopyWithOverridesFields() {
+    @Test
+    func `PasskeyAuthenticateViewParams copyWith overrides all fields`() {
         let original = Passage.Views.PasskeyAuthenticateViewParams(
             error: nil,
             success: nil,
@@ -131,8 +131,8 @@ struct PasskeyViewParamsTests {
         #expect(updated.redirectOnSuccess == "/home")
     }
 
-    @Test("PasskeyAuthenticateViewParams copyWith preserves unspecified fields")
-    func authenticateCopyWithPreservesOriginalValues() {
+    @Test
+    func `PasskeyAuthenticateViewParams copyWith preserves unspecified fields`() {
         let original = Passage.Views.PasskeyAuthenticateViewParams(
             error: "existing error",
             success: nil,
@@ -150,8 +150,8 @@ struct PasskeyViewParamsTests {
         #expect(updated.redirectOnSuccess == "/dashboard")
     }
 
-    @Test("PasskeyAuthenticateViewParams copyWith with only error set preserves other fields")
-    func authenticateCopyWithOnlyError() {
+    @Test
+    func `PasskeyAuthenticateViewParams copyWith with only error set preserves other fields`() {
         let original = Passage.Views.PasskeyAuthenticateViewParams(
             error: nil,
             success: nil,
@@ -169,8 +169,8 @@ struct PasskeyViewParamsTests {
         #expect(updated.redirectOnSuccess == "/home")
     }
 
-    @Test("PasskeyAuthenticateViewParams copyWith with redirectOnSuccess overrides correctly")
-    func authenticateCopyWithRedirectOnSuccess() {
+    @Test
+    func `PasskeyAuthenticateViewParams copyWith with redirectOnSuccess overrides correctly`() {
         let original = Passage.Views.PasskeyAuthenticateViewParams(
             error: nil,
             success: nil,

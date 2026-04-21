@@ -2,27 +2,26 @@ import Testing
 import Vapor
 @testable import Passage
 
-@Suite("Restoration Struct Tests")
-struct RestorationStructTests {
+@Suite
+struct `Restoration Struct Tests` {
 
     // MARK: - Restoration Struct Tests
 
-    @Test("Restoration struct is properly namespaced in Passage")
-    func restorationNamespace() {
+    @Test
+    func `Restoration struct is properly namespaced in Passage`() {
         let typeName = String(reflecting: Passage.Restoration.self)
         #expect(typeName.contains("Passage.Restoration"))
     }
 
-    @Test("Restoration struct conforms to Sendable")
-    func restorationSendable() {
+    @Test
+    func `Restoration struct conforms to Sendable`() {
         let _: any Sendable.Type = Passage.Restoration.self
-        #expect(Passage.Restoration.self is Sendable.Type)
     }
 
     // MARK: - EmailPasswordResetCodePayload Tests
 
-    @Test("EmailPasswordResetCodePayload initialization")
-    func emailPayloadInitialization() throws {
+    @Test
+    func `EmailPasswordResetCodePayload initialization`() throws {
         let url = try #require(URL(string: "https://example.com/reset?code=123&email=test@example.com"))
         let payload = Passage.Restoration.EmailPasswordResetCodePayload(
             email: "test@example.com",
@@ -37,8 +36,8 @@ struct RestorationStructTests {
         #expect(payload.resetCode == "123456")
     }
 
-    @Test("EmailPasswordResetCodePayload conforms to Codable")
-    func emailPayloadCodable() throws {
+    @Test
+    func `EmailPasswordResetCodePayload conforms to Codable`() throws {
         let url = try #require(URL(string: "https://example.com/reset"))
         let payload = Passage.Restoration.EmailPasswordResetCodePayload(
             email: "test@example.com",
@@ -60,8 +59,8 @@ struct RestorationStructTests {
         #expect(decoded.resetCode == payload.resetCode)
     }
 
-    @Test("EmailPasswordResetCodePayload with different URLs")
-    func emailPayloadDifferentURLs() throws {
+    @Test
+    func `EmailPasswordResetCodePayload with different URLs`() throws {
         let urls = [
             "https://example.com/reset",
             "https://myapp.com/password-reset",
@@ -80,8 +79,8 @@ struct RestorationStructTests {
         }
     }
 
-    @Test("EmailPasswordResetCodePayload round trip encoding")
-    func emailPayloadRoundTrip() throws {
+    @Test
+    func `EmailPasswordResetCodePayload round trip encoding`() throws {
         let url = try #require(URL(string: "https://example.com/reset?code=XYZ&email=user@example.com"))
         let original = Passage.Restoration.EmailPasswordResetCodePayload(
             email: "user@example.com",
@@ -102,8 +101,8 @@ struct RestorationStructTests {
         #expect(decoded.resetCode == original.resetCode)
     }
 
-    @Test("EmailPasswordResetCodePayload JSON encoding format")
-    func emailPayloadJSONFormat() throws {
+    @Test
+    func `EmailPasswordResetCodePayload JSON encoding format`() throws {
         let url = try #require(URL(string: "https://example.com/reset"))
         let payload = Passage.Restoration.EmailPasswordResetCodePayload(
             email: "test@example.com",
@@ -126,8 +125,8 @@ struct RestorationStructTests {
 
     // MARK: - PhonePasswordResetCodePayload Tests
 
-    @Test("PhonePasswordResetCodePayload initialization")
-    func phonePayloadInitialization() {
+    @Test
+    func `PhonePasswordResetCodePayload initialization`() {
         let payload = Passage.Restoration.PhonePasswordResetCodePayload(
             phone: "+1234567890",
             code: "123456",
@@ -139,8 +138,8 @@ struct RestorationStructTests {
         #expect(payload.userId == "user123")
     }
 
-    @Test("PhonePasswordResetCodePayload conforms to Codable")
-    func phonePayloadCodable() throws {
+    @Test
+    func `PhonePasswordResetCodePayload conforms to Codable`() throws {
         let payload = Passage.Restoration.PhonePasswordResetCodePayload(
             phone: "+1234567890",
             code: "ABC123",
@@ -174,8 +173,8 @@ struct RestorationStructTests {
         #expect(payload.phone == phone)
     }
 
-    @Test("PhonePasswordResetCodePayload round trip encoding")
-    func phonePayloadRoundTrip() throws {
+    @Test
+    func `PhonePasswordResetCodePayload round trip encoding`() throws {
         let original = Passage.Restoration.PhonePasswordResetCodePayload(
             phone: "+19876543210",
             code: "XYZ789",
@@ -193,8 +192,8 @@ struct RestorationStructTests {
         #expect(decoded.userId == original.userId)
     }
 
-    @Test("PhonePasswordResetCodePayload JSON encoding format")
-    func phonePayloadJSONFormat() throws {
+    @Test
+    func `PhonePasswordResetCodePayload JSON encoding format`() throws {
         let payload = Passage.Restoration.PhonePasswordResetCodePayload(
             phone: "+1234567890",
             code: "123456",
@@ -214,8 +213,8 @@ struct RestorationStructTests {
 
     // MARK: - Payload Independence Tests
 
-    @Test("Email and phone payloads are independent")
-    func payloadsIndependent() throws {
+    @Test
+    func `Email and phone payloads are independent`() throws {
         let url = try #require(URL(string: "https://example.com/reset"))
         let emailPayload = Passage.Restoration.EmailPasswordResetCodePayload(
             email: "test@example.com",
@@ -234,8 +233,8 @@ struct RestorationStructTests {
         #expect(emailPayload.resetCode != phonePayload.code)
     }
 
-    @Test("Multiple email payloads can coexist")
-    func multipleEmailPayloads() throws {
+    @Test
+    func `Multiple email payloads can coexist`() throws {
         let url1 = try #require(URL(string: "https://example.com/reset1"))
         let url2 = try #require(URL(string: "https://example.com/reset2"))
 
@@ -258,8 +257,8 @@ struct RestorationStructTests {
         #expect(payload1.resetCode != payload2.resetCode)
     }
 
-    @Test("Multiple phone payloads can coexist")
-    func multiplePhonePayloads() {
+    @Test
+    func `Multiple phone payloads can coexist`() {
         let payload1 = Passage.Restoration.PhonePasswordResetCodePayload(
             phone: "+1234567890",
             code: "CODE1",
@@ -313,8 +312,8 @@ struct RestorationStructTests {
 
     // MARK: - URL Query Parameters Tests
 
-    @Test("EmailPasswordResetCodePayload with URL containing query parameters")
-    func emailPayloadWithQueryParams() throws {
+    @Test
+    func `EmailPasswordResetCodePayload with URL containing query parameters`() throws {
         let url = try #require(URL(string: "https://example.com/reset?code=123&email=test@example.com&token=xyz"))
         let payload = Passage.Restoration.EmailPasswordResetCodePayload(
             email: "test@example.com",
@@ -328,8 +327,8 @@ struct RestorationStructTests {
         #expect(payload.resetURL.query!.contains("email="))
     }
 
-    @Test("EmailPasswordResetCodePayload with complex reset URL")
-    func emailPayloadComplexURL() throws {
+    @Test
+    func `EmailPasswordResetCodePayload with complex reset URL`() throws {
         let url = try #require(URL(string: "https://app.example.com/auth/reset-password?step=verify&token=abc123&redirect=/dashboard"))
         let payload = Passage.Restoration.EmailPasswordResetCodePayload(
             email: "test@example.com",
@@ -345,26 +344,26 @@ struct RestorationStructTests {
 
     // MARK: - Nested Type Tests
 
-    @Test("EmailPasswordResetCodePayload is nested in Restoration")
-    func emailPayloadNesting() {
+    @Test
+    func `EmailPasswordResetCodePayload is nested in Restoration`() {
         let typeName = String(reflecting: Passage.Restoration.EmailPasswordResetCodePayload.self)
         #expect(typeName.contains("Passage.Restoration.EmailPasswordResetCodePayload"))
     }
 
-    @Test("PhonePasswordResetCodePayload is nested in Restoration")
-    func phonePayloadNesting() {
+    @Test
+    func `PhonePasswordResetCodePayload is nested in Restoration`() {
         let typeName = String(reflecting: Passage.Restoration.PhonePasswordResetCodePayload.self)
         #expect(typeName.contains("Passage.Restoration.PhonePasswordResetCodePayload"))
     }
 
-    @Test("SendEmailPasswordResetCodeJob is nested in Restoration")
-    func sendEmailJobNesting() {
+    @Test
+    func `SendEmailPasswordResetCodeJob is nested in Restoration`() {
         let typeName = String(reflecting: Passage.Restoration.SendEmailPasswordResetCodeJob.self)
         #expect(typeName.contains("Passage.Restoration.SendEmailPasswordResetCodeJob"))
     }
 
-    @Test("SendPhonePasswordResetCodeJob is nested in Restoration")
-    func sendPhoneJobNesting() {
+    @Test
+    func `SendPhonePasswordResetCodeJob is nested in Restoration`() {
         let typeName = String(reflecting: Passage.Restoration.SendPhonePasswordResetCodeJob.self)
         #expect(typeName.contains("Passage.Restoration.SendPhonePasswordResetCodeJob"))
     }

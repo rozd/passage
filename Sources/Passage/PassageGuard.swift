@@ -1,11 +1,11 @@
-import Vapor
+public import Vapor
 
 public struct PassageGuard: AsyncMiddleware {
 
-    let error: Error?
+    let error: (any Error)?
 
     public init(
-        throwing error: Error? = nil
+        throwing error: (any Error)? = nil
     ) {
         self.error = error
     }

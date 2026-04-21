@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 /// A single-use WebAuthn challenge as persisted by the Relying Party.
 /// Modelled on ``ExchangeToken`` — hashed value, TTL, one-shot consumption.

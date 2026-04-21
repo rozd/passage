@@ -4,8 +4,8 @@ import Vapor
 @testable import Passage
 import PassageOnlyForTest
 
-@Suite("Delivery Protocols Tests")
-struct DeliveryProtocolsTests {
+@Suite
+struct `Delivery Protocols Tests` {
 
     // MARK: - Mock Implementations
 
@@ -74,20 +74,20 @@ struct DeliveryProtocolsTests {
         }
     }
 
-    @Test("EmailDelivery protocol can be implemented")
-    func emailDeliveryProtocolImplementation() {
+    @Test
+    func `EmailDelivery protocol can be implemented`() {
         let delivery: any Passage.EmailDelivery = MockEmailDelivery()
         #expect(delivery is MockEmailDelivery)
     }
 
-    @Test("EmailDelivery protocol conforms to Sendable")
-    func emailDeliveryProtocolIsSendable() {
+    @Test
+    func `EmailDelivery protocol conforms to Sendable`() {
         let delivery: any Sendable = MockEmailDelivery()
         #expect(delivery is MockEmailDelivery)
     }
 
-    @Test("EmailDelivery has all required methods")
-    func emailDeliveryRequiredMethods() async throws {
+    @Test
+    func `EmailDelivery has all required methods`() async throws {
         let delivery = MockEmailDelivery()
         let user = MockUser(
             id: UUID(),
@@ -156,20 +156,20 @@ struct DeliveryProtocolsTests {
         }
     }
 
-    @Test("PhoneDelivery protocol can be implemented")
-    func phoneDeliveryProtocolImplementation() {
+    @Test
+    func `PhoneDelivery protocol can be implemented`() {
         let delivery: any Passage.PhoneDelivery = MockPhoneDelivery()
         #expect(delivery is MockPhoneDelivery)
     }
 
-    @Test("PhoneDelivery protocol conforms to Sendable")
-    func phoneDeliveryProtocolIsSendable() {
+    @Test
+    func `PhoneDelivery protocol conforms to Sendable`() {
         let delivery: any Sendable = MockPhoneDelivery()
         #expect(delivery is MockPhoneDelivery)
     }
 
-    @Test("PhoneDelivery has all required methods")
-    func phoneDeliveryRequiredMethods() async throws {
+    @Test
+    func `PhoneDelivery has all required methods`() async throws {
         let delivery = MockPhoneDelivery()
         let user = MockUser(
             id: UUID(),
@@ -203,22 +203,22 @@ struct DeliveryProtocolsTests {
 
     // MARK: - FederatedLoginService Protocol Tests
 
-    @Test("FederatedLoginService protocol can be implemented")
-    func federatedLoginServiceProtocolImplementation() {
+    @Test
+    func `FederatedLoginService protocol can be implemented`() {
         let service: any Passage.FederatedLoginService = Passage.OnlyForTest.MockFederatedLoginService()
         #expect(service is Passage.OnlyForTest.MockFederatedLoginService)
     }
 
-    @Test("FederatedLoginService protocol conforms to Sendable")
-    func federatedLoginServiceProtocolIsSendable() {
+    @Test
+    func `FederatedLoginService protocol conforms to Sendable`() {
         let service: any Sendable = Passage.OnlyForTest.MockFederatedLoginService()
         #expect(service is Passage.OnlyForTest.MockFederatedLoginService)
     }
 
     // MARK: - Protocol Integration Tests
 
-    @Test("Multiple delivery protocols can coexist")
-    func multipleDeliveryProtocolsCoexist() {
+    @Test
+    func `Multiple delivery protocols can coexist`() {
         let emailDelivery: any Passage.EmailDelivery = MockEmailDelivery()
         let phoneDelivery: any Passage.PhoneDelivery = MockPhoneDelivery()
 
@@ -226,8 +226,8 @@ struct DeliveryProtocolsTests {
         #expect(phoneDelivery is MockPhoneDelivery)
     }
 
-    @Test("Delivery protocols are independent")
-    func deliveryProtocolsIndependent() {
+    @Test
+    func `Delivery protocols are independent`() {
         let emailDelivery = MockEmailDelivery()
         let phoneDelivery = MockPhoneDelivery()
 
@@ -284,8 +284,8 @@ struct DeliveryProtocolsTests {
         }
     }
 
-    @Test("Custom actor-based EmailDelivery implementation")
-    func customActorEmailDelivery() async throws {
+    @Test
+    func `Custom actor-based EmailDelivery implementation`() async throws {
         let delivery = CustomEmailDelivery()
         let user = MockUser(
             id: UUID(),
@@ -356,8 +356,8 @@ struct DeliveryProtocolsTests {
         }
     }
 
-    @Test("EmailDelivery can throw errors")
-    func emailDeliveryCanThrowErrors() async {
+    @Test
+    func `EmailDelivery can throw errors`() async {
         let delivery = FailingEmailDelivery()
         let user = MockUser(
             id: UUID(),

@@ -6,11 +6,11 @@ import Foundation
 /// the raw challenge bytes (which the store SHA-256-hashes before persisting),
 /// the ceremony kind, and the absolute expiry. These tests pin down field
 /// semantics, Sendable conformance, and the interaction with the store helper.
-@Suite("PasskeyChallenge DTO Tests", .tags(.unit))
-struct PasskeyChallengeTests {
+@Suite(.tags(.unit))
+struct `PasskeyChallenge DTO Tests` {
 
-    @Test("Initialization preserves all fields")
-    func initialization() {
+    @Test
+    func `Initialization preserves all fields`() {
         let bytes = Data([0x01, 0x02, 0x03, 0x04])
         let expiresAt = Date(timeIntervalSince1970: 10_000)
         let challenge = PasskeyChallenge(
@@ -24,8 +24,8 @@ struct PasskeyChallengeTests {
         #expect(challenge.expiresAt == expiresAt)
     }
 
-    @Test("Kind is carried verbatim")
-    func kindIsCarried() {
+    @Test
+    func `Kind is carried verbatim`() {
         let registration = PasskeyChallenge(
             bytes: Data("r".utf8),
             kind: .registration,
@@ -41,8 +41,8 @@ struct PasskeyChallengeTests {
         #expect(authentication.kind == .authentication)
     }
 
-    @Test("Empty bytes are allowed (store rejects separately)")
-    func emptyBytesAreAllowedAtTypeLevel() {
+    @Test
+    func `Empty bytes are allowed (store rejects separately)`() {
         let challenge = PasskeyChallenge(
             bytes: Data(),
             kind: .registration,
@@ -51,8 +51,8 @@ struct PasskeyChallengeTests {
         #expect(challenge.bytes.isEmpty)
     }
 
-    @Test("PasskeyChallenge is Sendable")
-    func isSendable() {
+    @Test
+    func `PasskeyChallenge is Sendable`() {
         let _: any Sendable = PasskeyChallenge(
             bytes: Data(),
             kind: .registration,
@@ -63,8 +63,8 @@ struct PasskeyChallengeTests {
 
     // The store owns hashing. Asserting here that the DTO doesn't accidentally
     // expose the hash, so tests that expect bytes-only won't drift later.
-    @Test("DTO exposes raw bytes, not a hash")
-    func dtoExposesRawBytes() {
+    @Test
+    func `DTO exposes raw bytes, not a hash`() {
         let bytes = Data([0xAB, 0xCD, 0xEF])
         let challenge = PasskeyChallenge(bytes: bytes, kind: .registration, expiresAt: Date())
         #expect(challenge.bytes == bytes)

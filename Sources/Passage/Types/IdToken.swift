@@ -1,4 +1,4 @@
-import JWTKit
+public import JWT
 
 // TODO: For future usage
 public struct IdToken: UserInfo, Sendable {

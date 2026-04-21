@@ -1,13 +1,13 @@
 import Testing
 @testable import Passage
 
-@Suite("Views Style Tests")
-struct ViewsStyleTests {
+@Suite
+struct `Views Style Tests` {
 
     // MARK: - Style Enum Tests
 
-    @Test("Style enum has all expected cases")
-    func styleEnumCases() {
+    @Test
+    func `Style enum has all expected cases`() {
         let styles: [Passage.Views.Style] = [
             .neobrutalism,
             .neomorphism,
@@ -32,8 +32,8 @@ struct ViewsStyleTests {
 
     // MARK: - Sendable Conformance Tests
 
-    @Test("Style conforms to Sendable")
-    func styleIsSendable() {
+    @Test
+    func `Style conforms to Sendable`() {
         let style: any Sendable = Passage.Views.Style.neobrutalism
         #expect(style is Passage.Views.Style)
     }

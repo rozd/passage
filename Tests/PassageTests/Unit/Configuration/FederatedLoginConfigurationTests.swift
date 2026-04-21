@@ -3,21 +3,21 @@ import Foundation
 import Vapor
 @testable import Passage
 
-@Suite("Federated Login Configuration Tests")
-struct FederatedLoginConfigurationTests {
+@Suite
+struct `Federated Login Configuration Tests` {
 
     // MARK: - FederatedLogin Routes Tests
 
-    @Test("FederatedLogin routes default group")
-    func routesDefaultGroup() {
+    @Test
+    func `FederatedLogin routes default group`() {
         let routes = Passage.Configuration.FederatedLogin.Routes()
 
         #expect(routes.group.count == 1)
         #expect(routes.group[0].description == "connect")
     }
 
-    @Test("FederatedLogin routes custom group")
-    func routesCustomGroup() {
+    @Test
+    func `FederatedLogin routes custom group`() {
         let routes = Passage.Configuration.FederatedLogin.Routes(group: "api", "auth", "social")
 
         #expect(routes.group.count == 3)
@@ -28,8 +28,8 @@ struct FederatedLoginConfigurationTests {
 
     // MARK: - FederatedLogin Configuration Tests
 
-    @Test("FederatedLogin default configuration")
-    func federatedLoginDefault() {
+    @Test
+    func `FederatedLogin default configuration`() {
         let config = Passage.Configuration.FederatedLogin(routes: .init(), providers: [])
 
         #expect(config.routes.group[0].description == "connect")
@@ -37,8 +37,8 @@ struct FederatedLoginConfigurationTests {
         #expect(config.redirectLocation == "/")
     }
 
-    @Test("FederatedLogin with custom redirect")
-    func federatedLoginCustomRedirect() {
+    @Test
+    func `FederatedLogin with custom redirect`() {
         let config = Passage.Configuration.FederatedLogin(
             routes: .init(),
             providers: [],
@@ -48,8 +48,8 @@ struct FederatedLoginConfigurationTests {
         #expect(config.redirectLocation == "/dashboard")
     }
 
-    @Test("FederatedLogin with providers")
-    func federatedLoginWithProviders() {
+    @Test
+    func `FederatedLogin with providers`() {
         let config = Passage.Configuration.FederatedLogin(
             routes: .init(),
             providers: [
@@ -65,8 +65,8 @@ struct FederatedLoginConfigurationTests {
 
     // MARK: - Path Helper Tests
 
-    @Test("Login path for provider")
-    func loginPathForProvider() {
+    @Test
+    func `Login path for provider`() {
         let provider = Passage.Configuration.FederatedLogin.Provider(
             provider: .google(),
         )
@@ -85,8 +85,8 @@ struct FederatedLoginConfigurationTests {
         #expect(path[2].description == "google")
     }
 
-    @Test("Callback path for provider")
-    func callbackPathForProvider() {
+    @Test
+    func `Callback path for provider`() {
         let provider = Passage.Configuration.FederatedLogin.Provider(
             provider: .github(),
         )
@@ -103,8 +103,8 @@ struct FederatedLoginConfigurationTests {
         #expect(path[2].description == "callback")
     }
 
-    @Test("Custom provider paths")
-    func customProviderPaths() {
+    @Test
+    func `Custom provider paths`() {
         let customRoutes = Passage.Configuration.FederatedLogin.Provider.Routes(
             login: .init(path: "custom", "login"),
             callback: .init(path: "custom", "cb")
@@ -129,8 +129,8 @@ struct FederatedLoginConfigurationTests {
         #expect(callbackPath[2].description == "cb")
     }
 
-    @Test("FederatedLogin Sendable conformance")
-    func federatedLoginSendableConformance() {
+    @Test
+    func `FederatedLogin Sendable conformance`() {
         let federatedLogin: Passage.Configuration.FederatedLogin = .init(
             routes: .init(),
             providers: []
@@ -142,42 +142,42 @@ struct FederatedLoginConfigurationTests {
 
     // MARK: - Provider Routes Tests
 
-    @Test("Provider Routes Login initialization with variadic path")
-    func routesLoginVariadic() {
+    @Test
+    func `Provider Routes Login initialization with variadic path`() {
         let login = Passage.Configuration.FederatedLogin.Provider.Routes.Login(path: "oauth", "google")
         #expect(login.path.count == 2)
     }
 
-    @Test("Provider Routes Login initialization with array path")
-    func routesLoginArray() {
+    @Test
+    func `Provider Routes Login initialization with array path`() {
         let path: [PathComponent] = ["oauth", "google"]
         let login = Passage.Configuration.FederatedLogin.Provider.Routes.Login(path: path)
         #expect(login.path.count == 2)
     }
 
-    @Test("Provider Routes Callback initialization with variadic path")
-    func routesCallbackVariadic() {
+    @Test
+    func `Provider Routes Callback initialization with variadic path`() {
         let callback = Passage.Configuration.FederatedLogin.Provider.Routes.Callback(path: "oauth", "callback")
         #expect(callback.path.count == 2)
     }
 
-    @Test("Provider Routes Callback initialization with array path")
-    func routesCallbackArray() {
+    @Test
+    func `Provider Routes Callback initialization with array path`() {
         let path: [PathComponent] = ["oauth", "callback"]
         let callback = Passage.Configuration.FederatedLogin.Provider.Routes.Callback(path: path)
         #expect(callback.path.count == 2)
     }
 
-    @Test("Provider Routes default initialization")
-    func routesDefaultInitialization() {
+    @Test
+    func `Provider Routes default initialization`() {
         let routes = Passage.Configuration.FederatedLogin.Provider.Routes()
 
         #expect(routes.login.path.isEmpty)
         #expect(routes.callback.path == ["callback"])
     }
 
-    @Test("Provider Routes custom initialization")
-    func routesCustomInitialization() {
+    @Test
+    func `Provider Routes custom initialization`() {
         let login = Passage.Configuration.FederatedLogin.Provider.Routes.Login(path: "auth", "login")
         let callback = Passage.Configuration.FederatedLogin.Provider.Routes.Callback(path: "auth", "callback")
         let routes = Passage.Configuration.FederatedLogin.Provider.Routes(login: login, callback: callback)
@@ -186,48 +186,38 @@ struct FederatedLoginConfigurationTests {
         #expect(routes.callback.path == ["auth", "callback"])
     }
 
-    @Test("Provider Routes conforms to Sendable")
-    func routesSendable() {
+    @Test
+    func `Provider Routes conforms to Sendable`() {
         let _: any Sendable.Type = Passage.Configuration.FederatedLogin.Provider.Routes.self
-        #expect(Passage.Configuration.FederatedLogin.Provider.Routes.self is Sendable.Type)
     }
 
     // MARK: - Provider Nested Type Tests
 
-    @Test("Provider Routes is nested within Provider")
-    func providerRoutesNesting() {
+    @Test
+    func `Provider Routes is nested within Provider`() {
         let typeName = String(reflecting: Passage.Configuration.FederatedLogin.Provider.Routes.self)
         #expect(typeName.contains("Passage.Configuration.FederatedLogin.Provider.Routes"))
     }
 
     // MARK: - Routes Nested Types Tests
 
-    @Test("Routes Login is nested within Routes")
-    func routesLoginNesting() {
+    @Test
+    func `Routes Login is nested within Routes`() {
         let typeName = String(reflecting: Passage.Configuration.FederatedLogin.Provider.Routes.Login.self)
         #expect(typeName.contains("Passage.Configuration.FederatedLogin.Provider.Routes.Login"))
     }
 
-    @Test("Routes Callback is nested within Routes")
-    func routesCallbackNesting() {
+    @Test
+    func `Routes Callback is nested within Routes`() {
         let typeName = String(reflecting: Passage.Configuration.FederatedLogin.Provider.Routes.Callback.self)
         #expect(typeName.contains("Passage.Configuration.FederatedLogin.Provider.Routes.Callback"))
-    }
-
-    // MARK: - All Sendable Conformance Tests
-
-    @Test("All FederatedLogin types conform to Sendable")
-    func allTypesSendable() {
-        #expect(Passage.Configuration.FederatedLogin.Provider.Routes.self is Sendable.Type)
-        #expect(Passage.Configuration.FederatedLogin.Provider.Routes.Login.self is Sendable.Type)
-        #expect(Passage.Configuration.FederatedLogin.Provider.Routes.Callback.self is Sendable.Type)
     }
 
     // MARK: - Integration Tests
 
 
-    @Test("Provider with different route configurations")
-    func differentRouteConfigurations() {
+    @Test
+    func `Provider with different route configurations`() {
         let defaultRoutes = Passage.Configuration.FederatedLogin.Provider(
             provider: .google()
         )
@@ -248,20 +238,20 @@ struct FederatedLoginConfigurationTests {
 
     // MARK: - Routes Path Component Tests
 
-    @Test("Routes Login stores path components")
-    func routesLoginPathComponents() {
+    @Test
+    func `Routes Login stores path components`() {
         let login = Passage.Configuration.FederatedLogin.Provider.Routes.Login(path: "a", "b", "c")
         #expect(login.path.count == 3)
     }
 
-    @Test("Routes Callback stores path components")
-    func routesCallbackPathComponents() {
+    @Test
+    func `Routes Callback stores path components`() {
         let callback = Passage.Configuration.FederatedLogin.Provider.Routes.Callback(path: "x", "y", "z")
         #expect(callback.path.count == 3)
     }
 
-    @Test("Routes with empty path components")
-    func routesEmptyPath() {
+    @Test
+    func `Routes with empty path components`() {
         let login = Passage.Configuration.FederatedLogin.Provider.Routes.Login(path: [])
         let callback = Passage.Configuration.FederatedLogin.Provider.Routes.Callback(path: [])
 
@@ -269,8 +259,8 @@ struct FederatedLoginConfigurationTests {
         #expect(callback.path.isEmpty)
     }
 
-    @Test("Provider google() with custom routes")
-    func googleWithCustomRoutes() {
+    @Test
+    func `Provider google() with custom routes`() {
         let login = Passage.Configuration.FederatedLogin.Provider.Routes.Login(path: "auth", "google")
         let callback = Passage.Configuration.FederatedLogin.Provider.Routes.Callback(path: "auth", "google", "callback")
         let routes = Passage.Configuration.FederatedLogin.Provider.Routes(login: login, callback: callback)

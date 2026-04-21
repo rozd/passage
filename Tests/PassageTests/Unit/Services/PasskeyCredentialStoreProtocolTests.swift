@@ -2,8 +2,8 @@ import Testing
 import Foundation
 @testable import Passage
 
-@Suite("PasskeyCredentialStore Protocol Tests", .tags(.unit))
-struct PasskeyCredentialStoreProtocolTests {
+@Suite(.tags(.unit))
+struct `PasskeyCredentialStore Protocol Tests` {
 
     // MARK: - Mock Implementations
 
@@ -121,22 +121,22 @@ struct PasskeyCredentialStoreProtocolTests {
 
     // MARK: - Protocol Conformance Tests
 
-    @Test("PasskeyCredentialStore protocol can be implemented")
-    func protocolCanBeImplemented() {
+    @Test
+    func `PasskeyCredentialStore protocol can be implemented`() {
         let store: any Passage.PasskeyCredentialStore = MockPasskeyCredentialStore()
         #expect(store is MockPasskeyCredentialStore)
     }
 
-    @Test("PasskeyCredentialStore is Sendable")
-    func protocolIsSendable() {
+    @Test
+    func `PasskeyCredentialStore is Sendable`() {
         let store: any Sendable = MockPasskeyCredentialStore()
         #expect(store is MockPasskeyCredentialStore)
     }
 
     // MARK: - Method Signature Tests
 
-    @Test("createPasskeyCredential returns StoredPasskeyCredential")
-    func createReturnsStoredPasskeyCredential() async throws {
+    @Test
+    func `createPasskeyCredential returns StoredPasskeyCredential`() async throws {
         let store = MockPasskeyCredentialStore()
         let user = createMockUser()
         let credential = createSampleCredential()
@@ -147,8 +147,8 @@ struct PasskeyCredentialStoreProtocolTests {
         #expect(stored.credentialID == credential.credentialID)
     }
 
-    @Test("createPasskeyCredential propagates credential fields")
-    func createPropagatesFields() async throws {
+    @Test
+    func `createPasskeyCredential propagates credential fields`() async throws {
         let store = MockPasskeyCredentialStore()
         let user = createMockUser()
         let credential = createSampleCredential()
@@ -165,8 +165,8 @@ struct PasskeyCredentialStoreProtocolTests {
         #expect(stored.attestationFormat == credential.attestationFormat)
     }
 
-    @Test("createPasskeyCredential binds to user")
-    func createBindsUser() async throws {
+    @Test
+    func `createPasskeyCredential binds to user`() async throws {
         let store = MockPasskeyCredentialStore()
         let user = createMockUser()
         let credential = createSampleCredential()
@@ -176,8 +176,8 @@ struct PasskeyCredentialStoreProtocolTests {
         #expect(stored.user.id?.description == user.id?.description)
     }
 
-    @Test("find returns nil for unknown credentialID")
-    func findReturnsNilForUnknown() async throws {
+    @Test
+    func `find returns nil for unknown credentialID`() async throws {
         let store = MockPasskeyCredentialStore()
 
         let result = try await store.find(byCredentialID: "does-not-exist")
@@ -185,8 +185,8 @@ struct PasskeyCredentialStoreProtocolTests {
         #expect(result == nil)
     }
 
-    @Test("listPasskeyCredentials returns empty for user with none")
-    func listReturnsEmpty() async throws {
+    @Test
+    func `listPasskeyCredentials returns empty for user with none`() async throws {
         let store = MockPasskeyCredentialStore()
         let user = createMockUser()
 
@@ -197,8 +197,8 @@ struct PasskeyCredentialStoreProtocolTests {
 
     // MARK: - Discardable Result Test
 
-    @Test("createPasskeyCredential is discardable")
-    func createIsDiscardable() async throws {
+    @Test
+    func `createPasskeyCredential is discardable`() async throws {
         let store = MockPasskeyCredentialStore()
         let user = createMockUser()
         let credential = createSampleCredential()
@@ -210,8 +210,8 @@ struct PasskeyCredentialStoreProtocolTests {
 
     // MARK: - Store Protocol Integration
 
-    @Test("Store protocol exposes passkeyCredentials as optional property")
-    func storeExposesPasskeyCredentials() {
+    @Test
+    func `Store protocol exposes passkeyCredentials as optional property`() {
         struct TestStore: Passage.Store {
             var users: any Passage.UserStore { fatalError() }
             var tokens: any Passage.TokenStore { fatalError() }
@@ -226,8 +226,8 @@ struct PasskeyCredentialStoreProtocolTests {
         #expect(store.passkeyCredentials is MockPasskeyCredentialStore)
     }
 
-    @Test("Store passkeyCredentials defaults to nil when not provided")
-    func storePasskeyCredentialsDefaultsToNil() {
+    @Test
+    func `Store passkeyCredentials defaults to nil when not provided`() {
         struct LegacyStore: Passage.Store {
             var users: any Passage.UserStore { fatalError() }
             var tokens: any Passage.TokenStore { fatalError() }

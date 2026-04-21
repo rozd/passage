@@ -1,8 +1,8 @@
-import Testing
-import Vapor
-import JWTKit
+import JWT
 @testable import Passage
 @testable import PassageOnlyForTest
+import Testing
+import Vapor
 
 // MARK: - Mock FederatedLoginService
 
@@ -25,8 +25,8 @@ private final class CapturingFederatedLoginService: Passage.FederatedLoginServic
 
 // MARK: - Tests
 
-@Suite("FederatedLogin Handler Tests", .tags(.unit, .federatedLogin))
-struct FederatedLoginHandlerTests {
+@Suite(.tags(.unit, .federatedLogin))
+struct `FederatedLogin Handler Tests` {
 
     @Sendable private func makeConfiguration() throws -> Passage.Configuration {
         try Passage.Configuration(
@@ -43,8 +43,8 @@ struct FederatedLoginHandlerTests {
 
     // MARK: - No Service
 
-    @Test("register() returns without error when no federated service is configured")
-    func registerDoesNothingWithoutService() async throws {
+    @Test
+    func `register() returns without error when no federated service is configured`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
 
@@ -71,8 +71,8 @@ struct FederatedLoginHandlerTests {
 
     // MARK: - With Service
 
-    @Test("configure() calls service.register() when a federated service is provided")
-    func configureCallsServiceRegister() async throws {
+    @Test
+    func `configure() calls service.register() when a federated service is provided`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
 
@@ -99,8 +99,8 @@ struct FederatedLoginHandlerTests {
         #expect(mockService.registerCallCount == 1)
     }
 
-    @Test("register() forwards origin from configuration to service")
-    func registerForwardsOrigin() async throws {
+    @Test
+    func `register() forwards origin from configuration to service`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
 

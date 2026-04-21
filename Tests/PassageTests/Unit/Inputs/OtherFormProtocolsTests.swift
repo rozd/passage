@@ -2,8 +2,8 @@ import Testing
 import Vapor
 @testable import Passage
 
-@Suite("Other Form Protocols Tests")
-struct OtherFormProtocolsTests {
+@Suite
+struct `Other Form Protocols Tests` {
 
     // MARK: - RefreshTokenForm Tests
 
@@ -19,14 +19,14 @@ struct OtherFormProtocolsTests {
         }
     }
 
-    @Test("RefreshTokenForm conforms to Form protocol")
-    func refreshTokenFormConformsToForm() {
+    @Test
+    func `RefreshTokenForm conforms to Form protocol`() {
         let form: any Form = MockRefreshTokenForm(refreshToken: "token123")
         #expect(form is MockRefreshTokenForm)
     }
 
-    @Test("RefreshTokenForm has refreshToken property")
-    func refreshTokenFormHasToken() {
+    @Test
+    func `RefreshTokenForm has refreshToken property`() {
         let form = MockRefreshTokenForm(refreshToken: "my_refresh_token")
         #expect(form.refreshToken == "my_refresh_token")
     }
@@ -39,8 +39,8 @@ struct OtherFormProtocolsTests {
         }
     }
 
-    @Test("LogoutForm conforms to Form protocol")
-    func logoutFormConformsToForm() {
+    @Test
+    func `LogoutForm conforms to Form protocol`() {
         let form: any Form = MockLogoutForm()
         #expect(form is MockLogoutForm)
     }
@@ -63,26 +63,26 @@ struct OtherFormProtocolsTests {
         let phone: String
     }
 
-    @Test("EmailVerificationRequestForm conforms to Form")
-    func emailVerificationRequestFormConformsToForm() {
+    @Test
+    func `EmailVerificationRequestForm conforms to Form`() {
         let form: any Form = MockEmailVerificationRequestForm(email: "test@example.com")
         #expect(form is MockEmailVerificationRequestForm)
     }
 
-    @Test("PhoneVerificationRequestForm conforms to Form")
-    func phoneVerificationRequestFormConformsToForm() {
+    @Test
+    func `PhoneVerificationRequestForm conforms to Form`() {
         let form: any Form = MockPhoneVerificationRequestForm(phone: "+1234567890")
         #expect(form is MockPhoneVerificationRequestForm)
     }
 
-    @Test("EmailVerificationRequestForm has email property")
-    func emailVerificationRequestFormHasEmail() {
+    @Test
+    func `EmailVerificationRequestForm has email property`() {
         let form = MockEmailVerificationRequestForm(email: "test@example.com")
         #expect(form.email == "test@example.com")
     }
 
-    @Test("PhoneVerificationRequestForm has phone property")
-    func phoneVerificationRequestFormHasPhone() {
+    @Test
+    func `PhoneVerificationRequestForm has phone property`() {
         let form = MockPhoneVerificationRequestForm(phone: "+1234567890")
         #expect(form.phone == "+1234567890")
     }
@@ -107,20 +107,20 @@ struct OtherFormProtocolsTests {
         let phone: String
     }
 
-    @Test("EmailVerificationConfirmForm conforms to VerificationConfirmForm")
-    func emailVerificationConfirmFormConformsToVerificationConfirmForm() {
+    @Test
+    func `EmailVerificationConfirmForm conforms to VerificationConfirmForm`() {
         let form: any VerificationConfirmForm = MockEmailVerificationConfirmForm(code: "123456", email: "test@example.com")
         #expect(form is MockEmailVerificationConfirmForm)
     }
 
-    @Test("PhoneVerificationConfirmForm conforms to VerificationConfirmForm")
-    func phoneVerificationConfirmFormConformsToVerificationConfirmForm() {
+    @Test
+    func `PhoneVerificationConfirmForm conforms to VerificationConfirmForm`() {
         let form: any VerificationConfirmForm = MockPhoneVerificationConfirmForm(code: "123456", phone: "+1234567890")
         #expect(form is MockPhoneVerificationConfirmForm)
     }
 
-    @Test("VerificationConfirmForm has code property")
-    func verificationConfirmFormHasCode() {
+    @Test
+    func `VerificationConfirmForm has code property`() {
         let form = MockEmailVerificationConfirmForm(code: "ABC123", email: "test@example.com")
         #expect(form.code == "ABC123")
     }
@@ -155,14 +155,14 @@ struct OtherFormProtocolsTests {
         let email: String
     }
 
-    @Test("EmailPasswordResetRequestForm conforms to Form")
-    func emailPasswordResetRequestFormConformsToForm() {
+    @Test
+    func `EmailPasswordResetRequestForm conforms to Form`() {
         let form: any Form = MockEmailPasswordResetRequestForm(email: "test@example.com")
         #expect(form is MockEmailPasswordResetRequestForm)
     }
 
-    @Test("EmailPasswordResetVerifyForm has required properties")
-    func emailPasswordResetVerifyFormProperties() {
+    @Test
+    func `EmailPasswordResetVerifyForm has required properties`() {
         let form = MockEmailPasswordResetVerifyForm(
             email: "test@example.com",
             code: "123456",
@@ -174,8 +174,8 @@ struct OtherFormProtocolsTests {
         #expect(form.newPassword == "newpassword123")
     }
 
-    @Test("EmailPasswordResetResendForm has email property")
-    func emailPasswordResetResendFormEmail() {
+    @Test
+    func `EmailPasswordResetResendForm has email property`() {
         let form = MockEmailPasswordResetResendForm(email: "test@example.com")
         #expect(form.email == "test@example.com")
     }
@@ -210,14 +210,14 @@ struct OtherFormProtocolsTests {
         let phone: String
     }
 
-    @Test("PhonePasswordResetRequestForm conforms to Form")
-    func phonePasswordResetRequestFormConformsToForm() {
+    @Test
+    func `PhonePasswordResetRequestForm conforms to Form`() {
         let form: any Form = MockPhonePasswordResetRequestForm(phone: "+1234567890")
         #expect(form is MockPhonePasswordResetRequestForm)
     }
 
-    @Test("PhonePasswordResetVerifyForm has required properties")
-    func phonePasswordResetVerifyFormProperties() {
+    @Test
+    func `PhonePasswordResetVerifyForm has required properties`() {
         let form = MockPhonePasswordResetVerifyForm(
             phone: "+1234567890",
             code: "123456",
@@ -229,16 +229,16 @@ struct OtherFormProtocolsTests {
         #expect(form.newPassword == "newpassword123")
     }
 
-    @Test("PhonePasswordResetResendForm has phone property")
-    func phonePasswordResetResendFormPhone() {
+    @Test
+    func `PhonePasswordResetResendForm has phone property`() {
         let form = MockPhonePasswordResetResendForm(phone: "+1234567890")
         #expect(form.phone == "+1234567890")
     }
 
     // MARK: - Protocol Hierarchy Tests
 
-    @Test("All form protocols inherit from Form")
-    func allFormProtocolsInheritFromForm() {
+    @Test
+    func `All form protocols inherit from Form`() {
         let forms: [any Form] = [
             MockRefreshTokenForm(refreshToken: "token"),
             MockLogoutForm(),
@@ -252,8 +252,8 @@ struct OtherFormProtocolsTests {
 
         #expect(forms.count == 8)
         for form in forms {
-            #expect(form is Content)
-            #expect(form is Validatable)
+            #expect(form is any Content)
+            #expect(form is any Validatable)
         }
     }
 }

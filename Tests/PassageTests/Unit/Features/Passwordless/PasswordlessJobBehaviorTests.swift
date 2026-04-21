@@ -5,8 +5,8 @@ import Queues
 @testable import Passage
 @testable import PassageOnlyForTest
 
-@Suite("Passwordless Job Behavior Tests", .tags(.unit, .passwordless))
-struct PasswordlessJobBehaviorTests {
+@Suite(.tags(.unit, .passwordless))
+struct `Passwordless Job Behavior Tests` {
 
     // MARK: - Helpers
 
@@ -56,8 +56,8 @@ struct PasswordlessJobBehaviorTests {
 
     // MARK: - dequeue: no email delivery configured
 
-    @Test("dequeue logs warning when email delivery is not configured")
-    func dequeueLogsWarningWhenNoEmailDelivery() async throws {
+    @Test
+    func `dequeue logs warning when email delivery is not configured`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configurePassage(app, emailDelivery: nil)
@@ -81,8 +81,8 @@ struct PasswordlessJobBehaviorTests {
 
     // MARK: - dequeue: delivery with nil userId
 
-    @Test("dequeue calls delivery with nil user when userId is nil")
-    func dequeueCallsDeliveryWithNilUser() async throws {
+    @Test
+    func `dequeue calls delivery with nil user when userId is nil`() async throws {
         final class RecordingEmailDelivery: Passage.EmailDelivery, @unchecked Sendable {
             var capturedUser: (any User)?
             var capturedEmail: String?
@@ -124,8 +124,8 @@ struct PasswordlessJobBehaviorTests {
 
     // MARK: - dequeue: delivery throws
 
-    @Test("dequeue propagates error when delivery throws")
-    func dequeueThrowsWhenDeliveryFails() async throws {
+    @Test
+    func `dequeue propagates error when delivery throws`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         let testError = MockDeliveryError(message: "SMTP connection refused")
@@ -148,8 +148,8 @@ struct PasswordlessJobBehaviorTests {
 
     // MARK: - error handler
 
-    @Test("error handler logs error with email address")
-    func errorHandlerLogsError() async throws {
+    @Test
+    func `error handler logs error with email address`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
 
@@ -173,8 +173,8 @@ struct PasswordlessJobBehaviorTests {
 
     // MARK: - EmailMagicLinkPayload Codable
 
-    @Test("EmailMagicLinkPayload encodes and decodes via Codable")
-    func payloadCodableRoundtrip() throws {
+    @Test
+    func `EmailMagicLinkPayload encodes and decodes via Codable`() throws {
         let original = Passage.Passwordless.EmailMagicLinkPayload(
             email: "round@example.com",
             userId: "abc-123",
@@ -189,8 +189,8 @@ struct PasswordlessJobBehaviorTests {
         #expect(decoded.magicLinkURL == original.magicLinkURL)
     }
 
-    @Test("EmailMagicLinkPayload encodes and decodes with nil userId")
-    func payloadCodableWithNilUserId() throws {
+    @Test
+    func `EmailMagicLinkPayload encodes and decodes with nil userId`() throws {
         let original = Passage.Passwordless.EmailMagicLinkPayload(
             email: "anon@example.com",
             userId: nil,

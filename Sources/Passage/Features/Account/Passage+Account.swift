@@ -1,3 +1,4 @@
+import JWT
 import Vapor
 
 extension Passage {
@@ -19,11 +20,11 @@ extension Request {
 
 extension Passage.Account {
     
-    var store: Passage.Store {
+    var store: any Passage.Store {
         request.store
     }
 
-    var random: Passage.RandomGenerator {
+    var random: any Passage.RandomGenerator {
         request.random
     }
 

@@ -1,4 +1,4 @@
-import Vapor
+public import Vapor
 
 public struct PasskeyAuthenticationResponse: Content {
     public let code: String

@@ -1,4 +1,5 @@
 import Foundation
+import NIOFoundationCompat
 import Vapor
 
 extension Passage.Passkey {

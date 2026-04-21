@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 import Vapor
 
 // MARK: - Passage Configuration
