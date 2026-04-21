@@ -779,8 +779,9 @@ requirements:
     section: "7.1 Session Bindings (binding-secret properties)"
     tags: [sessionManagement, reauthentication]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/SessionTimeoutTests.swift::sessionSecretTimesOutAfterTTL
     excluded_reason: null
     requirement: |
       [Secrets used for session binding] SHALL time out and not be accepted after the times specified in Sections 4.1.4, 4.2.4, and 4.3.4, as appropriate for the AAL.
