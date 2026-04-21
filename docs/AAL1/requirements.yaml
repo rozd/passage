@@ -634,8 +634,9 @@ requirements:
     section: "5.2.2 Rate Limiting (Throttling)"
     tags: [throttling, authenticator]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/Throttling/PerAccountCapTests.swift::perAccountCapIsAtMost100
     excluded_reason: null
     requirement: |
       Unless otherwise specified in the description of a given authenticator, the verifier SHALL limit consecutive failed authentication attempts on a single account to no more than 100.
