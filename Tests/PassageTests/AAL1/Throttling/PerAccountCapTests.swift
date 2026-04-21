@@ -29,4 +29,43 @@ struct PerAccountCapTests {
         #expect(login.perIdentifier.maxFailures > 0,
                 "per-account throttle must actually be engaged (maxFailures > 0)")
     }
+
+    @Test(
+        "§5.2.2-c: Successful authentication disregards prior failed attempts on the same bucket",
+        .tags(.aal1, .throttling, .authenticator, .unit, .should)
+    )
+    func successfulAuthResetsBucket() async throws {
+        // Exercise the concrete reset path on the shipped in-memory throttle.
+        // After a run of failures puts the bucket into a throttled state,
+        // calling `reset(bucket:)` — which `LoginThrottleMiddleware` invokes
+        // on a 2xx response — must return the bucket to `.allowed`. That is
+        // the library-side behaviour §5.2.2-c expects of the verifier when
+        // the subscriber successfully authenticates.
+        let service = Passage.Throttle.InMemoryService()
+        let rule = Passage.Throttle.Rule(maxFailures: 3, window: 60)
+        let bucket = Passage.Throttle.Bucket(
+            scope: .login,
+            dimension: .source("198.51.100.7"),
+            enabled: true
+        )
+        let t0 = Date()
+
+        for i in 0..<4 {
+            await service.penalize(bucket: bucket, at: t0.addingTimeInterval(Double(i)))
+        }
+
+        // Precondition: bucket is now throttled.
+        let before = await service.check(bucket: bucket, against: rule, at: t0.addingTimeInterval(4))
+        guard case .throttled = before else {
+            Issue.record("precondition failed: bucket must be throttled before reset, got \(before)")
+            return
+        }
+
+        // §5.2.2-c: a successful auth SHOULD disregard the history.
+        await service.reset(bucket: bucket)
+
+        let after = await service.check(bucket: bucket, against: rule, at: t0.addingTimeInterval(4))
+        #expect(after == .allowed,
+                "after reset (mirroring the success path §5.2.2-c), the bucket must be allowed again")
+    }
 }

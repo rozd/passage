@@ -645,8 +645,9 @@ requirements:
     section: "5.2.2 Rate Limiting (Throttling)"
     tags: [throttling, authenticator]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/Throttling/PerAccountCapTests.swift::successfulAuthResetsBucket
     excluded_reason: null
     requirement: |
       When the subscriber successfully authenticates, the verifier SHOULD disregard any previous failed attempts for that user from the same IP address.
