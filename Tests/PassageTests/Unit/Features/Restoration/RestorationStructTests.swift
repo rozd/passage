@@ -158,13 +158,13 @@ struct `Restoration Struct Tests` {
         #expect(decoded.userId == payload.userId)
     }
 
-    @Test("PhonePasswordResetCodePayload with different phone formats", arguments: [
+    @Test(arguments: [
         "+1234567890",
         "+44 7700 900000",
         "+81 90-1234-5678",
         "555-0123"
     ])
-    func phonePayloadPhoneFormats(phone: String) {
+    func `PhonePasswordResetCodePayload with different phone formats`(phone: String) {
         let payload = Passage.Restoration.PhonePasswordResetCodePayload(
             phone: phone,
             code: "123456",
@@ -278,13 +278,13 @@ struct `Restoration Struct Tests` {
 
     // MARK: - Reset Code Format Tests
 
-    @Test("EmailPasswordResetCodePayload with different code formats", arguments: [
+    @Test(arguments: [
         "123456",
         "ABC123",
         "A1B2C3",
         "000000"
     ])
-    func emailPayloadCodeFormats(code: String) throws {
+    func `EmailPasswordResetCodePayload with different code formats`(code: String) throws {
         let url = try #require(URL(string: "https://example.com/reset"))
         let payload = Passage.Restoration.EmailPasswordResetCodePayload(
             email: "test@example.com",
@@ -295,13 +295,13 @@ struct `Restoration Struct Tests` {
         #expect(payload.resetCode == code)
     }
 
-    @Test("PhonePasswordResetCodePayload with different code formats", arguments: [
+    @Test(arguments: [
         "123456",
         "ABC123",
         "A1B2C3",
         "000000"
     ])
-    func phonePayloadCodeFormats(code: String) {
+    func `PhonePasswordResetCodePayload with different code formats`(code: String) {
         let payload = Passage.Restoration.PhonePasswordResetCodePayload(
             phone: "+1234567890",
             code: code,

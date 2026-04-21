@@ -1,0 +1,7 @@
+# AAL1 memorized-secret tests — SP 800-63B §5.1.1
+#
+# Tests covering memorized-secret verifier requirements: length, character set,
+# breached-password rejection, hashing, SHALL-NOT clauses (no hints, no composition
+# rules, no forced rotation).
+#
+# Populated by /aal1-add. See docs/AAL1/README.md.

@@ -372,14 +372,14 @@ struct `RestorationCode Protocol Tests` {
 
     // MARK: - Different Max Attempts Tests
 
-    @Test("RestorationCode isValid with different max attempts", arguments: [
+    @Test(arguments: [
         (0, 1, true),
         (1, 1, false),
         (2, 3, true),
         (3, 3, false),
         (5, 10, true)
     ])
-    func isValidWithDifferentMaxAttempts(failedAttempts: Int, maxAttempts: Int, expectedValid: Bool) {
+    func `RestorationCode isValid with different max attempts`(failedAttempts: Int, maxAttempts: Int, expectedValid: Bool) {
         let code = MockEmailPasswordResetCode(
             user: MockUser(
                 id: UUID(),

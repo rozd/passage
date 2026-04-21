@@ -154,13 +154,13 @@ struct `AuthUser Tests` {
 
     // MARK: - ExpiresIn Tests
 
-    @Test("AuthUser with different expiresIn values", arguments: [
+    @Test(arguments: [
         300.0,    // 5 minutes
         3600.0,   // 1 hour
         7200.0,   // 2 hours
         86400.0   // 1 day
     ])
-    func authUserWithDifferentExpiresIn(expiresIn: TimeInterval) {
+    func `AuthUser with different expiresIn values`(expiresIn: TimeInterval) {
         let user = AuthUser.User(id: "user123", email: "test@example.com", phone: nil)
         let authUser = AuthUser(
             accessToken: "token",

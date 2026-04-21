@@ -20,13 +20,13 @@ struct `Views Style Tests` {
 
     // MARK: - Template Suffix Tests
 
-    @Test("Template suffix for each style", arguments: [
+    @Test(arguments: [
         (Passage.Views.Style.neobrutalism, "neobrutalism"),
         (Passage.Views.Style.neomorphism, "neomorphism"),
         (Passage.Views.Style.minimalism, "minimalism"),
         (Passage.Views.Style.material, "material")
     ])
-    func templateSuffix(style: Passage.Views.Style, expectedSuffix: String) {
+    func `Template suffix for each style`(style: Passage.Views.Style, expectedSuffix: String) {
         #expect(style.templateSuffix == expectedSuffix)
     }
 

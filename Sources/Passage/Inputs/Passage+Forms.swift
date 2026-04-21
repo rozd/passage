@@ -6,7 +6,7 @@ extension Passage {
     struct DefaultLoginForm: LoginForm {
         static func validations(_ validations: inout Validations) {
             validations.add("email", as: String?.self, is: .email || .nil, required: false)
-            validations.add("password", as: String.self, is: .count(6...))
+            validations.add("password", as: String.self, is: .codePointCount(6...))
         }
         
         let email: String?
@@ -27,8 +27,8 @@ extension Passage {
     struct DefaultRegisterForm: RegisterForm {
         static func validations(_ validations: inout Validations) {
             validations.add("email", as: String?.self, is: .email || .nil, required: false)
-            validations.add("password", as: String.self, is: .count(6...))
-            validations.add("confirmPassword", as: String.self, is: .count(6...))
+            validations.add("password", as: String.self, is: .codePointCount(6...))
+            validations.add("confirmPassword", as: String.self, is: .codePointCount(6...))
         }
 
         let email: String?
@@ -145,7 +145,7 @@ extension Passage {
         static func validations(_ validations: inout Validations) {
             validations.add("email", as: String.self, is: .email)
             validations.add("code", as: String.self, is: .count(6...20))
-            validations.add("newPassword", as: String.self, is: .count(6...))
+            validations.add("newPassword", as: String.self, is: .codePointCount(6...))
         }
 
         let email: String
@@ -175,7 +175,7 @@ extension Passage {
         static func validations(_ validations: inout Validations) {
             validations.add("phone", as: String.self, is: .count(6...))
             validations.add("code", as: String.self, is: .count(6...20))
-            validations.add("newPassword", as: String.self, is: .count(6...))
+            validations.add("newPassword", as: String.self, is: .codePointCount(6...))
         }
 
         let phone: String

@@ -1,0 +1,4 @@
+# AAL1 assertion-cryptography tests — SP 800-63B §4.1.5
+#
+# Tests covering approved cryptography for assertions (JWT signing, JWKS loading).
+# Populated by /aal1-add. See docs/AAL1/README.md.

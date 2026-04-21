@@ -18,18 +18,15 @@ struct `Passkey Enums Tests` {
 
     // MARK: - AuthenticatorTransport
 
-    @Test(
-        "AuthenticatorTransport round-trips every known case",
-        arguments: [
+    @Test(arguments: [
             ("usb", AuthenticatorTransport.usb),
             ("nfc", .nfc),
             ("ble", .ble),
             ("smart-card", .smartcard),
             ("internal", .internal),
             ("hybrid", .hybrid),
-        ] as [(String, AuthenticatorTransport)]
-    )
-    func transportKnownRawValues(raw: String, expected: AuthenticatorTransport) throws {
+        ] as [(String, AuthenticatorTransport)])
+    func `AuthenticatorTransport round-trips every known case`(raw: String, expected: AuthenticatorTransport) throws {
         #expect(AuthenticatorTransport(rawValue: raw) == expected)
         #expect(expected.rawValue == raw)
     }
@@ -55,15 +52,12 @@ struct `Passkey Enums Tests` {
 
     // MARK: - UserVerificationRequirement
 
-    @Test(
-        "UserVerificationRequirement known cases",
-        arguments: [
+    @Test(arguments: [
             ("required", UserVerificationRequirement.required),
             ("preferred", .preferred),
             ("discouraged", .discouraged),
-        ] as [(String, UserVerificationRequirement)]
-    )
-    func uvrKnownRawValues(raw: String, expected: UserVerificationRequirement) {
+        ] as [(String, UserVerificationRequirement)])
+    func `UserVerificationRequirement known cases`(raw: String, expected: UserVerificationRequirement) {
         #expect(UserVerificationRequirement(rawValue: raw) == expected)
         #expect(expected.rawValue == raw)
     }
@@ -80,16 +74,13 @@ struct `Passkey Enums Tests` {
 
     // MARK: - AttestationConveyancePreference
 
-    @Test(
-        "AttestationConveyancePreference known cases",
-        arguments: [
+    @Test(arguments: [
             ("none", AttestationConveyancePreference.none),
             ("direct", .direct),
             ("indirect", .indirect),
             ("enterprise", .enterprise),
-        ] as [(String, AttestationConveyancePreference)]
-    )
-    func attestationKnownRawValues(raw: String, expected: AttestationConveyancePreference) {
+        ] as [(String, AttestationConveyancePreference)])
+    func `AttestationConveyancePreference known cases`(raw: String, expected: AttestationConveyancePreference) {
         #expect(AttestationConveyancePreference(rawValue: raw) == expected)
         #expect(expected.rawValue == raw)
     }
@@ -121,9 +112,7 @@ struct `Passkey Enums Tests` {
 
     // MARK: - COSEAlgorithmIdentifier
 
-    @Test(
-        "COSEAlgorithmIdentifier known COSE identifiers",
-        arguments: [
+    @Test(arguments: [
             (COSEAlgorithmIdentifier.ES256, -7),
             (.EdDSA, -8),
             (.ESP256, -9),
@@ -138,9 +127,8 @@ struct `Passkey Enums Tests` {
             (.RS384, -258),
             (.RS512, -259),
             (.RS1, -65535),
-        ] as [(COSEAlgorithmIdentifier, Int)]
-    )
-    func coseIdentifiersMatchCOSERegistry(alg: COSEAlgorithmIdentifier, expectedRaw: Int) {
+        ] as [(COSEAlgorithmIdentifier, Int)])
+    func `COSEAlgorithmIdentifier known COSE identifiers`(alg: COSEAlgorithmIdentifier, expectedRaw: Int) {
         #expect(alg.rawValue == expectedRaw)
         #expect(COSEAlgorithmIdentifier(rawValue: expectedRaw) == alg)
     }

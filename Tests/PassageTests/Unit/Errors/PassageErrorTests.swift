@@ -7,7 +7,7 @@ struct `Passage Error Tests` {
 
     // MARK: - HTTP Status Code Tests
 
-    @Test("PassageError HTTP status codes", arguments: [
+    @Test(arguments: [
         (PassageError.notConfigured, HTTPResponseStatus.internalServerError),
         (PassageError.storeNotConfigured, HTTPResponseStatus.internalServerError),
         (PassageError.jwksNotConfigured, HTTPResponseStatus.internalServerError),
@@ -19,7 +19,7 @@ struct `Passage Error Tests` {
         (PassageError.missingEnvironmentVariable(name: "TEST"), HTTPResponseStatus.internalServerError),
         (PassageError.unexpected(message: "test"), HTTPResponseStatus.internalServerError)
     ])
-    func errorStatusCodes(error: PassageError, expectedStatus: HTTPResponseStatus) {
+    func `PassageError HTTP status codes`(error: PassageError, expectedStatus: HTTPResponseStatus) {
         #expect(error.status == expectedStatus)
     }
 
@@ -102,24 +102,24 @@ struct `Passage Error Tests` {
 
     // MARK: - Associated Values Tests
 
-    @Test("PassageError missingEnvironmentVariable preserves variable name", arguments: [
+    @Test(arguments: [
         "JWKS",
         "JWKS_FILE_PATH",
         "DATABASE_URL",
         "CUSTOM_VAR"
     ])
-    func missingEnvironmentVariablePreservesName(variableName: String) {
+    func `PassageError missingEnvironmentVariable preserves variable name`(variableName: String) {
         let error = PassageError.missingEnvironmentVariable(name: variableName)
         #expect(error.reason.contains(variableName))
     }
 
-    @Test("PassageError unexpected preserves custom message", arguments: [
+    @Test(arguments: [
         "Database connection failed",
         "Invalid configuration",
         "Network timeout",
         "Unknown error occurred"
     ])
-    func unexpectedPreservesMessage(message: String) {
+    func `PassageError unexpected preserves custom message`(message: String) {
         let error = PassageError.unexpected(message: message)
         #expect(error.reason == message)
     }

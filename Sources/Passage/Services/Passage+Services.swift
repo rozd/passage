@@ -11,6 +11,7 @@ public extension Passage {
         let phoneDelivery: (any PhoneDelivery)?
         let federatedLogin: (any FederatedLoginService)?
         let passkey: (any PasskeyService)?
+        let throttle: any Throttle.Service
 
         public init(
             store: any Store,
@@ -19,6 +20,7 @@ public extension Passage {
             phoneDelivery: (any PhoneDelivery)?,
             federatedLogin: (any FederatedLoginService)? = nil,
             passkey: (any PasskeyService)? = nil,
+            throttle: any Throttle.Service = Throttle.InMemoryService(),
         ) {
             self.store = store
             self.random = random
@@ -26,6 +28,7 @@ public extension Passage {
             self.phoneDelivery = phoneDelivery
             self.federatedLogin = federatedLogin
             self.passkey = passkey
+            self.throttle = throttle
         }
 
         public init(
@@ -34,6 +37,7 @@ public extension Passage {
             phoneDelivery: (any PhoneDelivery)?,
             federatedLogin: (any FederatedLoginService)? = nil,
             passkey: (any PasskeyService)? = nil,
+            throttle: any Throttle.Service = Throttle.InMemoryService(),
         ) {
             self.store = store
             self.random = DefaultRandomGenerator()
@@ -41,6 +45,7 @@ public extension Passage {
             self.phoneDelivery = phoneDelivery
             self.federatedLogin = federatedLogin
             self.passkey = passkey
+            self.throttle = throttle
         }
     }
 }
@@ -82,5 +87,9 @@ extension Passage {
 
     var passkey: (any PasskeyService)? {
         services.passkey
+    }
+
+    var throttle: any Throttle.Service {
+        services.throttle
     }
 }

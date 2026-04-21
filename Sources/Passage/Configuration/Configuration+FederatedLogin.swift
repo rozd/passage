@@ -49,16 +49,19 @@ public extension Passage.Configuration.FederatedLogin {
     struct Provider: Sendable {
         public let provider: FederatedProvider
         public let routes: Routes
+        public let maxAuthAge: TimeInterval?
 
         public init(
             provider: FederatedProvider,
             routes: Routes? = nil,
+            maxAuthAge: TimeInterval? = nil,
         ) {
             self.provider = provider
             self.routes = routes ?? .init(
                 login: .init(path: provider.name.description.pathComponents),
                 callback: .init(path: provider.name.description.pathComponents + ["callback"])
             )
+            self.maxAuthAge = maxAuthAge
         }
     }
 }

@@ -1,0 +1,4 @@
+# AAL1 session-management tests — SP 800-63B §7
+#
+# Tests covering session lifetime, binding, inactivity, and refresh-token rotation.
+# Populated by /aal1-add. See docs/AAL1/README.md.

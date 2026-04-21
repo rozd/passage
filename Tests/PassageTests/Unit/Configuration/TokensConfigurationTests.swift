@@ -7,38 +7,38 @@ struct `Tokens Configuration Tests` {
 
     // MARK: - IdToken Configuration Tests
 
-    @Test("ID token time to live", arguments: [
+    @Test(arguments: [
         (3600.0, "1 hour - default"),
         (300.0, "5 minutes"),
         (1800.0, "30 minutes"),
         (7200.0, "2 hours")
     ])
-    func idTokenTTL(ttl: TimeInterval, _: String) {
+    func `ID token time to live`(ttl: TimeInterval, _: String) {
         let idToken = Passage.Configuration.Tokens.IdToken(timeToLive: ttl)
         #expect(idToken.timeToLive == ttl)
     }
 
     // MARK: - AccessToken Configuration Tests
 
-    @Test("Access token time to live", arguments: [
+    @Test(arguments: [
         (900.0, "15 minutes - default"),
         (300.0, "5 minutes"),
         (1800.0, "30 minutes"),
         (3600.0, "1 hour")
     ])
-    func accessTokenTTL(ttl: TimeInterval, _: String) {
+    func `Access token time to live`(ttl: TimeInterval, _: String) {
         let accessToken = Passage.Configuration.Tokens.AccessToken(timeToLive: ttl)
         #expect(accessToken.timeToLive == ttl)
     }
 
     // MARK: - RefreshToken Configuration Tests
 
-    @Test("Refresh token time to live", arguments: [
+    @Test(arguments: [
         (604800.0, "7 days - default"),
         (86400.0, "1 day"),
         (2592000.0, "30 days")
     ])
-    func refreshTokenTTL(ttl: TimeInterval, _: String) {
+    func `Refresh token time to live`(ttl: TimeInterval, _: String) {
         let refreshToken = Passage.Configuration.Tokens.RefreshToken(timeToLive: ttl)
         #expect(refreshToken.timeToLive == ttl)
     }

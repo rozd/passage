@@ -69,12 +69,12 @@ struct `Access Token Tests` {
 
     // MARK: - Claims Tests
 
-    @Test("Access token subject claim", arguments: [
+    @Test(arguments: [
         "user123",
         "user-abc-123",
         "test-user-456"
     ])
-    func subjectClaim(userId: String) {
+    func `Access token subject claim`(userId: String) {
         let token = AccessToken(
             userId: userId,
             expiresAt: Date(timeIntervalSinceNow: 3600),
@@ -117,12 +117,12 @@ struct `Access Token Tests` {
         #expect(token.issuedAt.value.timeIntervalSince1970 == issuedAtDate.timeIntervalSince1970)
     }
 
-    @Test("Access token issuer claim", arguments: [
+    @Test(arguments: [
         "https://auth.example.com",
         "https://example.com",
         nil
     ])
-    func issuerClaim(issuer: String?) {
+    func `Access token issuer claim`(issuer: String?) {
         let token = AccessToken(
             userId: "user123",
             expiresAt: Date(timeIntervalSinceNow: 3600),
@@ -134,12 +134,12 @@ struct `Access Token Tests` {
         #expect(token.issuer?.value == issuer)
     }
 
-    @Test("Access token audience claim", arguments: [
+    @Test(arguments: [
         "api.example.com",
         "service.example.com",
         nil
     ])
-    func audienceClaim(audience: String?) {
+    func `Access token audience claim`(audience: String?) {
         let token = AccessToken(
             userId: "user123",
             expiresAt: Date(timeIntervalSinceNow: 3600),
@@ -151,12 +151,12 @@ struct `Access Token Tests` {
         #expect(token.audience?.value.first == audience)
     }
 
-    @Test("Access token scope claim", arguments: [
+    @Test(arguments: [
         "read write admin",
         "read",
         nil
     ])
-    func scopeClaim(scope: String?) {
+    func `Access token scope claim`(scope: String?) {
         let token = AccessToken(
             userId: "user123",
             expiresAt: Date(timeIntervalSinceNow: 3600),

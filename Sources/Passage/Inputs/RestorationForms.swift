@@ -1,15 +1,35 @@
 import Vapor
 
+public protocol PasswordResetRequestForm: Form {
+    var identifier: Identifier { get }
+}
+
+public protocol PasswordResetVerifyForm: Form {
+    var identifier: Identifier { get }
+    var code: String { get }
+    var newPassword: String { get }
+}
+
 // MARK: - Email Password Reset Forms
 
-public protocol EmailPasswordResetRequestForm: Form {
+public protocol EmailPasswordResetRequestForm: PasswordResetRequestForm {
     var email: String { get }
 }
 
-public protocol EmailPasswordResetVerifyForm: Form {
+public extension EmailPasswordResetRequestForm {
+    var identifier: Identifier {
+        .email(email)
+    }
+}
+
+public protocol EmailPasswordResetVerifyForm: PasswordResetVerifyForm {
     var email: String { get }
-    var code: String { get }
-    var newPassword: String { get }
+}
+
+public extension EmailPasswordResetVerifyForm {
+    var identifier: Identifier {
+        .email(email)
+    }
 }
 
 public protocol EmailPasswordResetResendForm: Form {
@@ -18,14 +38,24 @@ public protocol EmailPasswordResetResendForm: Form {
 
 // MARK: - Phone Password Reset Forms
 
-public protocol PhonePasswordResetRequestForm: Form {
+public protocol PhonePasswordResetRequestForm: PasswordResetRequestForm {
     var phone: String { get }
 }
 
-public protocol PhonePasswordResetVerifyForm: Form {
+public extension PhonePasswordResetRequestForm {
+    var identifier: Identifier {
+        .phone(phone)
+    }
+}
+
+public protocol PhonePasswordResetVerifyForm: PasswordResetVerifyForm {
     var phone: String { get }
-    var code: String { get }
-    var newPassword: String { get }
+}
+
+public extension PhonePasswordResetVerifyForm {
+    var identifier: Identifier {
+        .phone(phone)
+    }
 }
 
 public protocol PhonePasswordResetResendForm: Form {

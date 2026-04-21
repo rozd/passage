@@ -240,13 +240,12 @@ struct `Passkey Begin Signup Integration Tests` {
 
     // MARK: - Identifier variants
 
-    @Test("Email identifier flows through to user.name",
-          arguments: [
+    @Test(arguments: [
             ("email=alice%40example.com&displayName=Alice", "alice@example.com"),
             ("phone=%2B15551234567&displayName=Alice", "+15551234567"),
             ("username=alice&displayName=Alice", "alice"),
           ])
-    func identifierFlowsToUserName(body: String, expectedUserName: String) async throws {
+    func `Email identifier flows through to user.name`(body: String, expectedUserName: String) async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             holder.service = MockPasskeyService()

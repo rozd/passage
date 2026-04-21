@@ -262,13 +262,13 @@ struct `Views Route Collection Tests` {
         #expect(collection.restoration.email.routes.verify.path.count == 3)
     }
 
-    @Test("Passage.Views.RouteCollection group path variations", arguments: [
+    @Test(arguments: [
         ([], "empty group"),
         (["auth"] as [PathComponent], "single component"),
         (["api", "v1", "auth"] as [PathComponent], "multiple components"),
         (["views"] as [PathComponent], "views group")
     ])
-    func routeCollectionGroupVariations(group: [PathComponent], _: String) {
+    func `Passage.Views.RouteCollection group path variations`(group: [PathComponent], _: String) {
         let viewsConfig = Passage.Configuration.Views(
             register: nil,
             login: nil,

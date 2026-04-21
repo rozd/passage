@@ -60,14 +60,7 @@ extension Passage.Restoration.EmailRouteCollection {
         do {
             let form = try req.decodeContentAsFormOfType(req.contracts.emailPasswordResetVerifyForm)
 
-            // Hash the new password
-            let passwordHash = try Bcrypt.hash(form.newPassword)
-
-            try await req.restoration.verifyAndResetPassword(
-                identifier: .email(form.email),
-                code: form.code,
-                newPasswordHash: passwordHash
-            )
+            try await req.restoration.verifyReset(form: form)
 
             guard req.isFormSubmission, req.isWaitingForHTML, let view = req.configuration.views.passwordResetConfirm else {
                 return try await HTTPStatus.ok.encodeResponse(for: req)

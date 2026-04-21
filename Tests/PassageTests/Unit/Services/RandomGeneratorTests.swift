@@ -15,10 +15,10 @@ struct `RandomGenerator Tests` {
         #expect(!randomString.isEmpty)
     }
 
-    @Test("DefaultRandomGenerator generateRandomString with different counts", arguments: [
+    @Test(arguments: [
         8, 16, 32, 64
     ])
-    func generateRandomStringDifferentCounts(count: Int) {
+    func `DefaultRandomGenerator generateRandomString with different counts`(count: Int) {
         let generator = DefaultRandomGenerator()
         let randomString = generator.generateRandomString(count: count)
 
@@ -98,10 +98,10 @@ struct `RandomGenerator Tests` {
         #expect(code.count == 6)
     }
 
-    @Test("DefaultRandomGenerator generateVerificationCode with different lengths", arguments: [
+    @Test(arguments: [
         4, 6, 8, 10
     ])
-    func generateVerificationCodeDifferentLengths(length: Int) {
+    func `DefaultRandomGenerator generateVerificationCode with different lengths`(length: Int) {
         let generator = DefaultRandomGenerator()
         let code = generator.generateVerificationCode(length: length)
 

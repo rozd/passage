@@ -46,7 +46,12 @@ extension Passage.Account {
 extension Passage.Account {
 
     func register(form: any RegisterForm) async throws {
-        let hash = try await request.password.async.hash(form.password)
+        let policy = request.configuration.passwordPolicy
+
+        let password = form.password
+        try policy.validate(password: password)
+
+        let hash = try await request.password.async.hash(policy.normalize(password: password))
 
         let identifier = try form.asIdentifier()
 
@@ -69,8 +74,22 @@ extension Passage.Account {
 
     func login(form: any LoginForm) async throws -> AuthUser {
         let identifier = try form.asIdentifier()
+        let rules = configuration.throttle.login
+        let now = Date()
+        let idBucket = Passage.Throttle.Bucket(
+            scope: .login,
+            dimension: .identifier(kind: identifier.kind, value: identifier.value),
+            enabled: rules.enabled
+        )
+
+        if case let .throttled(delay) = await request.throttle.check(
+           bucket: idBucket, against: rules.perIdentifier, at: now
+       ) {
+            throw AuthenticationError.tooManyLoginAttempts(retryAfter: delay)
+        }
 
         guard let user = try await store.users.find(byIdentifier: identifier) else {
+            await request.throttle.penalize(bucket: idBucket, at: now)
             throw identifier.errorWhenIdentifierIsInvalid
         }
 
@@ -80,9 +99,15 @@ extension Passage.Account {
 
         try user.check(identifier: identifier)
 
-        guard try await request.password.async.verify(form.password, created: userPasswordHash) else {
+        let policy = request.configuration.passwordPolicy
+        let passwordNormalized = policy.normalize(password: form.password)
+
+        guard try await request.password.async.verify(passwordNormalized, created: userPasswordHash) else {
+            await request.throttle.penalize(bucket: idBucket, at: now)
             throw identifier.errorWhenIdentifierIsInvalid
         }
+
+        await request.throttle.reset(bucket: idBucket)
 
         request.passage.login(user)
 

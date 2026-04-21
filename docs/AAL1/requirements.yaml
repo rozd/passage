@@ -1,0 +1,973 @@
+# AAL1 requirements ledger — the single source of truth for the Ralph workflow.
+#
+# Each record is one normative clause from the source document below. The Ralph
+# workflow reads this file to determine the next pending clause and writes back
+# the `status` and `tests` fields as tests land.
+#
+# Do not hand-edit the `status` or `tests` fields — let `/aal1-add` update them
+# so validation in `.scripts/aal1-lint.sh` stays consistent.
+
+meta:
+  source: "NIST SP 800-63B rev 3 (2017, updated 2020)"
+  source_url: "https://pages.nist.gov/800-63-3/sp800-63b.html"
+  source_sha256: "4748858e50415b6193c84f26fcbccac64a62a025ca37a93f02721eb24f061305"
+  retrieved: "2026-04-20"
+  passage_version_claimed: null # filled when CLAIM.md is cut
+# Schema reference (see docs/AAL1/README.md for rationale):
+#   id            — clause identifier, e.g. "5.1.1.2-a". Also the §-prefix in tests.
+#   normative     — SHALL | SHALL_NOT | SHOULD | MAY
+#   section       — human label copied from the source document section heading
+#   tags          — Swift Testing tag names (mirror spec structure; see §5 of the plan)
+#   testability   — testable | design-assertion | excluded
+#   status        — pending | has_test | excluded
+#   tests         — array of "AAL1/<Module>/<File>.swift::<functionName>"
+#   excluded_reason — string; required when testability or status is `excluded`
+#   requirement   — verbatim clause text
+requirements:
+  # ==========================================================================
+  # § 4.1 Authenticator Assurance Level 1
+  # ==========================================================================
+  - id: "4.1.1-a"
+    normative: SHALL
+    section: "4.1.1 Permitted Authenticator Types"
+    tags: [authenticator]
+    testability: design-assertion
+    status: has_test
+    tests:
+      - AAL1/Architectural.swift::authenticatorSurfaceIsApproved
+    excluded_reason: null
+    requirement: |
+      AAL1 authentication SHALL occur by the use of any of the following authenticator types, which are defined in Section 5:
+      * Memorized Secret (Section 5.1.1)
+      * Look-Up Secret (Section 5.1.2)
+      * Out-of-Band Devices (Section 5.1.3)
+      * Single-Factor One-Time Password (OTP) Device (Section 5.1.4)
+      * Multi-Factor OTP Device (Section 5.1.5)
+      * Single-Factor Cryptographic Software (Section 5.1.6)
+      * Single-Factor Cryptographic Device (Section 5.1.7)
+      * Multi-Factor Cryptographic Software (Section 5.1.8)
+      * Multi-Factor Cryptographic Device (Section 5.1.9)
+  - id: "4.1.2-a"
+    normative: SHALL
+    section: "4.1.2 Authenticator and Verifier Requirements"
+    tags: [authenticator]
+    testability: design-assertion
+    status: has_test
+    tests:
+      - AAL1/Architectural.swift::cryptographicAuthenticatorsUseApprovedCryptography
+    excluded_reason: null
+    requirement: |
+      Cryptographic authenticators used at AAL1 SHALL use approved cryptography.
+  - id: "4.1.2-b"
+    normative: SHOULD
+    section: "4.1.2 Authenticator and Verifier Requirements"
+    tags: [authenticator]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "Addresses compromise detection by the user-endpoint authenticator software; Passage is a server-side verifier and does not run within the claimant's OS context."
+    requirement: |
+      Software-based authenticators that operate within the context of an operating system MAY, where applicable, attempt to detect compromise (e.g., by malware) of the user endpoint in which they are running and SHOULD NOT complete the operation when such a compromise is detected.
+  - id: "4.1.2-c"
+    normative: SHALL
+    section: "4.1.2 Authenticator and Verifier Requirements"
+    tags: [authenticator]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "TLS termination and protected-channel configuration are the responsibility of the deploying Vapor application / reverse proxy, not the Passage library."
+    requirement: |
+      Communication between the claimant and verifier (using the primary channel in the case of an out-of-band authenticator) SHALL be via an authenticated protected channel to provide confidentiality of the authenticator output and resistance to man-in-the-middle (MitM) attacks.
+  - id: "4.1.2-d"
+    normative: SHALL
+    section: "4.1.2 Authenticator and Verifier Requirements"
+    tags: [authenticator]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "Applies only to verifiers operated by U.S. federal agencies. Passage is an open-source library; FIPS 140 validation is performed on the deployed cryptographic module by the integrator, not on Passage itself."
+    requirement: |
+      Verifiers operated by government agencies at AAL1 SHALL be validated to meet the requirements of FIPS 140 Level 1.
+  - id: "4.1.3-a"
+    normative: SHALL
+    section: "4.1.3 Reauthentication"
+    tags: [reauthentication, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/Reauthentication/PeriodicReauthenticationTests.swift::refreshTokenTTLIsFinite
+    excluded_reason: null
+    requirement: |
+      Periodic reauthentication of subscriber sessions SHALL be performed as described in Section 7.2.
+  - id: "4.1.3-b"
+    normative: SHOULD
+    section: "4.1.3 Reauthentication"
+    tags: [reauthentication, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/Reauthentication/PeriodicReauthenticationTests.swift::refreshTokenTTLWithin30DayCeiling
+    excluded_reason: null
+    requirement: |
+      At AAL1, reauthentication of the subscriber SHOULD be repeated at least once per 30 days during an extended usage session, regardless of user activity.
+  - id: "4.1.3-c"
+    normative: SHOULD
+    section: "4.1.3 Reauthentication"
+    tags: [reauthentication, sessionManagement]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/Reauthentication/SessionTerminationTests.swift::expiredRefreshTokenIsInvalid
+    excluded_reason: null
+    requirement: |
+      The session SHOULD be terminated (i.e., logged out) when this time limit is reached.
+  - id: "4.1.4-a"
+    normative: SHALL
+    section: "4.1.4 Security Controls"
+    tags: [authenticator]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "SP 800-53 baseline selection is a deployment/operational control on the CSP side, not a property of the Passage library."
+    requirement: |
+      The CSP SHALL employ appropriately-tailored security controls from the low baseline of security controls defined in SP 800-53 or equivalent federal (e.g. FEDRAMP) or industry standard.
+  - id: "4.1.4-b"
+    normative: SHALL
+    section: "4.1.4 Security Controls"
+    tags: [authenticator]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "SP 800-53 assurance-related controls are a deployment/operational responsibility of the integrator operating the CSP, not a Passage library concern."
+    requirement: |
+      The CSP SHALL ensure that the minimum assurance-related controls for low-impact systems, or equivalent, are satisfied.
+  - id: "4.1.5-a"
+    normative: SHALL
+    section: "4.1.5 Records Retention Policy"
+    tags: [recordsRetention]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "Compliance with NARA / jurisdictional records-retention schedules is an integrator (CSP operator) responsibility and outside the scope of a library."
+    requirement: |
+      The CSP shall comply with its respective records retention policies in accordance with applicable laws, regulations, and policies, including any National Archives and Records Administration (NARA) records retention schedules that may apply.
+  - id: "4.1.5-b"
+    normative: SHALL
+    section: "4.1.5 Records Retention Policy"
+    tags: [recordsRetention]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "Risk-management process for discretionary retention is an integrator governance activity, not a library-testable behaviour."
+    requirement: |
+      If the CSP opts to retain records in the absence of any mandatory requirements, the CSP SHALL conduct a risk management process, including assessments of privacy and security risks, to determine how long records should be retained.
+  - id: "4.1.5-c"
+    normative: SHALL
+    section: "4.1.5 Records Retention Policy"
+    tags: [recordsRetention]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "Notifying subscribers of the retention policy is a published-notice/UI responsibility of the integrator, not of Passage."
+    requirement: |
+      [The CSP] SHALL inform the subscriber of that retention policy.
+  # ==========================================================================
+  # § 4.4 Privacy Requirements
+  # ==========================================================================
+  - id: "4.4-a"
+    normative: SHALL
+    section: "4.4 Privacy Requirements"
+    tags: [authenticator]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "SP 800-53 privacy-control selection is a deployment-time integrator responsibility, not a library property."
+    requirement: |
+      The CSP SHALL employ appropriately-tailored privacy controls defined in SP 800-53 or equivalent industry standard.
+  - id: "4.4-b"
+    normative: SHALL
+    section: "4.4 Privacy Requirements"
+    tags: [authenticator]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "Predictability and manageability measures depend on the CSP's specific attribute-processing purposes and consent model — governance responsibility of the integrator."
+    requirement: |
+      If CSPs process attributes for purposes other than identity proofing, authentication, or attribute assertions (collectively "identity service"), related fraud mitigation, or to comply with law or legal process, CSPs SHALL implement measures to maintain predictability and manageability commensurate with the privacy risk arising from the additional processing. Measures MAY include providing clear notice, obtaining subscriber consent, or enabling selective use or disclosure of attributes.
+  - id: "4.4-c"
+    normative: SHALL_NOT
+    section: "4.4 Privacy Requirements"
+    tags: [authenticator]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "How the integrator structures its consent UX and service-access gating is outside the library's observable surface."
+    requirement: |
+      When CSPs use consent measures, CSPs SHALL NOT make consent for the additional processing a condition of the identity service.
+  - id: "4.4-d"
+    normative: SHALL
+    section: "4.4 Privacy Requirements"
+    tags: [authenticator]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "Applies only to U.S. federal agencies and their internal Privacy Act compliance process."
+    requirement: |
+      The agency SHALL consult with their Senior Agency Official for Privacy (SAOP) and conduct an analysis to determine whether the collection of PII to issue or maintain authenticators triggers the requirements of the Privacy Act of 1974 (see Section 9.4).
+  - id: "4.4-e"
+    normative: SHALL
+    section: "4.4 Privacy Requirements"
+    tags: [authenticator]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "System of Records Notice publication is a U.S. federal-agency-only obligation."
+    requirement: |
+      The agency SHALL publish a System of Records Notice (SORN) to cover such collections, as applicable.
+  - id: "4.4-f"
+    normative: SHALL
+    section: "4.4 Privacy Requirements"
+    tags: [authenticator]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "Applies only to U.S. federal agencies and their internal E-Government Act compliance process."
+    requirement: |
+      The agency SHALL consult with their SAOP and conduct an analysis to determine whether the collection of PII to issue or maintain authenticators triggers the requirements of the E-Government Act of 2002.
+  - id: "4.4-g"
+    normative: SHALL
+    section: "4.4 Privacy Requirements"
+    tags: [authenticator]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "Privacy Impact Assessment publication is a U.S. federal-agency-only obligation."
+    requirement: |
+      The agency SHALL publish a Privacy Impact Assessment (PIA) to cover such collection, as applicable.
+  # ==========================================================================
+  # § 5.1.1 Memorized Secrets
+  # ==========================================================================
+  # § 5.1.1.1 Memorized Secret Authenticators
+  # --------------------------------------------------------------------------
+  - id: "5.1.1.1-a"
+    normative: SHALL
+    section: "5.1.1.1 Memorized Secret Authenticators"
+    tags: [memorizedSecret, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/MinimumLengthTests.swift::subscriberChosenSecretBelow8CharsIsRejected
+    excluded_reason: null
+    requirement: |
+      Memorized secrets SHALL be at least 8 characters in length if chosen by the subscriber.
+  - id: "5.1.1.1-b"
+    normative: SHALL
+    section: "5.1.1.1 Memorized Secret Authenticators"
+    tags: [memorizedSecret, authenticator]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "Passage does not issue CSP-chosen memorized secrets to subscribers; enrolment passwords are always subscriber-chosen. If an integrator layers a CSP-generated-password flow on top of Passage, this clause applies to that layer, not the library."
+    requirement: |
+      Memorized secrets chosen randomly by the CSP or verifier SHALL be at least 6 characters in length and MAY be entirely numeric.
+  - id: "5.1.1.1-c"
+    normative: SHALL
+    section: "5.1.1.1 Memorized Secret Authenticators"
+    tags: [memorizedSecret, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/BreachedPasswordTests.swift::blocklistedSecretForcesSubscriberToChooseAnother
+    excluded_reason: null
+    requirement: |
+      If the CSP or verifier disallows a chosen memorized secret based on its appearance on a blacklist of compromised values, the subscriber SHALL be required to choose a different memorized secret.
+  - id: "5.1.1.1-d"
+    normative: SHOULD
+    section: "5.1.1.1 Memorized Secret Authenticators"
+    tags: [memorizedSecret, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/ComplexityTests.swift::lengthCompliantLowercasePasswordIsAccepted
+    excluded_reason: null
+    requirement: |
+      No other complexity requirements for memorized secrets SHOULD be imposed. A rationale for this is presented in Appendix A Strength of Memorized Secrets.
+  # --------------------------------------------------------------------------
+  # § 5.1.1.2 Memorized Secret Verifiers — core AAL1 surface for Passage
+  # --------------------------------------------------------------------------
+  - id: "5.1.1.2-a"
+    normative: SHALL
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/MinimumLengthTests.swift::verifierRejectsShortNewPasswordAtReset
+    excluded_reason: null
+    requirement: |
+      Verifiers SHALL require subscriber-chosen memorized secrets to be at least 8 characters in length.
+  - id: "5.1.1.2-b"
+    normative: SHOULD
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/MaximumLengthTests.swift::verifierPermits64CharPassword
+    excluded_reason: null
+    requirement: |
+      Verifiers SHOULD permit subscriber-chosen memorized secrets at least 64 characters in length.
+  - id: "5.1.1.2-c"
+    normative: SHOULD
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/CharacterAcceptanceTests.swift::printableAsciiAndSpaceAreAccepted
+    excluded_reason: null
+    requirement: |
+      All printing ASCII [RFC 20] characters as well as the space character SHOULD be acceptable in memorized secrets.
+  - id: "5.1.1.2-d"
+    normative: SHOULD
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/CharacterAcceptanceTests.swift::unicodeCharactersAreAccepted
+    excluded_reason: null
+    requirement: |
+      Unicode [ISO/ISC 10646] characters SHOULD be accepted as well.
+  - id: "5.1.1.2-e"
+    normative: SHALL_NOT
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/TruncationTests.swift::truncatedPrefixMustNotAuthenticate
+    excluded_reason: null
+    requirement: |
+      Truncation of the secret SHALL NOT be performed.
+  - id: "5.1.1.2-f"
+    normative: SHALL
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/UnicodeLengthTests.swift::lengthIsMeasuredInCodePoints
+    excluded_reason: null
+    requirement: |
+      For purposes of the above length requirements, each Unicode code point SHALL be counted as a single character.
+  - id: "5.1.1.2-g"
+    normative: SHOULD
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/UnicodeNormalizationTests.swift::nfdRegisterAndNfcLoginAreEquivalent
+    excluded_reason: null
+    requirement: |
+      If Unicode characters are accepted in memorized secrets, the verifier SHOULD apply the Normalization Process for Stabilized Strings using either the NFKC or NFKD normalization defined in Section 12.1 of Unicode Standard Annex 15 [UAX 15]. This process is applied before hashing the byte string representing the memorized secret.
+  - id: "5.1.1.2-h"
+    normative: SHOULD
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, authenticator]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "Advisory copy to subscribers is an integrator UI concern; Passage exposes no end-user UI surface for secret selection."
+    requirement: |
+      Subscribers choosing memorized secrets containing Unicode characters SHOULD be advised that some characters may be represented differently by some endpoints, which can affect their ability to authenticate successfully.
+  - id: "5.1.1.2-i"
+    normative: SHALL
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, authenticator]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "Passage does not generate CSP/verifier-chosen memorized secrets (the library only accepts subscriber-chosen secrets at registration and password-change). NOTE: this record groups two SHALLs from one sentence — split if a CSP-generated-secret surface is later added."
+    requirement: |
+      Memorized secrets that are randomly chosen by the CSP (e.g., at enrollment) or by the verifier (e.g., when a user requests a new PIN) SHALL be at least 6 characters in length and SHALL be generated using an approved random bit generator [SP 800-90Ar1].
+  - id: "5.1.1.2-j"
+    normative: SHALL_NOT
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/PasswordHintTests.swift::noUnauthenticatedHintEndpoint
+    excluded_reason: null
+    requirement: |
+      Memorized secret verifiers SHALL NOT permit the subscriber to store a "hint" that is accessible to an unauthenticated claimant.
+  - id: "5.1.1.2-k"
+    normative: SHALL_NOT
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/SecurityQuestionTests.swift::noSecurityQuestionRoute
+    excluded_reason: null
+    requirement: |
+      Verifiers SHALL NOT prompt subscribers to use specific types of information (e.g., "What was the name of your first pet?") when choosing memorized secrets.
+  - id: "5.1.1.2-l"
+    normative: SHALL
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/BreachedPasswordTests.swift::verifierChecksBlocklistAtPasswordChange
+    excluded_reason: null
+    requirement: |
+      When processing requests to establish and change memorized secrets, verifiers SHALL compare the prospective secrets against a list that contains values known to be commonly-used, expected, or compromised. For example, the list MAY include, but is not limited to:
+      * Passwords obtained from previous breach corpuses.
+      * Dictionary words.
+      * Repetitive or sequential characters (e.g. 'aaaaaa', '1234abcd').
+      * Context-specific words, such as the name of the service, the username, and derivatives thereof.
+  - id: "5.1.1.2-m"
+    normative: SHALL
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/BreachedPasswordTests.swift::rejectionAdvisesSelectingDifferentSecret
+    excluded_reason: null
+    requirement: |
+      If the chosen secret is found in the list, the CSP or verifier SHALL advise the subscriber that they need to select a different secret.
+  - id: "5.1.1.2-n"
+    normative: SHALL
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/BreachedPasswordTests.swift::rejectionProvidesReason
+    excluded_reason: null
+    requirement: |
+      [If the chosen secret is found in the list, the CSP or verifier] SHALL provide the reason for rejection.
+  - id: "5.1.1.2-o"
+    normative: SHALL
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/BreachedPasswordTests.swift::rejectedSubscriberCanRetryWithDifferentSecret
+    excluded_reason: null
+    requirement: |
+      [If the chosen secret is found in the list, the CSP or verifier] SHALL require the subscriber to choose a different value.
+  - id: "5.1.1.2-p"
+    normative: SHOULD
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, authenticator]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "Strength meters / user-education hints are UI concerns; Passage is a backend library and does not render registration forms (Leaf templates provided are for password-reset, not strength guidance)."
+    requirement: |
+      Verifiers SHOULD offer guidance to the subscriber, such as a password-strength meter [Meters], to assist the user in choosing a strong memorized secret. This is particularly important following the rejection of a memorized secret on the above list as it discourages trivial modification of listed (and likely very weak) memorized secrets [Blacklists].
+  - id: "5.1.1.2-q"
+    normative: SHALL
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, throttling, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/RateLimitingTests.swift::sustainedFailedLoginsAreRateLimited
+    excluded_reason: null
+    requirement: |
+      Verifiers SHALL implement a rate-limiting mechanism that effectively limits the number of failed authentication attempts that can be made on the subscriber's account as described in Section 5.2.2.
+  - id: "5.1.1.2-r"
+    normative: SHOULD
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/ComplexityTests.swift::repeatedCharacterPasswordIsAccepted
+    excluded_reason: null
+    requirement: |
+      Verifiers SHOULD NOT impose other composition rules (e.g., requiring mixtures of different character types or prohibiting consecutively repeated characters) for memorized secrets.
+  - id: "5.1.1.2-s"
+    normative: SHOULD
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/PasswordRotationTests.swift::noPasswordRotationPolicyField
+    excluded_reason: null
+    requirement: |
+      Verifiers SHOULD NOT require memorized secrets to be changed arbitrarily (e.g., periodically).
+  - id: "5.1.1.2-t"
+    normative: SHALL
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/PasswordRotationTests.swift::adminForcedRotationInvalidatesOldSecret
+    excluded_reason: null
+    requirement: |
+      However, verifiers SHALL force a change if there is evidence of compromise of the authenticator.
+  - id: "5.1.1.2-u"
+    normative: SHOULD
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, authenticator]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "Paste behaviour and on-screen rendering of the secret are client-side UI concerns. Passage is a backend verifier and does not control the secret-entry widget. NOTE: this record groups two SHOULDs (paste-support + display-option) from adjacent paragraphs."
+    requirement: |
+      Verifiers SHOULD permit claimants to use "paste" functionality when entering a memorized secret. This facilitates the use of password managers, which are widely used and in many cases increase the likelihood that users will choose stronger memorized secrets.
+
+      In order to assist the claimant in successfully entering a memorized secret, the verifier SHOULD offer an option to display the secret — rather than a series of dots or asterisks — until it is entered. This allows the claimant to verify their entry if they are in a location where their screen is unlikely to be observed. The verifier MAY also permit the user's device to display individual entered characters for a short time after each character is typed to verify correct entry. This is particularly applicable on mobile devices.
+  - id: "5.1.1.2-v"
+    normative: SHALL
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, authenticator]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "Approved encryption and TLS termination for the request-entry channel are the responsibility of the deploying Vapor application / reverse proxy, not the Passage library."
+    requirement: |
+      The verifier SHALL use approved encryption and an authenticated protected channel when requesting memorized secrets in order to provide resistance to eavesdropping and MitM attacks.
+  - id: "5.1.1.2-w"
+    normative: SHALL
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/HashingTests.swift::storedHashIsNotPlaintext
+    excluded_reason: null
+    requirement: |
+      Verifiers SHALL store memorized secrets in a form that is resistant to offline attacks.
+  - id: "5.1.1.2-x"
+    normative: SHALL
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, authenticator]
+    testability: design-assertion
+    status: has_test
+    tests:
+      - AAL1/Architectural.swift::saltedHashedWithApprovedKDF
+    excluded_reason: null
+    requirement: |
+      Memorized secrets SHALL be salted and hashed using a suitable one-way key derivation function. Key derivation functions take a password, a salt, and a cost factor as inputs then generate a password hash. Their purpose is to make each password guessing trial by an attacker who has obtained a password hash file expensive and therefore the cost of a guessing attack high or prohibitive. Examples of suitable key derivation functions include Password-based Key Derivation Function 2 (PBKDF2) [SP 800-132] and Balloon [BALLOON]. A memory-hard function SHOULD be used because it increases the cost of an attack. The key derivation function SHALL use an approved one-way function such as Keyed Hash Message Authentication Code (HMAC) [FIPS 198-1], any approved hash function in SP 800-107, Secure Hash Algorithm 3 (SHA-3) [FIPS 202], CMAC [SP 800-38B] or Keccak Message Authentication Code (KMAC), Customizable SHAKE (cSHAKE), or ParallelHash [SP 800-185]. The chosen output length of the key derivation function SHOULD be the same as the length of the underlying one-way function output.
+
+      NOTE: this record groups the four normative statements of the KDF-composition paragraph — (i) SHALL salted+hashed with a KDF, (ii) SHOULD memory-hard, (iii) SHALL approved one-way primitive, (iv) SHOULD KDF output length matches the underlying one-way function — because they form a single cryptographic-design assertion and the clause-ID regex caps the sub-section at 26 letters.
+  - id: "5.1.1.2-y"
+    normative: SHALL
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/MemorizedSecret/HashingTests.swift::distinctSaltsAcrossUsers
+    excluded_reason: null
+    requirement: |
+      The salt SHALL be at least 32 bits in length and be chosen arbitrarily so as to minimize salt value collisions among stored hashes. Both the salt value and the resulting hash SHALL be stored for each subscriber using a memorized secret authenticator.
+
+      NOTE: this record groups two SHALLs (salt size/arbitrariness + stored-alongside-hash) because both are tested against the same persisted-credential observation.
+  - id: "5.1.1.2-z"
+    normative: SHOULD
+    section: "5.1.1.2 Memorized Secret Verifiers"
+    tags: [memorizedSecret, authenticator]
+    testability: design-assertion
+    status: has_test
+    tests:
+      - AAL1/Architectural.swift::kdfCostFactorIsHigh
+    excluded_reason: null
+    requirement: |
+      For PBKDF2, the cost factor is an iteration count: the more times the PBKDF2 function is iterated, the longer it takes to compute the password hash. Therefore, the iteration count SHOULD be as large as verification server performance will allow, typically at least 10,000 iterations.
+
+      In addition, verifiers SHOULD perform an additional iteration of a key derivation function using a salt value that is secret and known only to the verifier. This salt value, if used, SHALL be generated by an approved random bit generator [SP 800-90Ar1] and provide at least the minimum security strength specified in the latest revision of SP 800-131A (112 bits as of the date of this publication). The secret salt value SHALL be stored separately from the hashed memorized secrets (e.g., in a specialized device like a hardware security module). With this additional iteration, brute-force attacks on the hashed memorized secrets are impractical as long as the secret salt value remains secret.
+
+      NOTE: this record groups PBKDF2-iteration guidance and the optional "pepper" (secret-salt) requirements from the two closing paragraphs of § 5.1.1.2. Split into child records if Passage gains a peppered-KDF surface.
+  # ==========================================================================
+  # § 5.2 General Authenticator Requirements
+  # ==========================================================================
+  # § 5.2.1 Physical Authenticators
+  # --------------------------------------------------------------------------
+  - id: "5.2.1-a"
+    normative: SHALL
+    section: "5.2.1 Physical Authenticators"
+    tags: [authenticator]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "Applies to physical authenticators (hardware tokens, OTP devices) that Passage does not issue. For memorized-secret authenticators this clause has no analogue."
+    requirement: |
+      CSPs SHALL provide subscriber instructions on how to appropriately protect the authenticator against theft or loss.
+  - id: "5.2.1-b"
+    normative: SHALL
+    section: "5.2.1 Physical Authenticators"
+    tags: [authenticator]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "Applies to physical authenticators. Passage's analogous surface — password-reset on compromise — is covered by § 5.1.1.2-t."
+    requirement: |
+      The CSP SHALL provide a mechanism to revoke or suspend the authenticator immediately upon notification from subscriber that loss or theft of the authenticator is suspected.
+  # --------------------------------------------------------------------------
+  # § 5.2.2 Rate Limiting (Throttling)
+  # --------------------------------------------------------------------------
+  - id: "5.2.2-a"
+    normative: SHALL
+    section: "5.2.2 Rate Limiting (Throttling)"
+    tags: [throttling, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/Throttling/OnlineGuessingTests.swift::loginThrottlesSprayAttacks
+    excluded_reason: null
+    requirement: |
+      When required by the authenticator type descriptions in Section 5.1, the verifier SHALL implement controls to protect against online guessing attacks.
+  - id: "5.2.2-b"
+    normative: SHALL
+    section: "5.2.2 Rate Limiting (Throttling)"
+    tags: [throttling, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/Throttling/PerAccountCapTests.swift::perAccountCapIsAtMost100
+    excluded_reason: null
+    requirement: |
+      Unless otherwise specified in the description of a given authenticator, the verifier SHALL limit consecutive failed authentication attempts on a single account to no more than 100.
+  - id: "5.2.2-c"
+    normative: SHOULD
+    section: "5.2.2 Rate Limiting (Throttling)"
+    tags: [throttling, authenticator]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/Throttling/PerAccountCapTests.swift::successfulAuthResetsBucket
+    excluded_reason: null
+    requirement: |
+      When the subscriber successfully authenticates, the verifier SHOULD disregard any previous failed attempts for that user from the same IP address.
+  # ==========================================================================
+  # § 7 Session Management
+  # ==========================================================================
+  # § 7.1 Session Bindings
+  # --------------------------------------------------------------------------
+  - id: "7.1-a"
+    normative: SHALL
+    section: "7.1 Session Bindings"
+    tags: [sessionManagement]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/SessionBindingTests.swift::sessionSecretIsSharedBetweenSubscriberAndService
+    excluded_reason: null
+    requirement: |
+      A session secret SHALL be shared between the subscriber's software and the service being accessed.
+  - id: "7.1-b"
+    normative: SHALL
+    section: "7.1 Session Bindings"
+    tags: [sessionManagement]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/SessionBindingTests.swift::sessionSecretIsPresentedDirectly
+    excluded_reason: null
+    requirement: |
+      The secret SHALL be presented directly by the subscriber's software or possession of the secret SHALL be proven using a cryptographic mechanism.
+  - id: "7.1-c"
+    normative: SHALL
+    section: "7.1 Session Bindings"
+    tags: [sessionManagement]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/SessionBindingTests.swift::sessionSecretIsGeneratedInDirectResponseToAuth
+    excluded_reason: null
+    requirement: |
+      The secret used for session binding SHALL be generated by the session host in direct response to an authentication event.
+  - id: "7.1-d"
+    normative: SHOULD
+    section: "7.1 Session Bindings"
+    tags: [sessionManagement]
+    testability: design-assertion
+    status: has_test
+    tests:
+      - AAL1/Architectural.swift::sessionInheritsAALFromAuthEvent
+    excluded_reason: null
+    requirement: |
+      A session SHOULD inherit the AAL properties of the authentication event which triggered its creation.
+  - id: "7.1-e"
+    normative: SHALL_NOT
+    section: "7.1 Session Bindings"
+    tags: [sessionManagement]
+    testability: design-assertion
+    status: has_test
+    tests:
+      - AAL1/Architectural.swift::sessionNotAboveAALOfAuthEvent
+    excluded_reason: null
+    requirement: |
+      A session MAY be considered at a lower AAL than the authentication event but SHALL NOT be considered at a higher AAL than the authentication event.
+  - id: "7.1-f"
+    normative: SHALL
+    section: "7.1 Session Bindings (binding-secret properties)"
+    tags: [sessionManagement]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/SessionBindingTests.swift::sessionSecretGeneratedByHostPostAuth
+    excluded_reason: null
+    requirement: |
+      [Secrets used for session binding] SHALL be generated by the session host during an interaction, typically immediately following authentication.
+  - id: "7.1-g"
+    normative: SHALL
+    section: "7.1 Session Bindings (binding-secret properties)"
+    tags: [sessionManagement]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/SessionBindingTests.swift::sessionSecretHasAtLeast64BitsOfEntropy
+    excluded_reason: null
+    requirement: |
+      [Secrets used for session binding] SHALL be generated by an approved random bit generator [SP 800-90Ar1] and contain at least 64 bits of entropy.
+  - id: "7.1-h"
+    normative: SHALL
+    section: "7.1 Session Bindings (binding-secret properties)"
+    tags: [sessionManagement]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/SessionInvalidationTests.swift::refreshTokenInvalidatedOnLogout
+    excluded_reason: null
+    requirement: |
+      [Secrets used for session binding] SHALL be erased or invalidated by the session subject when the subscriber logs out.
+  - id: "7.1-i"
+    normative: SHOULD
+    section: "7.1 Session Bindings (binding-secret properties)"
+    tags: [sessionManagement]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "Applies to the subscriber endpoint (client application/browser), which Passage does not run on. Server-side invalidation on logout is covered by § 7.1-h."
+    requirement: |
+      [Secrets used for session binding] SHOULD be erased on the subscriber endpoint when the user logs out or when the secret is deemed to have expired.
+  - id: "7.1-j"
+    normative: SHOULD
+    section: "7.1 Session Bindings (binding-secret properties)"
+    tags: [sessionManagement]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "Client-side storage guidance; Passage does not dictate where the integrator's frontend persists issued tokens."
+    requirement: |
+      [Secrets used for session binding] SHOULD NOT be placed in insecure locations such as HTML5 Local Storage due to the potential exposure of local storage to cross-site scripting (XSS) attacks.
+  - id: "7.1-k"
+    normative: SHALL
+    section: "7.1 Session Bindings (binding-secret properties)"
+    tags: [sessionManagement]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "TLS/authenticated-protected-channel configuration is the responsibility of the deploying Vapor application / reverse proxy, not the library."
+    requirement: |
+      [Secrets used for session binding] SHALL be sent to and received from the device using an authenticated protected channel.
+  - id: "7.1-l"
+    normative: SHALL
+    section: "7.1 Session Bindings (binding-secret properties)"
+    tags: [sessionManagement, reauthentication]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/SessionTimeoutTests.swift::sessionSecretTimesOutAfterTTL
+    excluded_reason: null
+    requirement: |
+      [Secrets used for session binding] SHALL time out and not be accepted after the times specified in Sections 4.1.4, 4.2.4, and 4.3.4, as appropriate for the AAL.
+  - id: "7.1-m"
+    normative: SHALL_NOT
+    section: "7.1 Session Bindings (binding-secret properties)"
+    tags: [sessionManagement]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "Transport-security fallback is governed by deployment-layer TLS configuration (reverse proxy, HSTS) rather than by the Passage library. NOTE: groups two SHALL NOTs (insecure-transport availability + https→http fallback) from a single bullet."
+    requirement: |
+      [Secrets used for session binding] SHALL NOT be available to insecure communications between the host and subscriber's endpoint. Authenticated sessions SHALL NOT fall back to an insecure transport, such as from https to http, following authentication.
+  - id: "7.1-n"
+    normative: SHALL
+    section: "7.1 Session Bindings"
+    tags: [sessionManagement]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/SessionBindingTests.swift::postContentCarriesSessionIdentifier
+    excluded_reason: null
+    requirement: |
+      URLs or POST content SHALL contain a session identifier that SHALL be verified by the RP to ensure that actions taken outside the session do not affect the protected session.
+  # --------------------------------------------------------------------------
+  # § 7.1.1 Browser Cookies
+  # --------------------------------------------------------------------------
+  - id: "7.1.1-a"
+    normative: SHALL
+    section: "7.1.1 Browser Cookies"
+    tags: [sessionManagement]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/SessionCookieTests.swift::sessionCookieIsSecureInProduction
+    excluded_reason: null
+    requirement: |
+      [Cookies] SHALL be tagged to be accessible only on secure (HTTPS) sessions.
+  - id: "7.1.1-b"
+    normative: SHALL
+    section: "7.1.1 Browser Cookies"
+    tags: [sessionManagement]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/SessionCookieTests.swift::sessionCookieIsScopedMinimally
+    excluded_reason: null
+    requirement: |
+      [Cookies] SHALL be accessible to the minimum practical set of hostnames and paths.
+  - id: "7.1.1-c"
+    normative: SHOULD
+    section: "7.1.1 Browser Cookies"
+    tags: [sessionManagement]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/SessionCookieTests.swift::sessionCookieIsHttpOnly
+    excluded_reason: null
+    requirement: |
+      [Cookies] SHOULD be tagged to be inaccessible via JavaScript (HttpOnly).
+  - id: "7.1.1-d"
+    normative: SHOULD
+    section: "7.1.1 Browser Cookies"
+    tags: [sessionManagement]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/SessionCookieTests.swift::sessionCookieExpiresWithSession
+    excluded_reason: null
+    requirement: |
+      [Cookies] SHOULD be tagged to expire at, or soon after, the session's validity period. This requirement is intended to limit the accumulation of cookies, but SHALL NOT be depended upon to enforce session timeouts.
+  # --------------------------------------------------------------------------
+  # § 7.1.2 Access Tokens
+  # --------------------------------------------------------------------------
+  - id: "7.1.2-a"
+    normative: SHALL_NOT
+    section: "7.1.2 Access Tokens"
+    tags: [sessionManagement]
+    testability: design-assertion
+    status: has_test
+    tests:
+      - AAL1/Architectural.swift::oauthAccessTokenIsNotPresenceSignal
+    excluded_reason: null
+    requirement: |
+      The presence of an OAuth access token SHALL NOT be interpreted by the RP as presence of the subscriber, in the absence of other signals. The OAuth access token, and any associated refresh tokens, MAY be valid long after the authentication session has ended and the subscriber has left the application.
+  # --------------------------------------------------------------------------
+  # § 7.2 Reauthentication
+  # --------------------------------------------------------------------------
+  - id: "7.2-a"
+    normative: SHALL
+    section: "7.2 Reauthentication"
+    tags: [sessionManagement, reauthentication]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/ContinuityTests.swift::continuityRequiresValidSessionSecret
+    excluded_reason: null
+    requirement: |
+      Continuity of authenticated sessions SHALL be based upon the possession of a session secret issued by the verifier at the time of authentication and optionally refreshed during the session.
+  - id: "7.2-b"
+    normative: SHALL_NOT
+    section: "7.2 Reauthentication"
+    tags: [sessionManagement, reauthentication]
+    testability: excluded
+    status: excluded
+    tests: []
+    excluded_reason: "Non-persistence across restart/reboot is a property of the subscriber's client application (browser session cookie, mobile app in-memory store), not of a server-issued token. Passage does not control client storage."
+    requirement: |
+      Session secrets SHALL be non-persistent. That is, they SHALL NOT be retained across a restart of the associated application or a reboot of the host device.
+  - id: "7.2-c"
+    normative: SHALL
+    section: "7.2 Reauthentication"
+    tags: [sessionManagement, reauthentication]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/ContinuityTests.swift::periodicReauthenticationIsEnforced
+    excluded_reason: null
+    requirement: |
+      Periodic reauthentication of sessions SHALL be performed to confirm the continued presence of the subscriber at an authenticated session (i.e., that the subscriber has not walked away without logging out).
+  - id: "7.2-d"
+    normative: SHALL_NOT
+    section: "7.2 Reauthentication"
+    tags: [sessionManagement, reauthentication]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/ContinuityTests.swift::secretPresentationCannotExtendPastCeiling
+    excluded_reason: null
+    requirement: |
+      A session SHALL NOT be extended past the guidelines in Sections 4.1.3, 4.2.3, and 4.3.3 (depending on AAL) based on presentation of the session secret alone.
+  - id: "7.2-e"
+    normative: SHALL
+    section: "7.2 Reauthentication"
+    tags: [sessionManagement, reauthentication]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/Reauthentication/PeriodicReauthenticationTests.swift::authFactorPresentationExtendsReauthLimit
+    excluded_reason: null
+    requirement: |
+      Prior to session expiration, the reauthentication time limit SHALL be extended by prompting the subscriber for the authentication factor(s) specified in Table 7-1. (AAL1 row: "Presentation of any one factor".)
+  - id: "7.2-f"
+    normative: SHALL
+    section: "7.2 Reauthentication"
+    tags: [sessionManagement, reauthentication]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/Reauthentication/SessionTerminationTests.swift::terminatedSessionRequiresFreshAuthToResume
+    excluded_reason: null
+    requirement: |
+      When a session has been terminated, due to a time-out or other action, the user SHALL be required to establish a new session by authenticating again.
+  # --------------------------------------------------------------------------
+  # § 7.2.1 Reauthentication from a Federation or Assertion
+  # --------------------------------------------------------------------------
+  - id: "7.2.1-a"
+    normative: SHALL_NOT
+    section: "7.2.1 Reauthentication from a Federation or Assertion"
+    tags: [sessionManagement, reauthentication]
+    testability: design-assertion
+    status: has_test
+    tests:
+      - AAL1/Architectural.swift::federationSessionNotCorrelatedWithLocalSession
+    excluded_reason: null
+    requirement: |
+      When using a federation protocol as described in SP 800-63C, Section 5 to connect the CSP and RP, special considerations apply to session management and reauthentication. The federation protocol communicates an authentication event between the CSP and the RP but establishes no session between them. Since the CSP and RP often employ separate session management technologies, there SHALL NOT be any assumption of correlation between these sessions.
+  - id: "7.2.1-b"
+    normative: SHALL
+    section: "7.2.1 Reauthentication from a Federation or Assertion"
+    tags: [sessionManagement, reauthentication]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/FederationReauthenticationTests.swift::rpSpecifiesMaxAuthenticationAge
+    excluded_reason: null
+    requirement: |
+      An RP requiring reauthentication through a federation protocol SHALL — if possible within the protocol — specify the maximum acceptable authentication age to the CSP, and the CSP SHALL reauthenticate the subscriber if they have not been authenticated within that time period.
+  - id: "7.2.1-c"
+    normative: SHALL
+    section: "7.2.1 Reauthentication from a Federation or Assertion"
+    tags: [sessionManagement, reauthentication]
+    testability: testable
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/FederationReauthenticationTests.swift::cspCommunicatesAuthEventTime
+    excluded_reason: null
+    requirement: |
+      The CSP SHALL communicate the authentication event time to the RP to allow the RP to decide if the assertion is sufficient for reauthentication and to determine the time for the next reauthentication event.

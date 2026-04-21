@@ -38,14 +38,7 @@ extension Passage.Restoration.PhoneRouteCollection {
     func verify(_ req: Request) async throws -> HTTPStatus {
         let form = try req.decodeContentAsFormOfType(req.contracts.phonePasswordResetVerifyForm)
 
-        // Hash the new password
-        let passwordHash = try Bcrypt.hash(form.newPassword)
-
-        try await req.restoration.verifyAndResetPassword(
-            identifier: .phone(form.phone),
-            code: form.code,
-            newPasswordHash: passwordHash
-        )
+        try await req.restoration.verifyReset(form: form)
 
         return .ok
     }
