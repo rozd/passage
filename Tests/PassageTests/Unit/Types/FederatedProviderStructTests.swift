@@ -24,16 +24,6 @@ struct `FederatedProvider Struct Tests` {
         #expect(typeName.contains("FederatedProvider.Credentials"))
     }
 
-    // MARK: - All Sendable Conformance Tests
-
-    @Test
-    func `All FederatedLogin types conform to Sendable`() {
-        #expect(FederatedProvider.self is (any Sendable).Type)
-        #expect(FederatedProvider.Name.self is (any Sendable).Type)
-        #expect(FederatedProvider.Credentials.self is (any Sendable).Type)
-
-    }
-
     // MARK: - Type Hierarchy Tests
 
     @Test

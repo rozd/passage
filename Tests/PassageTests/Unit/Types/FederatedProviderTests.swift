@@ -63,7 +63,6 @@ struct `Federated Provider Tests` {
     @Test
     func `Provider Name conforms to Sendable`() {
         let _: any Sendable.Type = FederatedProvider.Name.self
-        #expect(FederatedProvider.Name.self is (any Sendable).Type)
     }
 
     // MARK: - Provider Credentials Tests
@@ -97,7 +96,6 @@ struct `Federated Provider Tests` {
     @Test
     func `Provider Credentials conforms to Sendable`() {
         let _: any Sendable.Type = FederatedProvider.Credentials.self
-        #expect(FederatedProvider.Credentials.self is (any Sendable).Type)
     }
 
     // MARK: - Provider Initialization Tests
@@ -253,6 +251,5 @@ struct `Federated Provider Tests` {
     @Test
     func `Provider conforms to Sendable`() {
         let _: any Sendable.Type = FederatedProvider.self
-        #expect(FederatedProvider.self is (any Sendable).Type)
     }
 }

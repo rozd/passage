@@ -16,7 +16,6 @@ struct `Verification Struct Tests` {
     @Test
     func `Verification struct conforms to Sendable`() {
         let _: any Sendable.Type = Passage.Verification.self
-        #expect(Passage.Verification.self is (any Sendable).Type)
     }
 
     // MARK: - SendEmailCodePayload Tests

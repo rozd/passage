@@ -16,7 +16,6 @@ struct `FederatedLogin Struct Tests` {
     @Test
     func `FederatedLogin struct conforms to Sendable`() {
         let _: any Sendable.Type = Passage.FederatedLogin.self
-        #expect(Passage.FederatedLogin.self is (any Sendable).Type)
     }
 
     @Test
@@ -24,13 +23,6 @@ struct `FederatedLogin Struct Tests` {
         // Verify the entire FederatedLogin namespace is in Passage
         let structName = String(reflecting: Passage.FederatedLogin.self)
         #expect(structName.contains("Passage.FederatedLogin"))
-    }
-
-    // MARK: - All Sendable Conformance Tests
-
-    @Test
-    func `All FederatedLogin types conform to Sendable`() {
-        #expect(Passage.FederatedLogin.self is (any Sendable).Type)
     }
 
 }

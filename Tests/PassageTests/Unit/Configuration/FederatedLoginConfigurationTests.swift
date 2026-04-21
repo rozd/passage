@@ -189,7 +189,6 @@ struct `Federated Login Configuration Tests` {
     @Test
     func `Provider Routes conforms to Sendable`() {
         let _: any Sendable.Type = Passage.Configuration.FederatedLogin.Provider.Routes.self
-        #expect(Passage.Configuration.FederatedLogin.Provider.Routes.self is (any Sendable).Type)
     }
 
     // MARK: - Provider Nested Type Tests
@@ -212,15 +211,6 @@ struct `Federated Login Configuration Tests` {
     func `Routes Callback is nested within Routes`() {
         let typeName = String(reflecting: Passage.Configuration.FederatedLogin.Provider.Routes.Callback.self)
         #expect(typeName.contains("Passage.Configuration.FederatedLogin.Provider.Routes.Callback"))
-    }
-
-    // MARK: - All Sendable Conformance Tests
-
-    @Test
-    func `All FederatedLogin types conform to Sendable`() {
-        #expect(Passage.Configuration.FederatedLogin.Provider.Routes.self is (any Sendable).Type)
-        #expect(Passage.Configuration.FederatedLogin.Provider.Routes.Login.self is (any Sendable).Type)
-        #expect(Passage.Configuration.FederatedLogin.Provider.Routes.Callback.self is (any Sendable).Type)
     }
 
     // MARK: - Integration Tests

@@ -16,7 +16,6 @@ struct `Restoration Struct Tests` {
     @Test
     func `Restoration struct conforms to Sendable`() {
         let _: any Sendable.Type = Passage.Restoration.self
-        #expect(Passage.Restoration.self is (any Sendable).Type)
     }
 
     // MARK: - EmailPasswordResetCodePayload Tests
