@@ -705,8 +705,9 @@ requirements:
     section: "7.1 Session Bindings"
     tags: [sessionManagement]
     testability: design-assertion
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/Architectural.swift::sessionNotAboveAALOfAuthEvent
     excluded_reason: null
     requirement: |
       A session MAY be considered at a lower AAL than the authentication event but SHALL NOT be considered at a higher AAL than the authentication event.

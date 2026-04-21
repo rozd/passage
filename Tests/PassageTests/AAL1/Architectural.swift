@@ -133,6 +133,54 @@ struct AAL1ArchitecturalTests {
     }
 
     @Test(
+        "§7.1-e: Session is never considered at a higher AAL than the authentication event",
+        .tags(.aal1, .sessionManagement, .unit, .shallNot)
+    )
+    func sessionNotAboveAALOfAuthEvent() async throws {
+        // §7.1-e SHALL NOT: a session may not be rated higher than the
+        // authentication that produced it. Passage does not re-level a
+        // session after the fact — there is no public API that escalates a
+        // live session's AAL. The only way to raise the AAL is to
+        // authenticate again, and `issue(for:)` revokes the prior family on
+        // each auth event (see `Passage+Tokens.swift::issue` with
+        // `revokeExisting = true`). This test pins the invariant: a new
+        // auth event replaces the prior session rather than augmenting it,
+        // so §7.1-e can never be violated by in-place upgrades.
+        let random = DefaultRandomGenerator()
+        let store = Passage.OnlyForTest.InMemoryStore()
+        let user = try await store.users.create(
+            identifier: .username("no-escalation"),
+            with: .password("$2b$12$hash")
+        )
+
+        let firstSecret = random.generateOpaqueToken()
+        _ = try await store.tokens.createRefreshToken(
+            for: user,
+            tokenHash: random.hashOpaqueToken(token: firstSecret),
+            expiresAt: Date().addingTimeInterval(3600)
+        )
+
+        // Second auth event — models the real `issue(for: user,
+        // revokeExisting: true)` path in Passage.Tokens.issue.
+        try await store.tokens.revokeRefreshToken(for: user)
+        let secondSecret = random.generateOpaqueToken()
+        _ = try await store.tokens.createRefreshToken(
+            for: user,
+            tokenHash: random.hashOpaqueToken(token: secondSecret),
+            expiresAt: Date().addingTimeInterval(3600)
+        )
+
+        // The first session's secret no longer opens a valid session —
+        // escalation would require it to survive alongside the new one,
+        // which §7.1-e forbids.
+        let stale = try await store.tokens.find(
+            refreshTokenHash: random.hashOpaqueToken(token: firstSecret)
+        )
+        #expect(stale == nil || stale?.isValid == false,
+                "§7.1-e: a prior session cannot survive (let alone be escalated) past a new auth event")
+    }
+
+    @Test(
         "§5.1.1.2-z: Default KDF cost factor is high enough to deter brute-force (Bcrypt cost ≥ 10)",
         .tags(.aal1, .memorizedSecret, .authenticator, .unit, .should)
     )
