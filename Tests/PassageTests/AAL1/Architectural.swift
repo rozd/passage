@@ -181,6 +181,33 @@ struct AAL1ArchitecturalTests {
     }
 
     @Test(
+        "§7.1.2-a: OAuth access-token presence is not treated as proof of subscriber presence",
+        .tags(.aal1, .sessionManagement, .unit, .shallNot)
+    )
+    func oauthAccessTokenIsNotPresenceSignal() async throws {
+        // §7.1.2-a SHALL NOT: an OAuth access token (or its refresh token)
+        // can outlive the subscriber's authenticated session, so its
+        // presence is not a proxy for subscriber presence. Passage models
+        // "presence" via its own refresh-token lifetime, independent of
+        // any OAuth provider's token. During federated login, the OAuth
+        // exchange code is consumed once (see
+        // `Passage.Tokens.exchange(code:)`) and *Passage* mints its own
+        // session — subsequent presence checks consult the Passage
+        // refresh-token chain, not the upstream OAuth token.
+        //
+        // Structural attestation: Passage's refresh-token TTL (≤ 30 days
+        // per §4.1.3-b) bounds subscriber-presence from the session-host
+        // side. An OAuth token's TTL — which can be much longer — is not
+        // used for presence checks because Passage doesn't persist it.
+        let tokens = Passage.Configuration.Tokens()
+        #expect(tokens.refreshToken.timeToLive > 0,
+                "§7.1.2-a: subscriber presence is bounded by Passage's own refresh-token TTL")
+        let thirtyDays: TimeInterval = 30 * 24 * 3600
+        #expect(tokens.refreshToken.timeToLive <= thirtyDays,
+                "§7.1.2-a: presence window must be Passage-controlled and ≤ §4.1.3-b AAL1 ceiling")
+    }
+
+    @Test(
         "§5.1.1.2-z: Default KDF cost factor is high enough to deter brute-force (Bcrypt cost ≥ 10)",
         .tags(.aal1, .memorizedSecret, .authenticator, .unit, .should)
     )

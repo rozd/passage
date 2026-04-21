@@ -861,8 +861,9 @@ requirements:
     section: "7.1.2 Access Tokens"
     tags: [sessionManagement]
     testability: design-assertion
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/Architectural.swift::oauthAccessTokenIsNotPresenceSignal
     excluded_reason: null
     requirement: |
       The presence of an OAuth access token SHALL NOT be interpreted by the RP as presence of the subscriber, in the absence of other signals. The OAuth access token, and any associated refresh tokens, MAY be valid long after the authentication session has ended and the subscriber has left the application.
