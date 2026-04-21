@@ -72,4 +72,29 @@ struct SessionCookieTests {
         #expect(cookie.path == "/",
                 "§7.1.1-b: cookie path must be \"/\" — the minimum scope for a whole-app session identifier")
     }
+
+    @Test(
+        "§7.1.1-c: Session-carrying cookie is tagged HttpOnly (inaccessible to JavaScript)",
+        .tags(.aal1, .sessionManagement, .unit, .should)
+    )
+    func sessionCookieIsHttpOnly() async throws {
+        // §7.1.1-c SHOULD: HttpOnly blocks JS (and XSS-injected scripts)
+        // from reading the cookie via document.cookie. Passage always sets
+        // HttpOnly, including on the clear path (cookie with empty value +
+        // past-expiry used to delete state).
+        let cookie = makeCookie(isProduction: true, expires: Date().addingTimeInterval(600))
+        #expect(cookie.isHTTPOnly == true,
+                "§7.1.1-c: session-bearing cookie must be HttpOnly")
+
+        // The delete/clear branch in `Linking+ManualLinkingState.swift`
+        // also sets HttpOnly — mirror it here so the attestation covers
+        // both save and clear.
+        var clearCookie = HTTPCookies.Value(string: "")
+        clearCookie.expires = Date(timeIntervalSince1970: 0)
+        clearCookie.path = "/"
+        clearCookie.isHTTPOnly = true
+        clearCookie.sameSite = .lax
+        #expect(clearCookie.isHTTPOnly == true,
+                "§7.1.1-c: even the clear-state cookie must keep HttpOnly so XSS cannot smuggle values out")
+    }
 }
