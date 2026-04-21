@@ -896,8 +896,9 @@ requirements:
     section: "7.2 Reauthentication"
     tags: [sessionManagement, reauthentication]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/ContinuityTests.swift::periodicReauthenticationIsEnforced
     excluded_reason: null
     requirement: |
       Periodic reauthentication of sessions SHALL be performed to confirm the continued presence of the subscriber at an authenticated session (i.e., that the subscriber has not walked away without logging out).

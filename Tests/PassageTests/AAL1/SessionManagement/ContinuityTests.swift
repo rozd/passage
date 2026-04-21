@@ -57,4 +57,45 @@ struct ContinuityTests {
         #expect(revoked == nil || revoked?.isValid == false,
                 "§7.2-a: once the secret is revoked, continuity ends")
     }
+
+    @Test(
+        "§7.2-c: Periodic reauthentication is enforced — a session cannot survive indefinitely on its secret",
+        .tags(.aal1, .sessionManagement, .reauthentication, .authenticator, .unit, .shall)
+    )
+    func periodicReauthenticationIsEnforced() async throws {
+        // §7.2-c SHALL: sessions must be periodically reauthenticated.
+        // Passage's mechanism is the finite refresh-token TTL: once the
+        // token's `expiresAt` passes, rotation fails (§7.2-a wiring) and
+        // the subscriber must reauthenticate via /auth/login with
+        // credentials. Proof by contradiction: simulate the session
+        // reaching its TTL and confirm the secret is no longer accepted.
+        let random = DefaultRandomGenerator()
+        let store = Passage.OnlyForTest.InMemoryStore()
+        let user = try await store.users.create(
+            identifier: .username("reauth-required"),
+            with: .password("$2b$12$hash")
+        )
+
+        let secret = random.generateOpaqueToken()
+        let hash = random.hashOpaqueToken(token: secret)
+        _ = try await store.tokens.createRefreshToken(
+            for: user,
+            tokenHash: hash,
+            expiresAt: Date().addingTimeInterval(-1) // models the TTL expiring
+        )
+
+        let stored = try await store.tokens.find(refreshTokenHash: hash)
+        try #require(stored != nil, "precondition: the record must be retrievable")
+        #expect(stored?.isValid == false,
+                "§7.2-c: once the TTL lapses the session must stop accepting its secret — forcing reauth")
+
+        // The shipped default TTL is finite and positive — the invariant
+        // that makes periodic reauth possible at all. An infinite TTL
+        // would silently defeat §7.2-c.
+        let config = Passage.Configuration.Tokens()
+        #expect(config.refreshToken.timeToLive > 0,
+                "§7.2-c: refresh-token TTL must be positive")
+        #expect(config.refreshToken.timeToLive.isFinite,
+                "§7.2-c: refresh-token TTL must be finite so reauth is eventually forced")
+    }
 }
