@@ -738,8 +738,9 @@ requirements:
     section: "7.1 Session Bindings (binding-secret properties)"
     tags: [sessionManagement]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/SessionInvalidationTests.swift::refreshTokenInvalidatedOnLogout
     excluded_reason: null
     requirement: |
       [Secrets used for session binding] SHALL be erased or invalidated by the session subject when the subscriber logs out.
