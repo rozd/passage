@@ -28,6 +28,10 @@ struct TruncationTests {
         )
         app.queues.use(.asyncTest)
 
+        app.passwords.use(.bcrypt(
+            pepper: SymmetricKey(data: Data("aal1-test-pepper-do-not-use-in-prod".utf8))
+        ))
+
         let services = Passage.Services(
             store: Passage.OnlyForTest.InMemoryStore(),
             random: DefaultRandomGenerator(),
