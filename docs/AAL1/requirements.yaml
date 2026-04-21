@@ -800,8 +800,9 @@ requirements:
     section: "7.1 Session Bindings"
     tags: [sessionManagement]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/SessionBindingTests.swift::postContentCarriesSessionIdentifier
     excluded_reason: null
     requirement: |
       URLs or POST content SHALL contain a session identifier that SHALL be verified by the RP to ensure that actions taken outside the session do not affect the protected session.

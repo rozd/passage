@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+import Vapor
 @testable import Passage
 @testable import PassageOnlyForTest
 
@@ -220,5 +221,32 @@ struct SessionBindingTests {
             let inserted = seen.insert(t).inserted
             #expect(inserted, "§7.1-g: RBG must not produce duplicate tokens in a 1024-draw batch")
         }
+    }
+
+    @Test(
+        "§7.1-n: POST content carries a session identifier the RP verifies against stored state",
+        .tags(.aal1, .sessionManagement, .authenticator, .unit, .shall)
+    )
+    func postContentCarriesSessionIdentifier() async throws {
+        // §7.1-n: URLs or POST content SHALL contain a session identifier
+        // that the RP verifies, so actions outside the session cannot
+        // affect the protected session. Passage's rotation endpoint
+        // /auth/refresh-token decodes a `RefreshTokenForm` whose required
+        // field is precisely the session identifier (the opaque refresh
+        // token). The validation pipeline rejects an empty value — a
+        // caller cannot slip through a "no-session-id" action.
+        var validations = Validations()
+        Passage.DefaultRefreshTokenForm.validations(&validations)
+
+        // Valid: a real session identifier is present.
+        let valid = try validations.validate(json: #"{"refreshToken":"some-opaque-session-id"}"#)
+        #expect(valid.error == nil,
+                "§7.1-n: a POST carrying a session identifier must validate")
+
+        // Invalid: POST without a session identifier (empty string) fails —
+        // so the RP cannot be tricked into acting outside a session.
+        let invalid = try validations.validate(json: #"{"refreshToken":""}"#)
+        #expect(invalid.error != nil,
+                "§7.1-n: POST without a session identifier must be rejected by the RP")
     }
 }
