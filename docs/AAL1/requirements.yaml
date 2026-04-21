@@ -825,8 +825,9 @@ requirements:
     section: "7.1.1 Browser Cookies"
     tags: [sessionManagement]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/SessionCookieTests.swift::sessionCookieIsScopedMinimally
     excluded_reason: null
     requirement: |
       [Cookies] SHALL be accessible to the minimum practical set of hostnames and paths.

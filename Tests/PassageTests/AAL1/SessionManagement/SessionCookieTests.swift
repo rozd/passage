@@ -53,4 +53,23 @@ struct SessionCookieTests {
         #expect(devCookie.isSecure == false,
                 "dev environment deliberately relaxes Secure for local HTTP — documented exception")
     }
+
+    @Test(
+        "§7.1.1-b: Session-carrying cookie is scoped to the minimum practical set of hostnames and paths",
+        .tags(.aal1, .sessionManagement, .unit, .shall)
+    )
+    func sessionCookieIsScopedMinimally() async throws {
+        // §7.1.1-b wants the cookie to not leak beyond the app. Passage
+        // scopes to a single origin: `domain: nil` (host-only — never
+        // broadened to a parent domain) and `path: "/"` (the entire app,
+        // which is the smallest scope a multi-route Vapor app can use
+        // without excluding its own handlers). That combination is the
+        // minimum practical scope for a server-wide session identifier.
+        let cookie = makeCookie(isProduction: true, expires: Date().addingTimeInterval(600))
+
+        #expect(cookie.domain == nil,
+                "§7.1.1-b: cookie must be host-only (domain == nil) — never broadened to a parent domain")
+        #expect(cookie.path == "/",
+                "§7.1.1-b: cookie path must be \"/\" — the minimum scope for a whole-app session identifier")
+    }
 }
