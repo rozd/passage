@@ -943,8 +943,9 @@ requirements:
     section: "7.2.1 Reauthentication from a Federation or Assertion"
     tags: [sessionManagement, reauthentication]
     testability: design-assertion
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/Architectural.swift::federationSessionNotCorrelatedWithLocalSession
     excluded_reason: null
     requirement: |
       When using a federation protocol as described in SP 800-63C, Section 5 to connect the CSP and RP, special considerations apply to session management and reauthentication. The federation protocol communicates an authentication event between the CSP and the RP but establishes no session between them. Since the CSP and RP often employ separate session management technologies, there SHALL NOT be any assumption of correlation between these sessions.

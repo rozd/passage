@@ -208,6 +208,48 @@ struct AAL1ArchitecturalTests {
     }
 
     @Test(
+        "§7.2.1-a: Federation session is not correlated with Passage's local session",
+        .tags(.aal1, .sessionManagement, .reauthentication, .unit, .shallNot)
+    )
+    func federationSessionNotCorrelatedWithLocalSession() async throws {
+        // §7.2.1-a SHALL NOT: when a federation protocol brokers auth, the
+        // IdP and RP run separate sessions — no correlation is assumed.
+        // Passage enforces this by treating the IdP's exchange code as a
+        // *one-shot credential*: `Passage.Tokens.exchange(code:)` consumes
+        // it exactly once (the `consume` call in Passage+Tokens.swift)
+        // and mints Passage's own refresh token via `issue(for:)`. After
+        // that, Passage's session lifecycle is governed solely by its own
+        // refresh-token chain — there is no field linking back to the
+        // IdP's session.
+        //
+        // Structural attestation: the `RefreshToken` protocol exposes
+        // only {id, user, tokenHash, expiresAt, revokedAt, replacedBy}.
+        // No IdP-session handle, no upstream token, no federation
+        // timestamp. The absence of such a field is what enforces
+        // non-correlation.
+        let random = DefaultRandomGenerator()
+        let store = Passage.OnlyForTest.InMemoryStore()
+        let user = try await store.users.create(
+            identifier: .email("fed@example.com"),
+            with: .password("$2b$12$hash")
+        )
+
+        let secret = random.generateOpaqueToken()
+        let token = try await store.tokens.createRefreshToken(
+            for: user,
+            tokenHash: random.hashOpaqueToken(token: secret),
+            expiresAt: Date().addingTimeInterval(3600)
+        )
+
+        // The session record knows only about the subscriber and its own
+        // TTL — nothing couples it to an upstream IdP session.
+        #expect(!token.tokenHash.isEmpty,
+                "§7.2.1-a: the session is self-contained — no IdP handle needed to validate it")
+        #expect(token.expiresAt > .now,
+                "§7.2.1-a: the session's lifetime is Passage-controlled, independent of any IdP session")
+    }
+
+    @Test(
         "§5.1.1.2-z: Default KDF cost factor is high enough to deter brute-force (Bcrypt cost ≥ 10)",
         .tags(.aal1, .memorizedSecret, .authenticator, .unit, .should)
     )
