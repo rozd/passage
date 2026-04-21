@@ -2,13 +2,13 @@ import Testing
 import Vapor
 @testable import Passage
 
-@Suite("Phone Verification Route Collection Tests")
-struct PhoneVerificationRouteCollectionTests {
+@Suite
+struct `Phone Verification Route Collection Tests` {
 
     // MARK: - Initialization Tests
 
-    @Test("Passage.Verification.PhoneRouteCollection initialization with default group")
-    func initializationWithDefaultGroup() {
+    @Test
+    func `Passage.Verification.PhoneRouteCollection initialization with default group`() {
         let config = Passage.Configuration.Verification.Phone()
         let collection = Passage.Verification.PhoneRouteCollection(
             config: config,
@@ -18,8 +18,8 @@ struct PhoneVerificationRouteCollectionTests {
         #expect(collection.groupPath.isEmpty)
     }
 
-    @Test("Passage.Verification.PhoneRouteCollection initialization with custom group")
-    func initializationWithCustomGroup() {
+    @Test
+    func `Passage.Verification.PhoneRouteCollection initialization with custom group`() {
         let config = Passage.Configuration.Verification.Phone()
         let groupPath: [PathComponent] = ["auth", "phone"]
         let collection = Passage.Verification.PhoneRouteCollection(
@@ -30,8 +30,8 @@ struct PhoneVerificationRouteCollectionTests {
         #expect(collection.groupPath.count == 2)
     }
 
-    @Test("Passage.Verification.PhoneRouteCollection stores configuration")
-    func storesConfiguration() {
+    @Test
+    func `Passage.Verification.PhoneRouteCollection stores configuration`() {
         let config = Passage.Configuration.Verification.Phone(
             codeLength: 8,
             codeExpiration: 600,
@@ -49,8 +49,8 @@ struct PhoneVerificationRouteCollectionTests {
 
     // MARK: - Group Path Tests
 
-    @Test("Passage.Verification.PhoneRouteCollection with empty group")
-    func emptyGroup() {
+    @Test
+    func `Passage.Verification.PhoneRouteCollection with empty group`() {
         let config = Passage.Configuration.Verification.Phone()
         let collection = Passage.Verification.PhoneRouteCollection(
             config: config,
@@ -60,8 +60,8 @@ struct PhoneVerificationRouteCollectionTests {
         #expect(collection.groupPath.isEmpty)
     }
 
-    @Test("Passage.Verification.PhoneRouteCollection with single component group")
-    func singleComponentGroup() {
+    @Test
+    func `Passage.Verification.PhoneRouteCollection with single component group`() {
         let config = Passage.Configuration.Verification.Phone()
         let collection = Passage.Verification.PhoneRouteCollection(
             config: config,
@@ -71,8 +71,8 @@ struct PhoneVerificationRouteCollectionTests {
         #expect(collection.groupPath.count == 1)
     }
 
-    @Test("Passage.Verification.PhoneRouteCollection with multiple components")
-    func multipleComponentsGroup() {
+    @Test
+    func `Passage.Verification.PhoneRouteCollection with multiple components`() {
         let config = Passage.Configuration.Verification.Phone()
         let collection = Passage.Verification.PhoneRouteCollection(
             config: config,
@@ -82,8 +82,8 @@ struct PhoneVerificationRouteCollectionTests {
         #expect(collection.groupPath.count == 4)
     }
 
-    @Test("Passage.Verification.PhoneRouteCollection with versioned group")
-    func versionedGroup() {
+    @Test
+    func `Passage.Verification.PhoneRouteCollection with versioned group`() {
         let config = Passage.Configuration.Verification.Phone()
         let collection = Passage.Verification.PhoneRouteCollection(
             config: config,
@@ -95,8 +95,8 @@ struct PhoneVerificationRouteCollectionTests {
 
     // MARK: - Route Configuration Tests
 
-    @Test("Passage.Verification.PhoneRouteCollection with default routes")
-    func defaultRoutes() {
+    @Test
+    func `Passage.Verification.PhoneRouteCollection with default routes`() {
         let config = Passage.Configuration.Verification.Phone()
         let collection = Passage.Verification.PhoneRouteCollection(
             config: config,
@@ -108,8 +108,8 @@ struct PhoneVerificationRouteCollectionTests {
         #expect(collection.config.routes.resend.path.count > 0)
     }
 
-    @Test("Passage.Verification.PhoneRouteCollection with custom route paths")
-    func customRoutePaths() {
+    @Test
+    func `Passage.Verification.PhoneRouteCollection with custom route paths`() {
         let sendCodeRoute = Passage.Configuration.Verification.Phone.Routes.SendCode(path: "custom-send")
         let verifyRoute = Passage.Configuration.Verification.Phone.Routes.Verify(path: "custom-verify")
         let resendRoute = Passage.Configuration.Verification.Phone.Routes.Resend(path: "custom-resend")
@@ -130,8 +130,8 @@ struct PhoneVerificationRouteCollectionTests {
         #expect(collection.config.routes.resend.path == ["custom-resend"])
     }
 
-    @Test("Passage.Verification.PhoneRouteCollection sendCode route path")
-    func sendCodeRoutePath() {
+    @Test
+    func `Passage.Verification.PhoneRouteCollection sendCode route path`() {
         let config = Passage.Configuration.Verification.Phone()
         let collection = Passage.Verification.PhoneRouteCollection(
             config: config,
@@ -141,8 +141,8 @@ struct PhoneVerificationRouteCollectionTests {
         #expect(!collection.config.routes.sendCode.path.isEmpty)
     }
 
-    @Test("Passage.Verification.PhoneRouteCollection verify route path")
-    func verifyRoutePath() {
+    @Test
+    func `Passage.Verification.PhoneRouteCollection verify route path`() {
         let config = Passage.Configuration.Verification.Phone()
         let collection = Passage.Verification.PhoneRouteCollection(
             config: config,
@@ -152,8 +152,8 @@ struct PhoneVerificationRouteCollectionTests {
         #expect(!collection.config.routes.verify.path.isEmpty)
     }
 
-    @Test("Passage.Verification.PhoneRouteCollection resend route path")
-    func resendRoutePath() {
+    @Test
+    func `Passage.Verification.PhoneRouteCollection resend route path`() {
         let config = Passage.Configuration.Verification.Phone()
         let collection = Passage.Verification.PhoneRouteCollection(
             config: config,
@@ -165,8 +165,8 @@ struct PhoneVerificationRouteCollectionTests {
 
     // MARK: - Configuration Parameter Tests
 
-    @Test("Passage.Verification.PhoneRouteCollection with custom code length")
-    func customCodeLength() {
+    @Test
+    func `Passage.Verification.PhoneRouteCollection with custom code length`() {
         let config = Passage.Configuration.Verification.Phone(codeLength: 10)
         let collection = Passage.Verification.PhoneRouteCollection(
             config: config,
@@ -176,8 +176,8 @@ struct PhoneVerificationRouteCollectionTests {
         #expect(collection.config.codeLength == 10)
     }
 
-    @Test("Passage.Verification.PhoneRouteCollection with custom expiration")
-    func customExpiration() {
+    @Test
+    func `Passage.Verification.PhoneRouteCollection with custom expiration`() {
         let config = Passage.Configuration.Verification.Phone(codeExpiration: 1800)
         let collection = Passage.Verification.PhoneRouteCollection(
             config: config,
@@ -187,8 +187,8 @@ struct PhoneVerificationRouteCollectionTests {
         #expect(collection.config.codeExpiration == 1800)
     }
 
-    @Test("Passage.Verification.PhoneRouteCollection with custom max attempts")
-    func customMaxAttempts() {
+    @Test
+    func `Passage.Verification.PhoneRouteCollection with custom max attempts`() {
         let config = Passage.Configuration.Verification.Phone(maxAttempts: 10)
         let collection = Passage.Verification.PhoneRouteCollection(
             config: config,
@@ -200,8 +200,8 @@ struct PhoneVerificationRouteCollectionTests {
 
     // MARK: - Multiple Instance Tests
 
-    @Test("Multiple Passage.Verification.PhoneRouteCollection instances are independent")
-    func multipleInstancesIndependent() {
+    @Test
+    func `Multiple Passage.Verification.PhoneRouteCollection instances are independent`() {
         let config1 = Passage.Configuration.Verification.Phone(codeLength: 6)
         let collection1 = Passage.Verification.PhoneRouteCollection(
             config: config1,
@@ -218,8 +218,8 @@ struct PhoneVerificationRouteCollectionTests {
         #expect(collection1.groupPath != collection2.groupPath)
     }
 
-    @Test("Passage.Verification.PhoneRouteCollection can be instantiated multiple times")
-    func multipleInstantiations() {
+    @Test
+    func `Passage.Verification.PhoneRouteCollection can be instantiated multiple times`() {
         let config = Passage.Configuration.Verification.Phone()
 
         let collection1 = Passage.Verification.PhoneRouteCollection(config: config, groupPath: [])
@@ -230,8 +230,8 @@ struct PhoneVerificationRouteCollectionTests {
 
     // MARK: - Protocol Conformance Tests
 
-    @Test("Passage.Verification.PhoneRouteCollection conforms to RouteCollection")
-    func conformsToRouteCollection() {
+    @Test
+    func `Passage.Verification.PhoneRouteCollection conforms to RouteCollection`() {
         let config = Passage.Configuration.Verification.Phone()
         let collection = Passage.Verification.PhoneRouteCollection(
             config: config,
@@ -239,13 +239,13 @@ struct PhoneVerificationRouteCollectionTests {
         )
 
         let _: any RouteCollection = collection
-        #expect(collection is RouteCollection)
+        #expect(collection is any RouteCollection)
     }
 
     // MARK: - Group Path Component Tests
 
-    @Test("Passage.Verification.PhoneRouteCollection with different path component types")
-    func differentPathComponentTypes() {
+    @Test
+    func `Passage.Verification.PhoneRouteCollection with different path component types`() {
         let config = Passage.Configuration.Verification.Phone()
 
         // String path components
@@ -263,8 +263,8 @@ struct PhoneVerificationRouteCollectionTests {
         #expect(collection2.groupPath.count == 2)
     }
 
-    @Test("Passage.Verification.PhoneRouteCollection preserves group order")
-    func preservesGroupOrder() {
+    @Test
+    func `Passage.Verification.PhoneRouteCollection preserves group order`() {
         let config = Passage.Configuration.Verification.Phone()
         let groupPath: [PathComponent] = ["first", "second", "third"]
         let collection = Passage.Verification.PhoneRouteCollection(
@@ -278,8 +278,8 @@ struct PhoneVerificationRouteCollectionTests {
 
     // MARK: - Configuration Preservation Tests
 
-    @Test("Passage.Verification.PhoneRouteCollection preserves all configuration settings")
-    func preservesAllConfiguration() {
+    @Test
+    func `Passage.Verification.PhoneRouteCollection preserves all configuration settings`() {
         let sendCodeRoute = Passage.Configuration.Verification.Phone.Routes.SendCode(path: "send")
         let verifyRoute = Passage.Configuration.Verification.Phone.Routes.Verify(path: "verify")
         let resendRoute = Passage.Configuration.Verification.Phone.Routes.Resend(path: "resend")
@@ -310,8 +310,8 @@ struct PhoneVerificationRouteCollectionTests {
         #expect(collection.groupPath == ["phone"])
     }
 
-    @Test("Passage.Verification.PhoneRouteCollection with nested path groups")
-    func nestedPathGroups() {
+    @Test
+    func `Passage.Verification.PhoneRouteCollection with nested path groups`() {
         let config = Passage.Configuration.Verification.Phone()
         let collection = Passage.Verification.PhoneRouteCollection(
             config: config,
@@ -323,8 +323,8 @@ struct PhoneVerificationRouteCollectionTests {
 
     // MARK: - Route Collection Comparison Tests
 
-    @Test("Passage.Verification.PhoneRouteCollection has three routes")
-    func hasThreeRoutes() {
+    @Test
+    func `Passage.Verification.PhoneRouteCollection has three routes`() {
         let config = Passage.Configuration.Verification.Phone()
         let collection = Passage.Verification.PhoneRouteCollection(
             config: config,
@@ -337,8 +337,8 @@ struct PhoneVerificationRouteCollectionTests {
         #expect(!collection.config.routes.resend.path.isEmpty)
     }
 
-    @Test("Passage.Verification.PhoneRouteCollection route paths are distinct")
-    func routePathsAreDistinct() {
+    @Test
+    func `Passage.Verification.PhoneRouteCollection route paths are distinct`() {
         let config = Passage.Configuration.Verification.Phone()
         let collection = Passage.Verification.PhoneRouteCollection(
             config: config,
@@ -357,8 +357,8 @@ struct PhoneVerificationRouteCollectionTests {
 
     // MARK: - Default Configuration Tests
 
-    @Test("Passage.Verification.PhoneRouteCollection default configuration values")
-    func defaultConfigurationValues() {
+    @Test
+    func `Passage.Verification.PhoneRouteCollection default configuration values`() {
         let config = Passage.Configuration.Verification.Phone()
         let collection = Passage.Verification.PhoneRouteCollection(
             config: config,
@@ -371,8 +371,8 @@ struct PhoneVerificationRouteCollectionTests {
         #expect(collection.config.maxAttempts > 0)
     }
 
-    @Test("Passage.Verification.PhoneRouteCollection with all custom settings")
-    func allCustomSettings() {
+    @Test
+    func `Passage.Verification.PhoneRouteCollection with all custom settings`() {
         let sendCodeRoute = Passage.Configuration.Verification.Phone.Routes.SendCode(
             path: "custom-send-code"
         )
@@ -414,8 +414,8 @@ struct PhoneVerificationRouteCollectionTests {
     /// Helper function that requires Sendable conformance.
     private func assertSendable<T: Sendable>(_ value: T) {}
 
-    @Test("Verification.PhoneRouteCollection conforms to Sendable")
-    func conformsToSendable() {
+    @Test
+    func `Verification.PhoneRouteCollection conforms to Sendable`() {
         let config = Passage.Configuration.Verification.Phone()
         assertSendable(Passage.Verification.PhoneRouteCollection(config: config, groupPath: []))
     }

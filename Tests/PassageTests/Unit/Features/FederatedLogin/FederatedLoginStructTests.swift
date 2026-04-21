@@ -2,25 +2,25 @@ import Testing
 import Vapor
 @testable import Passage
 
-@Suite("FederatedLogin Struct Tests")
-struct FederatedLoginStructTests {
+@Suite
+struct `FederatedLogin Struct Tests` {
 
     // MARK: - FederatedLogin Struct Tests
 
-    @Test("FederatedLogin struct is properly namespaced in Passage")
-    func federatedLoginNamespace() {
+    @Test
+    func `FederatedLogin struct is properly namespaced in Passage`() {
         let typeName = String(reflecting: Passage.FederatedLogin.self)
         #expect(typeName.contains("Passage.FederatedLogin"))
     }
 
-    @Test("FederatedLogin struct conforms to Sendable")
-    func federatedLoginSendable() {
+    @Test
+    func `FederatedLogin struct conforms to Sendable`() {
         let _: any Sendable.Type = Passage.FederatedLogin.self
-        #expect(Passage.FederatedLogin.self is Sendable.Type)
+        #expect(Passage.FederatedLogin.self is (any Sendable).Type)
     }
 
-    @Test("FederatedLogin feature is properly namespaced")
-    func federatedLoginFeatureNamespace() {
+    @Test
+    func `FederatedLogin feature is properly namespaced`() {
         // Verify the entire FederatedLogin namespace is in Passage
         let structName = String(reflecting: Passage.FederatedLogin.self)
         #expect(structName.contains("Passage.FederatedLogin"))
@@ -28,9 +28,9 @@ struct FederatedLoginStructTests {
 
     // MARK: - All Sendable Conformance Tests
 
-    @Test("All FederatedLogin types conform to Sendable")
-    func allTypesSendable() {
-        #expect(Passage.FederatedLogin.self is Sendable.Type)
+    @Test
+    func `All FederatedLogin types conform to Sendable`() {
+        #expect(Passage.FederatedLogin.self is (any Sendable).Type)
     }
 
 }

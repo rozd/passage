@@ -2,13 +2,13 @@ import Testing
 import Vapor
 @testable import Passage
 
-@Suite("AuthUser Tests")
-struct AuthUserTests {
+@Suite
+struct `AuthUser Tests` {
 
     // MARK: - AuthUser Initialization Tests
 
-    @Test("AuthUser initialization with all properties")
-    func authUserInitialization() {
+    @Test
+    func `AuthUser initialization with all properties`() {
         let user = AuthUser.User(
             id: "user123",
             email: "test@example.com",
@@ -32,8 +32,8 @@ struct AuthUserTests {
         #expect(authUser.user.phone == "+1234567890")
     }
 
-    @Test("AuthUser with nil email and phone")
-    func authUserWithNilEmailAndPhone() {
+    @Test
+    func `AuthUser with nil email and phone`() {
         let user = AuthUser.User(
             id: "user123",
             email: nil,
@@ -54,8 +54,8 @@ struct AuthUserTests {
 
     // MARK: - AuthUser.User Tests
 
-    @Test("AuthUser.User initialization")
-    func authUserUserInitialization() {
+    @Test
+    func `AuthUser.User initialization`() {
         let user = AuthUser.User(
             id: "user_id_123",
             email: "john@example.com",
@@ -67,8 +67,8 @@ struct AuthUserTests {
         #expect(user.phone == "+19876543210")
     }
 
-    @Test("AuthUser.User with only email")
-    func authUserUserWithOnlyEmail() {
+    @Test
+    func `AuthUser.User with only email`() {
         let user = AuthUser.User(
             id: "user123",
             email: "test@example.com",
@@ -79,8 +79,8 @@ struct AuthUserTests {
         #expect(user.phone == nil)
     }
 
-    @Test("AuthUser.User with only phone")
-    func authUserUserWithOnlyPhone() {
+    @Test
+    func `AuthUser.User with only phone`() {
         let user = AuthUser.User(
             id: "user123",
             email: nil,
@@ -93,8 +93,8 @@ struct AuthUserTests {
 
     // MARK: - Protocol Conformance Tests
 
-    @Test("AuthUser conforms to Content")
-    func authUserConformsToContent() {
+    @Test
+    func `AuthUser conforms to Content`() {
         let user = AuthUser.User(id: "user123", email: "test@example.com", phone: nil)
         let authUser = AuthUser(
             accessToken: "token",
@@ -105,27 +105,27 @@ struct AuthUserTests {
         )
 
         let _: any Content = authUser
-        #expect(authUser is Content)
+        #expect(authUser is any Content)
     }
 
-    @Test("AuthUser.User conforms to Content")
-    func authUserUserConformsToContent() {
+    @Test
+    func `AuthUser.User conforms to Content`() {
         let user = AuthUser.User(id: "user123", email: "test@example.com", phone: nil)
         let _: any Content = user
-        #expect(user is Content)
+        #expect(user is any Content)
     }
 
-    @Test("AuthUser.User conforms to UserInfo")
-    func authUserUserConformsToUserInfo() {
+    @Test
+    func `AuthUser.User conforms to UserInfo`() {
         let user = AuthUser.User(id: "user123", email: "test@example.com", phone: "+1234567890")
         let _: any UserInfo = user
-        #expect(user is UserInfo)
+        #expect(user is any UserInfo)
     }
 
     // MARK: - Token Type Tests
 
-    @Test("AuthUser with Bearer token type")
-    func authUserWithBearerTokenType() {
+    @Test
+    func `AuthUser with Bearer token type`() {
         let user = AuthUser.User(id: "user123", email: "test@example.com", phone: nil)
         let authUser = AuthUser(
             accessToken: "token",
@@ -138,8 +138,8 @@ struct AuthUserTests {
         #expect(authUser.tokenType == "Bearer")
     }
 
-    @Test("AuthUser with custom token type")
-    func authUserWithCustomTokenType() {
+    @Test
+    func `AuthUser with custom token type`() {
         let user = AuthUser.User(id: "user123", email: "test@example.com", phone: nil)
         let authUser = AuthUser(
             accessToken: "token",
@@ -175,8 +175,8 @@ struct AuthUserTests {
 
     // MARK: - Token Properties Tests
 
-    @Test("AuthUser stores accessToken correctly")
-    func authUserStoresAccessToken() {
+    @Test
+    func `AuthUser stores accessToken correctly`() {
         let user = AuthUser.User(id: "user123", email: "test@example.com", phone: nil)
         let authUser = AuthUser(
             accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -189,8 +189,8 @@ struct AuthUserTests {
         #expect(authUser.accessToken == "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
     }
 
-    @Test("AuthUser stores refreshToken correctly")
-    func authUserStoresRefreshToken() {
+    @Test
+    func `AuthUser stores refreshToken correctly`() {
         let user = AuthUser.User(id: "user123", email: "test@example.com", phone: nil)
         let authUser = AuthUser(
             accessToken: "access_token_value",
@@ -205,8 +205,8 @@ struct AuthUserTests {
 
     // MARK: - Nested User Structure Tests
 
-    @Test("AuthUser.User as nested struct")
-    func authUserUserAsNestedStruct() {
+    @Test
+    func `AuthUser.User as nested struct`() {
         // Verify that User is properly nested within AuthUser
         let typeName = String(reflecting: AuthUser.User.self)
         #expect(typeName.contains("AuthUser.User"))
@@ -214,8 +214,8 @@ struct AuthUserTests {
 
     // MARK: - Multiple AuthUser Instances Tests
 
-    @Test("Multiple AuthUser instances are independent")
-    func multipleAuthUserInstancesIndependent() {
+    @Test
+    func `Multiple AuthUser instances are independent`() {
         let user1 = AuthUser.User(id: "user1", email: "user1@example.com", phone: nil)
         let authUser1 = AuthUser(
             accessToken: "token1",
@@ -242,8 +242,8 @@ struct AuthUserTests {
 
     // MARK: - UserInfo Protocol Implementation Tests
 
-    @Test("AuthUser.User email property from UserInfo")
-    func authUserUserEmailFromUserInfo() {
+    @Test
+    func `AuthUser.User email property from UserInfo`() {
         let user: any UserInfo = AuthUser.User(
             id: "user123",
             email: "test@example.com",
@@ -259,8 +259,8 @@ struct AuthUserTests {
     /// Helper function that requires Sendable conformance.
     private func assertSendable<T: Sendable>(_ value: T) {}
 
-    @Test("AuthUser conforms to Sendable")
-    func authUserConformsToSendable() {
+    @Test
+    func `AuthUser conforms to Sendable`() {
         let user = AuthUser.User(id: "123", email: "test@example.com", phone: nil)
         let authUser = AuthUser(
             accessToken: "token",
@@ -272,8 +272,8 @@ struct AuthUserTests {
         assertSendable(authUser)
     }
 
-    @Test("AuthUser.User conforms to Sendable")
-    func authUserUserConformsToSendable() {
+    @Test
+    func `AuthUser.User conforms to Sendable`() {
         let user = AuthUser.User(id: "123", email: "test@example.com", phone: nil)
         assertSendable(user)
     }

@@ -6,8 +6,8 @@ import Testing
 import Vapor
 import VaporTesting
 
-@Suite("Federated Login Integration Tests", .tags(.integration, .federatedLogin))
-struct FederatedLoginIntegrationTests {
+@Suite(.tags(.integration, .federatedLogin))
+struct `Federated Login Integration Tests` {
 
     // MARK: - Configuration Helpers
 
@@ -184,8 +184,8 @@ struct FederatedLoginIntegrationTests {
 
     // MARK: - New User (No Linking) Tests
 
-    @Test("Federated login creates new user when no existing user with federated identifier")
-    func createsNewUserForNewFederatedIdentity() async throws {
+    @Test
+    func `Federated login creates new user when no existing user with federated identifier`() async throws {
         try await withApp(configure: configureWithDisabledLinking) { app in
             let identity = FederatedIdentity(
                 identifier: .federated(.google, userId: "new-google-user"),
@@ -212,8 +212,8 @@ struct FederatedLoginIntegrationTests {
         }
     }
 
-    @Test("Federated login returns existing user when federated identifier already exists")
-    func returnsExistingUserForKnownFederatedIdentity() async throws {
+    @Test
+    func `Federated login returns existing user when federated identifier already exists`() async throws {
         try await withApp(configure: configureWithDisabledLinking) { app in
             let federatedIdentifier = Identifier.federated(.google, userId: "existing-user")
 
@@ -246,8 +246,8 @@ struct FederatedLoginIntegrationTests {
 
     // MARK: - Automatic Linking Tests
 
-    @Test("Federated login with automatic linking links to existing verified email user")
-    func automaticLinkingLinksToVerifiedEmailUser() async throws {
+    @Test
+    func `Federated login with automatic linking links to existing verified email user`() async throws {
         try await withApp(configure: configureWithAutomaticLinking) { app in
             // Create existing user with verified email
             let existingUser = try await createTestUser(
@@ -280,8 +280,8 @@ struct FederatedLoginIntegrationTests {
         }
     }
 
-    @Test("Federated login with automatic linking creates new user when no match")
-    func automaticLinkingCreatesNewUserWhenNoMatch() async throws {
+    @Test
+    func `Federated login with automatic linking creates new user when no match`() async throws {
         try await withApp(configure: configureWithAutomaticLinking) { app in
             let identity = FederatedIdentity(
                 identifier: .federated(.google, userId: "no-match-user"),
@@ -306,8 +306,8 @@ struct FederatedLoginIntegrationTests {
 
     // MARK: - Manual Linking Tests
 
-    @Test("Federated login with manual linking redirects to link select when candidates exist")
-    func manualLinkingRedirectsToLinkSelect() async throws {
+    @Test
+    func `Federated login with manual linking redirects to link select when candidates exist`() async throws {
         try await withApp(configure: configureWithManualLinking) { app in
             // Create existing user that will be a candidate
             _ = try await createTestUser(
@@ -336,8 +336,8 @@ struct FederatedLoginIntegrationTests {
         }
     }
 
-    @Test("Federated login with manual linking creates new user when no candidates")
-    func manualLinkingCreatesNewUserWhenNoCandidates() async throws {
+    @Test
+    func `Federated login with manual linking creates new user when no candidates`() async throws {
         try await withApp(configure: configureWithManualLinking) { app in
             let identity = FederatedIdentity(
                 identifier: .federated(.google, userId: "no-candidates"),
@@ -365,8 +365,8 @@ struct FederatedLoginIntegrationTests {
 
     // MARK: - Redirect URL Tests
 
-    @Test("Federated login redirect includes exchange code")
-    func redirectIncludesExchangeCode() async throws {
+    @Test
+    func `Federated login redirect includes exchange code`() async throws {
         try await withApp(configure: configureWithDisabledLinking) { app in
             let identity = FederatedIdentity(
                 identifier: .federated(.google, userId: "code-test"),
@@ -388,8 +388,8 @@ struct FederatedLoginIntegrationTests {
 
     // MARK: - Session Authentication Tests
 
-    @Test("Federated login authenticates user in session")
-    func authenticatesUserInSession() async throws {
+    @Test
+    func `Federated login authenticates user in session`() async throws {
         try await withApp(configure: configureWithDisabledLinking) { app in
             let identity = FederatedIdentity(
                 identifier: .federated(.google, userId: "session-test"),
@@ -411,8 +411,8 @@ struct FederatedLoginIntegrationTests {
 
     // MARK: - Provider Tests
 
-    @Test("Federated login works with different OAuth providers")
-    func worksWithDifferentProviders() async throws {
+    @Test
+    func `Federated login works with different OAuth providers`() async throws {
         try await withApp(configure: configureWithDisabledLinking) { app in
             let providers = [
                 ("google", "google-user-id"),

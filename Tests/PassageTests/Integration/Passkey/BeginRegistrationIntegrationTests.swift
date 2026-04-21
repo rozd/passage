@@ -14,8 +14,8 @@ import VaporTesting
 /// the bearer/session, not the request body.
 ///
 /// The parallel public signup flow lives at `BeginSignupIntegrationTests`.
-@Suite("Passkey Begin Registration (authenticated) Integration Tests", .tags(.integration, .passkey))
-struct BeginRegistrationIntegrationTests {
+@Suite(.tags(.integration, .passkey))
+struct `Passkey Begin Registration (authenticated) Integration Tests` {
 
     final class Holder: @unchecked Sendable {
         var service: MockPasskeyService?
@@ -101,8 +101,8 @@ struct BeginRegistrationIntegrationTests {
 
     // MARK: - Authentication gating
 
-    @Test("POST begin returns 401 when the request carries no auth")
-    func unauthenticatedReturns401() async throws {
+    @Test
+    func `POST begin returns 401 when the request carries no auth`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder)
@@ -120,8 +120,8 @@ struct BeginRegistrationIntegrationTests {
         }
     }
 
-    @Test("POST begin returns 401 when the bearer token is invalid")
-    func invalidBearerReturns401() async throws {
+    @Test
+    func `POST begin returns 401 when the bearer token is invalid`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder)
@@ -142,8 +142,8 @@ struct BeginRegistrationIntegrationTests {
 
     // MARK: - Happy path
 
-    @Test("POST begin with valid bearer returns ceremony options")
-    func authenticatedReturnsOptions() async throws {
+    @Test
+    func `POST begin with valid bearer returns ceremony options`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder)
@@ -170,8 +170,8 @@ struct BeginRegistrationIntegrationTests {
         }
     }
 
-    @Test("POST begin binds the stored challenge to the authenticated user")
-    func beginBindsChallengeToAuthenticatedUser() async throws {
+    @Test
+    func `POST begin binds the stored challenge to the authenticated user`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder)
@@ -200,8 +200,8 @@ struct BeginRegistrationIntegrationTests {
         }
     }
 
-    @Test("POST begin falls back to user identifier when displayName is omitted")
-    func beginDerivesDisplayNameFromUser() async throws {
+    @Test
+    func `POST begin falls back to user identifier when displayName is omitted`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder)

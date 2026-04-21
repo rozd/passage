@@ -2,37 +2,37 @@ import Testing
 import Vapor
 @testable import Passage
 
-@Suite("Federated Provider Tests")
-struct FederatedProviderTests {
+@Suite
+struct `Federated Provider Tests` {
 
     // MARK: - Provider Name Tests
 
-    @Test("Provider Name initialization with rawValue")
-    func providerNameInitialization() {
+    @Test
+    func `Provider Name initialization with rawValue`() {
         let name = FederatedProvider.Name("custom")
         #expect(name.description == "custom")
     }
 
-    @Test("Provider Name google static member")
-    func providerNameGoogle() {
+    @Test
+    func `Provider Name google static member`() {
         let google = FederatedProvider.Name.google
         #expect(google.description == "google")
     }
 
-    @Test("Provider Name github static member")
-    func providerNameGithub() {
+    @Test
+    func `Provider Name github static member`() {
         let github = FederatedProvider.Name.github
         #expect(github.description == "github")
     }
 
-    @Test("Provider Name named factory method")
-    func providerNameNamed() {
+    @Test
+    func `Provider Name named factory method`() {
         let name = FederatedProvider.Name.named("custom-provider")
         #expect(name.description == "custom-provider")
     }
 
-    @Test("Provider Name conforms to Codable")
-    func providerNameCodable() throws {
+    @Test
+    func `Provider Name conforms to Codable`() throws {
         let name = FederatedProvider.Name("test")
 
         let encoder = JSONEncoder()
@@ -44,8 +44,8 @@ struct FederatedProviderTests {
         #expect(decoded.description == name.description)
     }
 
-    @Test("Provider Name conforms to Hashable")
-    func providerNameHashable() {
+    @Test
+    func `Provider Name conforms to Hashable`() {
         let name1 = FederatedProvider.Name("test")
         let name2 = FederatedProvider.Name("test")
         let name3 = FederatedProvider.Name("different")
@@ -60,16 +60,16 @@ struct FederatedProviderTests {
         #expect(set.count == 1)
     }
 
-    @Test("Provider Name conforms to Sendable")
-    func providerNameSendable() {
+    @Test
+    func `Provider Name conforms to Sendable`() {
         let _: any Sendable.Type = FederatedProvider.Name.self
-        #expect(FederatedProvider.Name.self is Sendable.Type)
+        #expect(FederatedProvider.Name.self is (any Sendable).Type)
     }
 
     // MARK: - Provider Credentials Tests
 
-    @Test("Provider Credentials conventional case")
-    func credentialsConventional() {
+    @Test
+    func `Provider Credentials conventional case`() {
         let credentials = FederatedProvider.Credentials.conventional
 
         if case .conventional = credentials {
@@ -79,8 +79,8 @@ struct FederatedProviderTests {
         }
     }
 
-    @Test("Provider Credentials client case")
-    func credentialsClient() {
+    @Test
+    func `Provider Credentials client case`() {
         let credentials = FederatedProvider.Credentials.client(
             id: "client-id",
             secret: "client-secret"
@@ -94,16 +94,16 @@ struct FederatedProviderTests {
         }
     }
 
-    @Test("Provider Credentials conforms to Sendable")
-    func credentialsSendable() {
+    @Test
+    func `Provider Credentials conforms to Sendable`() {
         let _: any Sendable.Type = FederatedProvider.Credentials.self
-        #expect(FederatedProvider.Credentials.self is Sendable.Type)
+        #expect(FederatedProvider.Credentials.self is (any Sendable).Type)
     }
 
     // MARK: - Provider Initialization Tests
 
-    @Test("Provider initialization with all parameters")
-    func providerInitialization() {
+    @Test
+    func `Provider initialization with all parameters`() {
         let name = FederatedProvider.Name("google")
         let credentials = FederatedProvider.Credentials.client(id: "id", secret: "secret")
         let scope = ["email", "profile"]
@@ -118,8 +118,8 @@ struct FederatedProviderTests {
         #expect(provider.scope == ["email", "profile"])
     }
 
-    @Test("Provider initialization with conventional credentials")
-    func providerConventionalCredentials() {
+    @Test
+    func `Provider initialization with conventional credentials`() {
         let name = FederatedProvider.Name.google
         let provider = FederatedProvider(name: name)
 
@@ -130,8 +130,8 @@ struct FederatedProviderTests {
         }
     }
 
-    @Test("Provider initialization with empty scope")
-    func providerEmptyScope() {
+    @Test
+    func `Provider initialization with empty scope`() {
         let name = FederatedProvider.Name.google
         let provider = FederatedProvider(name: name)
 
@@ -140,16 +140,16 @@ struct FederatedProviderTests {
 
     // MARK: - Provider Convenience Initializers Tests
 
-    @Test("Provider google() convenience initializer")
-    func googleConvenienceInitializer() {
+    @Test
+    func `Provider google() convenience initializer`() {
         let provider = FederatedProvider.google()
 
         #expect(provider.name.description == "google")
         #expect(provider.scope.isEmpty)
     }
 
-    @Test("Provider google() with credentials")
-    func googleWithCredentials() {
+    @Test
+    func `Provider google() with credentials`() {
         let credentials = FederatedProvider.Credentials.client(id: "google-id", secret: "google-secret")
         let provider = FederatedProvider.google(credentials: credentials)
 
@@ -161,23 +161,23 @@ struct FederatedProviderTests {
         }
     }
 
-    @Test("Provider google() with scope")
-    func googleWithScope() {
+    @Test
+    func `Provider google() with scope`() {
         let provider = FederatedProvider.google(scope: ["email", "profile"])
 
         #expect(provider.scope == ["email", "profile"])
     }
 
-    @Test("Provider github() convenience initializer")
-    func githubConvenienceInitializer() {
+    @Test
+    func `Provider github() convenience initializer`() {
         let provider = FederatedProvider.github()
 
         #expect(provider.name.description == "github")
         #expect(provider.scope.isEmpty)
     }
 
-    @Test("Provider github() with credentials")
-    func githubWithCredentials() {
+    @Test
+    func `Provider github() with credentials`() {
         let credentials = FederatedProvider.Credentials.client(id: "github-id", secret: "github-secret")
         let provider = FederatedProvider.github(credentials: credentials)
 
@@ -189,22 +189,22 @@ struct FederatedProviderTests {
         }
     }
 
-    @Test("Provider github() with scope")
-    func githubWithScope() {
+    @Test
+    func `Provider github() with scope`() {
         let provider = FederatedProvider.github(scope: ["user:email", "read:user"])
 
         #expect(provider.scope == ["user:email", "read:user"])
     }
 
-    @Test("Provider custom() convenience initializer")
-    func customConvenienceInitializer() {
+    @Test
+    func `Provider custom() convenience initializer`() {
         let provider = FederatedProvider.custom(name: "custom-oauth")
 
         #expect(provider.name.description == "custom-oauth")
     }
 
-    @Test("Provider custom() with all parameters")
-    func customWithAllParameters() {
+    @Test
+    func `Provider custom() with all parameters`() {
         let credentials = FederatedProvider.Credentials.client(id: "custom-id", secret: "custom-secret")
 
         let provider = FederatedProvider.custom(
@@ -219,8 +219,8 @@ struct FederatedProviderTests {
 
     // MARK: - Multiple Providers Tests
 
-    @Test("Multiple providers can coexist")
-    func multipleProviders() {
+    @Test
+    func `Multiple providers can coexist`() {
         let google = FederatedProvider.google(scope: ["email"])
         let github = FederatedProvider.github(scope: ["user"])
 
@@ -229,8 +229,8 @@ struct FederatedProviderTests {
         #expect(google.scope != github.scope)
     }
 
-    @Test("Provider instances are independent")
-    func providerInstancesIndependent() {
+    @Test
+    func `Provider instances are independent`() {
         let provider1 = FederatedProvider.google(scope: ["email"])
         let provider2 = FederatedProvider.google(scope: ["profile"])
 
@@ -239,8 +239,8 @@ struct FederatedProviderTests {
 
     // MARK: - Path Component Conversion Tests
 
-    @Test("Provider with multi-segment name")
-    func providerMultiSegmentName() {
+    @Test
+    func `Provider with multi-segment name`() {
         let name = FederatedProvider.Name("oauth/provider")
         let provider = FederatedProvider(name: name)
 
@@ -250,9 +250,9 @@ struct FederatedProviderTests {
 
     // MARK: - Provider Sendable Conformance Tests
 
-    @Test("Provider conforms to Sendable")
-    func providerSendable() {
+    @Test
+    func `Provider conforms to Sendable`() {
         let _: any Sendable.Type = FederatedProvider.self
-        #expect(FederatedProvider.self is Sendable.Type)
+        #expect(FederatedProvider.self is (any Sendable).Type)
     }
 }

@@ -2,8 +2,8 @@ import Testing
 import Foundation
 @testable import Passage
 
-@Suite("ExchangeToken Protocol Tests", .tags(.unit))
-struct ExchangeTokenProtocolTests {
+@Suite(.tags(.unit))
+struct `ExchangeToken Protocol Tests` {
 
     // MARK: - Mock Implementations
 
@@ -55,8 +55,8 @@ struct ExchangeTokenProtocolTests {
 
     // MARK: - isExpired Tests
 
-    @Test("ExchangeToken isExpired returns true when expired")
-    func isExpiredWhenExpired() {
+    @Test
+    func `ExchangeToken isExpired returns true when expired`() {
         let token = MockExchangeToken(
             id: UUID(),
             user: createMockUser(),
@@ -69,8 +69,8 @@ struct ExchangeTokenProtocolTests {
         #expect(token.isExpired == true)
     }
 
-    @Test("ExchangeToken isExpired returns false when not expired")
-    func isExpiredWhenNotExpired() {
+    @Test
+    func `ExchangeToken isExpired returns false when not expired`() {
         let token = MockExchangeToken(
             id: UUID(),
             user: createMockUser(),
@@ -83,8 +83,8 @@ struct ExchangeTokenProtocolTests {
         #expect(token.isExpired == false)
     }
 
-    @Test("ExchangeToken isExpired returns true when exactly at expiration time")
-    func isExpiredAtExactExpirationTime() {
+    @Test
+    func `ExchangeToken isExpired returns true when exactly at expiration time`() {
         // Token that expired a tiny amount of time ago
         let token = MockExchangeToken(
             id: UUID(),
@@ -100,8 +100,8 @@ struct ExchangeTokenProtocolTests {
 
     // MARK: - isConsumed Tests
 
-    @Test("ExchangeToken isConsumed returns true when consumed")
-    func isConsumedWhenConsumed() {
+    @Test
+    func `ExchangeToken isConsumed returns true when consumed`() {
         let token = MockExchangeToken(
             id: UUID(),
             user: createMockUser(),
@@ -114,8 +114,8 @@ struct ExchangeTokenProtocolTests {
         #expect(token.isConsumed == true)
     }
 
-    @Test("ExchangeToken isConsumed returns false when not consumed")
-    func isConsumedWhenNotConsumed() {
+    @Test
+    func `ExchangeToken isConsumed returns false when not consumed`() {
         let token = MockExchangeToken(
             id: UUID(),
             user: createMockUser(),
@@ -128,8 +128,8 @@ struct ExchangeTokenProtocolTests {
         #expect(token.isConsumed == false)
     }
 
-    @Test("ExchangeToken isConsumed with past consumption time")
-    func isConsumedWithPastConsumptionTime() {
+    @Test
+    func `ExchangeToken isConsumed with past consumption time`() {
         let token = MockExchangeToken(
             id: UUID(),
             user: createMockUser(),
@@ -144,8 +144,8 @@ struct ExchangeTokenProtocolTests {
 
     // MARK: - isValid Tests
 
-    @Test("ExchangeToken isValid returns true when not expired and not consumed")
-    func isValidWhenValid() {
+    @Test
+    func `ExchangeToken isValid returns true when not expired and not consumed`() {
         let token = MockExchangeToken(
             id: UUID(),
             user: createMockUser(),
@@ -158,8 +158,8 @@ struct ExchangeTokenProtocolTests {
         #expect(token.isValid == true)
     }
 
-    @Test("ExchangeToken isValid returns false when expired")
-    func isValidWhenExpired() {
+    @Test
+    func `ExchangeToken isValid returns false when expired`() {
         let token = MockExchangeToken(
             id: UUID(),
             user: createMockUser(),
@@ -172,8 +172,8 @@ struct ExchangeTokenProtocolTests {
         #expect(token.isValid == false)
     }
 
-    @Test("ExchangeToken isValid returns false when consumed")
-    func isValidWhenConsumed() {
+    @Test
+    func `ExchangeToken isValid returns false when consumed`() {
         let token = MockExchangeToken(
             id: UUID(),
             user: createMockUser(),
@@ -186,8 +186,8 @@ struct ExchangeTokenProtocolTests {
         #expect(token.isValid == false)
     }
 
-    @Test("ExchangeToken isValid returns false when both expired and consumed")
-    func isValidWhenExpiredAndConsumed() {
+    @Test
+    func `ExchangeToken isValid returns false when both expired and consumed`() {
         let token = MockExchangeToken(
             id: UUID(),
             user: createMockUser(),
@@ -202,8 +202,8 @@ struct ExchangeTokenProtocolTests {
 
     // MARK: - Protocol Conformance Tests
 
-    @Test("MockExchangeToken conforms to ExchangeToken protocol")
-    func mockExchangeTokenConformsToProtocol() {
+    @Test
+    func `MockExchangeToken conforms to ExchangeToken protocol`() {
         let token: any ExchangeToken = MockExchangeToken(
             id: UUID(),
             user: createMockUser(),
@@ -215,8 +215,8 @@ struct ExchangeTokenProtocolTests {
         #expect(token is MockExchangeToken)
     }
 
-    @Test("ExchangeToken protocol conforms to Sendable")
-    func exchangeTokenProtocolIsSendable() {
+    @Test
+    func `ExchangeToken protocol conforms to Sendable`() {
         let token: any Sendable = MockExchangeToken(
             id: UUID(),
             user: createMockUser(),
@@ -230,8 +230,8 @@ struct ExchangeTokenProtocolTests {
 
     // MARK: - Properties Tests
 
-    @Test("ExchangeToken stores tokenHash correctly")
-    func tokenHashStorage() {
+    @Test
+    func `ExchangeToken stores tokenHash correctly`() {
         let hash = "abc123hash456"
         let token = MockExchangeToken(
             id: UUID(),
@@ -245,8 +245,8 @@ struct ExchangeTokenProtocolTests {
         #expect(token.tokenHash == hash)
     }
 
-    @Test("ExchangeToken stores user reference")
-    func userReference() {
+    @Test
+    func `ExchangeToken stores user reference`() {
         let userId = UUID()
         let user = MockUser(
             id: userId,
@@ -271,8 +271,8 @@ struct ExchangeTokenProtocolTests {
         #expect(token.user.email == "test@example.com")
     }
 
-    @Test("ExchangeToken stores id correctly")
-    func idStorage() {
+    @Test
+    func `ExchangeToken stores id correctly`() {
         let tokenId = UUID()
         let token = MockExchangeToken(
             id: tokenId,
@@ -286,8 +286,8 @@ struct ExchangeTokenProtocolTests {
         #expect(token.id == tokenId)
     }
 
-    @Test("ExchangeToken with nil id")
-    func nilId() {
+    @Test
+    func `ExchangeToken with nil id`() {
         let token = MockExchangeToken(
             id: nil,
             user: createMockUser(),
@@ -300,8 +300,8 @@ struct ExchangeTokenProtocolTests {
         #expect(token.id == nil)
     }
 
-    @Test("ExchangeToken stores createdAt correctly")
-    func createdAtStorage() {
+    @Test
+    func `ExchangeToken stores createdAt correctly`() {
         let createdAt = Date().addingTimeInterval(-30)
         let token = MockExchangeToken(
             id: UUID(),
@@ -315,8 +315,8 @@ struct ExchangeTokenProtocolTests {
         #expect(token.createdAt == createdAt)
     }
 
-    @Test("ExchangeToken with nil createdAt")
-    func nilCreatedAt() {
+    @Test
+    func `ExchangeToken with nil createdAt`() {
         let token = MockExchangeToken(
             id: UUID(),
             user: createMockUser(),
@@ -331,8 +331,8 @@ struct ExchangeTokenProtocolTests {
 
     // MARK: - Short TTL Behavior Tests
 
-    @Test("ExchangeToken with typical 60-second TTL")
-    func typicalShortTTL() {
+    @Test
+    func `ExchangeToken with typical 60-second TTL`() {
         let createdAt = Date()
         let token = MockExchangeToken(
             id: UUID(),
@@ -348,8 +348,8 @@ struct ExchangeTokenProtocolTests {
         #expect(token.isConsumed == false)
     }
 
-    @Test("ExchangeToken expired after short TTL")
-    func expiredAfterShortTTL() {
+    @Test
+    func `ExchangeToken expired after short TTL`() {
         let createdAt = Date().addingTimeInterval(-120) // created 2 minutes ago
         let token = MockExchangeToken(
             id: UUID(),
@@ -366,8 +366,8 @@ struct ExchangeTokenProtocolTests {
 
     // MARK: - Single-Use Behavior Tests
 
-    @Test("ExchangeToken becomes invalid after consumption")
-    func becomesInvalidAfterConsumption() {
+    @Test
+    func `ExchangeToken becomes invalid after consumption`() {
         // Simulate consumption by creating a token with consumedAt set
         var token = MockExchangeToken(
             id: UUID(),

@@ -3,8 +3,8 @@ import Foundation
 @testable import Passage
 import PassageOnlyForTest
 
-@Suite("InMemoryPasskeyCredentialStore Tests", .tags(.unit))
-struct InMemoryPasskeyCredentialStoreTests {
+@Suite(.tags(.unit))
+struct `InMemoryPasskeyCredentialStore Tests` {
 
     // MARK: - Mock User
 
@@ -65,8 +65,8 @@ struct InMemoryPasskeyCredentialStoreTests {
 
     // MARK: - Create & Find
 
-    @Test("create then find returns the same credential")
-    func createThenFind() async throws {
+    @Test
+    func `create then find returns the same credential`() async throws {
         let store = makeStore()
         let user = makeUser()
         let credential = makeCredential(id: "cred-1")
@@ -78,8 +78,8 @@ struct InMemoryPasskeyCredentialStoreTests {
         #expect(found?.credentialID == stored.credentialID)
     }
 
-    @Test("create preserves all W3C credential-record fields")
-    func createPreservesAllFields() async throws {
+    @Test
+    func `create preserves all W3C credential-record fields`() async throws {
         let store = makeStore()
         let user = makeUser()
         let credential = makeCredential(id: "cred-roundtrip")
@@ -98,8 +98,8 @@ struct InMemoryPasskeyCredentialStoreTests {
         #expect(found.attestationFormat == credential.attestationFormat)
     }
 
-    @Test("create stamps createdAt and updatedAt")
-    func createStampsTimestamps() async throws {
+    @Test
+    func `create stamps createdAt and updatedAt`() async throws {
         let store = makeStore()
         let user = makeUser()
         let before = Date()
@@ -111,8 +111,8 @@ struct InMemoryPasskeyCredentialStoreTests {
         #expect((stored.createdAt ?? .distantPast) >= before)
     }
 
-    @Test("find returns nil for unknown credentialID")
-    func findReturnsNilForUnknown() async throws {
+    @Test
+    func `find returns nil for unknown credentialID`() async throws {
         let store = makeStore()
 
         let result = try await store.find(byCredentialID: "never-stored")
@@ -122,8 +122,8 @@ struct InMemoryPasskeyCredentialStoreTests {
 
     // MARK: - List
 
-    @Test("listPasskeyCredentials returns empty for user with none")
-    func listEmptyForNewUser() async throws {
+    @Test
+    func `listPasskeyCredentials returns empty for user with none`() async throws {
         let store = makeStore()
         let user = makeUser()
 
@@ -132,8 +132,8 @@ struct InMemoryPasskeyCredentialStoreTests {
         #expect(result.isEmpty)
     }
 
-    @Test("listPasskeyCredentials returns only that user's credentials")
-    func listIsolatesPerUser() async throws {
+    @Test
+    func `listPasskeyCredentials returns only that user's credentials`() async throws {
         let store = makeStore()
         let alice = makeUser(email: "alice@example.com")
         let bob = makeUser(email: "bob@example.com")
@@ -153,8 +153,8 @@ struct InMemoryPasskeyCredentialStoreTests {
 
     // MARK: - Update
 
-    @Test("update changes signCount and isBackedUp")
-    func updateMutatesAuthFields() async throws {
+    @Test
+    func `update changes signCount and isBackedUp`() async throws {
         let store = makeStore()
         let user = makeUser()
         _ = try await store.createPasskeyCredential(for: user, from: makeCredential(id: "cred-upd"))
@@ -170,8 +170,8 @@ struct InMemoryPasskeyCredentialStoreTests {
         #expect(found.isBackedUp == true)
     }
 
-    @Test("update preserves immutable fields")
-    func updatePreservesImmutables() async throws {
+    @Test
+    func `update preserves immutable fields`() async throws {
         let store = makeStore()
         let user = makeUser()
         let credential = makeCredential(id: "cred-immut")
@@ -192,8 +192,8 @@ struct InMemoryPasskeyCredentialStoreTests {
         #expect(found.createdAt == originalCreatedAt)
     }
 
-    @Test("update bumps updatedAt")
-    func updateBumpsUpdatedAt() async throws {
+    @Test
+    func `update bumps updatedAt`() async throws {
         let store = makeStore()
         let user = makeUser()
         let stored = try await store.createPasskeyCredential(for: user, from: makeCredential(id: "cred-updbump"))
@@ -214,8 +214,8 @@ struct InMemoryPasskeyCredentialStoreTests {
 
     // MARK: - Delete
 
-    @Test("delete removes the credential")
-    func deleteRemovesCredential() async throws {
+    @Test
+    func `delete removes the credential`() async throws {
         let store = makeStore()
         let user = makeUser()
         _ = try await store.createPasskeyCredential(for: user, from: makeCredential(id: "cred-del"))
@@ -226,8 +226,8 @@ struct InMemoryPasskeyCredentialStoreTests {
         #expect(result == nil)
     }
 
-    @Test("delete for unknown credentialID is a no-op")
-    func deleteUnknownIsNoop() async throws {
+    @Test
+    func `delete for unknown credentialID is a no-op`() async throws {
         let store = makeStore()
 
         // Should not throw

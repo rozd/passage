@@ -5,8 +5,8 @@ import Testing
 import Vapor
 import VaporTesting
 
-@Suite("Linking Struct Tests", .tags(.unit, .federatedLogin))
-struct LinkingStructTests {
+@Suite(.tags(.unit, .federatedLogin))
+struct `Linking Struct Tests` {
 
     // MARK: - Configuration Helper
 
@@ -57,8 +57,8 @@ struct LinkingStructTests {
 
     // MARK: - Initialization Tests
 
-    @Test("Passage.Linking is accessible from Request")
-    func linkingAccessibleFromRequest() async throws {
+    @Test
+    func `Passage.Linking is accessible from Request`() async throws {
         try await withApp(configure: configure) { app in
             let request = Request(application: app, on: app.eventLoopGroup.any())
             let linking = request.linking
@@ -68,8 +68,8 @@ struct LinkingStructTests {
         }
     }
 
-    @Test("Passage.Linking provides automatic accessor")
-    func linkingProvidesAutomaticAccessor() async throws {
+    @Test
+    func `Passage.Linking provides automatic accessor`() async throws {
         try await withApp(configure: configure) { app in
             let request = Request(application: app, on: app.eventLoopGroup.any())
             let automatic = request.linking.automatic
@@ -78,8 +78,8 @@ struct LinkingStructTests {
         }
     }
 
-    @Test("Passage.Linking provides manual accessor")
-    func linkingProvidesManualAccessor() async throws {
+    @Test
+    func `Passage.Linking provides manual accessor`() async throws {
         try await withApp(configure: configure) { app in
             let request = Request(application: app, on: app.eventLoopGroup.any())
             let manual = request.linking.manual
@@ -90,8 +90,8 @@ struct LinkingStructTests {
 
     // MARK: - Service Accessor Tests
 
-    @Test("Passage.Linking provides config accessor")
-    func linkingProvidesConfigAccessor() async throws {
+    @Test
+    func `Passage.Linking provides config accessor`() async throws {
         try await withApp(configure: configure) { app in
             let request = Request(application: app, on: app.eventLoopGroup.any())
             let config = request.linking.config
@@ -101,8 +101,8 @@ struct LinkingStructTests {
         }
     }
 
-    @Test("Passage.Linking provides store accessor")
-    func linkingProvidesStoreAccessor() async throws {
+    @Test
+    func `Passage.Linking provides store accessor`() async throws {
         try await withApp(configure: configure) { app in
             let request = Request(application: app, on: app.eventLoopGroup.any())
             let store = request.linking.store
@@ -112,8 +112,8 @@ struct LinkingStructTests {
         }
     }
 
-    @Test("Passage.Linking provides random accessor")
-    func linkingProvidesRandomAccessor() async throws {
+    @Test
+    func `Passage.Linking provides random accessor`() async throws {
         try await withApp(configure: configure) { app in
             let request = Request(application: app, on: app.eventLoopGroup.any())
             let random = request.linking.random
@@ -125,8 +125,8 @@ struct LinkingStructTests {
 
     // MARK: - Link Helper Method Tests
 
-    @Test("Link method throws when identifier already linked to different user")
-    func linkThrowsWhenIdentifierLinkedToDifferentUser() async throws {
+    @Test
+    func `Link method throws when identifier already linked to different user`() async throws {
         try await withApp(configure: configure) { app in
             let store = app.passage.storage.services.store
 
@@ -156,8 +156,8 @@ struct LinkingStructTests {
         }
     }
 
-    @Test("Link method succeeds when identifier already linked to same user")
-    func linkSucceedsWhenIdentifierLinkedToSameUser() async throws {
+    @Test
+    func `Link method succeeds when identifier already linked to same user`() async throws {
         try await withApp(configure: configure) { app in
             let store = app.passage.storage.services.store
 
@@ -182,8 +182,8 @@ struct LinkingStructTests {
         }
     }
 
-    @Test("Link method adds new identifier when not existing")
-    func linkAddsNewIdentifierWhenNotExisting() async throws {
+    @Test
+    func `Link method adds new identifier when not existing`() async throws {
         try await withApp(configure: configure) { app in
             let store = app.passage.storage.services.store
 
@@ -215,8 +215,8 @@ struct LinkingStructTests {
 
     // MARK: - Sendable Tests
 
-    @Test("Passage.Linking conforms to Sendable")
-    func linkingConformsToSendable() async throws {
+    @Test
+    func `Passage.Linking conforms to Sendable`() async throws {
         try await withApp(configure: configure) { app in
             let request = Request(application: app, on: app.eventLoopGroup.any())
             let linking: any Sendable = request.linking
@@ -225,8 +225,8 @@ struct LinkingStructTests {
         }
     }
 
-    @Test("Passage.Linking.AutomaticLinking conforms to Sendable")
-    func automaticLinkingConformsToSendable() async throws {
+    @Test
+    func `Passage.Linking.AutomaticLinking conforms to Sendable`() async throws {
         try await withApp(configure: configure) { app in
             let request = Request(application: app, on: app.eventLoopGroup.any())
             let automatic: any Sendable = request.linking.automatic
@@ -235,8 +235,8 @@ struct LinkingStructTests {
         }
     }
 
-    @Test("Passage.Linking.ManualLinking conforms to Sendable")
-    func manualLinkingConformsToSendable() async throws {
+    @Test
+    func `Passage.Linking.ManualLinking conforms to Sendable`() async throws {
         try await withApp(configure: configure) { app in
             let request = Request(application: app, on: app.eventLoopGroup.any())
             let manual: any Sendable = request.linking.manual

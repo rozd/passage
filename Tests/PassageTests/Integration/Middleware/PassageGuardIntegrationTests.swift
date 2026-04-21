@@ -6,8 +6,8 @@ import Testing
 import Vapor
 import VaporTesting
 
-@Suite("PassageGuard Integration Tests", .tags(.integration))
-struct PassageGuardIntegrationTests {
+@Suite(.tags(.integration))
+struct `PassageGuard Integration Tests` {
 
     // MARK: - Configuration Helpers
 
@@ -112,8 +112,8 @@ struct PassageGuardIntegrationTests {
 
     // MARK: - Authenticated User Tests
 
-    @Test("Guard allows authenticated requests through")
-    func allowsAuthenticatedRequests() async throws {
+    @Test
+    func `Guard allows authenticated requests through`() async throws {
         try await withApp(configure: configure) { app in
             let userId = try await createTestUser(app: app)
             let token = try await createAccessToken(app: app, userId: userId)
@@ -128,8 +128,8 @@ struct PassageGuardIntegrationTests {
         }
     }
 
-    @Test("Guard allows authenticated requests through with custom error config")
-    func allowsAuthenticatedRequestsWithCustomError() async throws {
+    @Test
+    func `Guard allows authenticated requests through with custom error config`() async throws {
         try await withApp(configure: configure) { app in
             let userId = try await createTestUser(app: app)
             let token = try await createAccessToken(app: app, userId: userId)
@@ -146,8 +146,8 @@ struct PassageGuardIntegrationTests {
 
     // MARK: - Unauthenticated User Tests
 
-    @Test("Guard blocks unauthenticated requests with default 401 error")
-    func blocksUnauthenticatedWithDefault401() async throws {
+    @Test
+    func `Guard blocks unauthenticated requests with default 401 error`() async throws {
         try await withApp(configure: configure) { app in
             try await app.testing().test(.GET, "guarded-default", afterResponse: { res async in
                 #expect(res.status == .unauthorized)
@@ -155,8 +155,8 @@ struct PassageGuardIntegrationTests {
         }
     }
 
-    @Test("Guard blocks unauthenticated requests with custom error")
-    func blocksUnauthenticatedWithCustomError() async throws {
+    @Test
+    func `Guard blocks unauthenticated requests with custom error`() async throws {
         try await withApp(configure: configure) { app in
             try await app.testing().test(.GET, "guarded-custom", afterResponse: { res async in
                 #expect(res.status == .forbidden)
@@ -164,8 +164,8 @@ struct PassageGuardIntegrationTests {
         }
     }
 
-    @Test("Guard default error includes helpful reason message")
-    func defaultErrorIncludesReason() async throws {
+    @Test
+    func `Guard default error includes helpful reason message`() async throws {
         try await withApp(configure: configure) { app in
             try await app.testing().test(.GET, "guarded-default", afterResponse: { res async throws in
                 #expect(res.status == .unauthorized)
@@ -177,8 +177,8 @@ struct PassageGuardIntegrationTests {
         }
     }
 
-    @Test("Guard custom error includes custom reason message")
-    func customErrorIncludesCustomReason() async throws {
+    @Test
+    func `Guard custom error includes custom reason message`() async throws {
         try await withApp(configure: configure) { app in
             try await app.testing().test(.GET, "guarded-custom", afterResponse: { res async throws in
                 #expect(res.status == .forbidden)
@@ -191,8 +191,8 @@ struct PassageGuardIntegrationTests {
 
     // MARK: - Integration with PassageAuthenticator
 
-    @Test("Guard integrates properly with PassageAuthenticator chain")
-    func integratesWithAuthenticatorChain() async throws {
+    @Test
+    func `Guard integrates properly with PassageAuthenticator chain`() async throws {
         try await withApp(configure: configure) { app in
             // First verify unauthenticated is blocked
             try await app.testing().test(.GET, "guarded-default", afterResponse: { res async in

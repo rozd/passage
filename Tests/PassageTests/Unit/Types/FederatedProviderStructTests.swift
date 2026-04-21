@@ -1,43 +1,43 @@
 import Testing
 @testable import Passage
 
-@Suite("FederatedProvider Struct Tests")
-struct FederatedProviderStructTests {
+@Suite
+struct `FederatedProvider Struct Tests` {
 
     // MARK: - Provider Nested Type Tests
 
-    @Test("Provider is nested within FederatedLogin")
-    func providerNesting() {
+    @Test
+    func `Provider is nested within FederatedLogin`() {
         let typeName = String(reflecting: FederatedProvider.self)
         #expect(typeName.contains("FederatedProvider"))
     }
 
-    @Test("Provider Name is nested within Provider")
-    func providerNameNesting() {
+    @Test
+    func `Provider Name is nested within Provider`() {
         let typeName = String(reflecting: FederatedProvider.Name.self)
         #expect(typeName.contains("FederatedProvider.Name"))
     }
 
-    @Test("Provider Credentials is nested within Provider")
-    func providerCredentialsNesting() {
+    @Test
+    func `Provider Credentials is nested within Provider`() {
         let typeName = String(reflecting: FederatedProvider.Credentials.self)
         #expect(typeName.contains("FederatedProvider.Credentials"))
     }
 
     // MARK: - All Sendable Conformance Tests
 
-    @Test("All FederatedLogin types conform to Sendable")
-    func allTypesSendable() {
-        #expect(FederatedProvider.self is Sendable.Type)
-        #expect(FederatedProvider.Name.self is Sendable.Type)
-        #expect(FederatedProvider.Credentials.self is Sendable.Type)
+    @Test
+    func `All FederatedLogin types conform to Sendable`() {
+        #expect(FederatedProvider.self is (any Sendable).Type)
+        #expect(FederatedProvider.Name.self is (any Sendable).Type)
+        #expect(FederatedProvider.Credentials.self is (any Sendable).Type)
 
     }
 
     // MARK: - Type Hierarchy Tests
 
-    @Test("FederatedLogin namespace contains Provider")
-    func namespaceContainsProvider() {
+    @Test
+    func `FederatedLogin namespace contains Provider`() {
         // Create a provider to verify it's accessible through FederatedLogin
         let provider = FederatedProvider.google()
         #expect(provider.name.description == "google")
@@ -45,8 +45,8 @@ struct FederatedProviderStructTests {
 
     // MARK: - Integration Tests
 
-    @Test("Can create multiple providers with different configurations")
-    func multipleProviderConfigurations() {
+    @Test
+    func `Can create multiple providers with different configurations`() {
         let providers: [FederatedProvider] = [
             .google(scope: ["email"]),
             .github(scope: ["user"]),
@@ -59,8 +59,8 @@ struct FederatedProviderStructTests {
         #expect(providers[2].name.description == "custom")
     }
 
-    @Test("Provider with different credential types")
-    func differentCredentialTypes() {
+    @Test
+    func `Provider with different credential types`() {
         let conventional = FederatedProvider.google()
         let withClient = FederatedProvider.google(
             credentials: .client(id: "id", secret: "secret")
@@ -81,24 +81,24 @@ struct FederatedProviderStructTests {
 
     // MARK: - Name Equality Tests
 
-    @Test("Provider names with same rawValue are equal")
-    func nameEquality() {
+    @Test
+    func `Provider names with same rawValue are equal`() {
         let name1 = FederatedProvider.Name("test")
         let name2 = FederatedProvider.Name("test")
 
         #expect(name1 == name2)
     }
 
-    @Test("Provider names with different rawValue are not equal")
-    func nameInequality() {
+    @Test
+    func `Provider names with different rawValue are not equal`() {
         let name1 = FederatedProvider.Name("test1")
         let name2 = FederatedProvider.Name("test2")
 
         #expect(name1 != name2)
     }
 
-    @Test("Static provider names are equal to constructed ones")
-    func staticNameEquality() {
+    @Test
+    func `Static provider names are equal to constructed ones`() {
         let staticGoogle = FederatedProvider.Name.google
         let constructedGoogle = FederatedProvider.Name("google")
 
@@ -107,20 +107,20 @@ struct FederatedProviderStructTests {
 
     // MARK: - Scope Tests
 
-    @Test("Provider with empty scope")
-    func emptyScope() {
+    @Test
+    func `Provider with empty scope`() {
         let provider = FederatedProvider.google()
         #expect(provider.scope.isEmpty)
     }
 
-    @Test("Provider with single scope")
-    func singleScope() {
+    @Test
+    func `Provider with single scope`() {
         let provider = FederatedProvider.google(scope: ["email"])
         #expect(provider.scope == ["email"])
     }
 
-    @Test("Provider with multiple scopes")
-    func multipleScopes() {
+    @Test
+    func `Provider with multiple scopes`() {
         let provider = FederatedProvider.google(scope: ["email", "profile", "openid"])
         #expect(provider.scope.count == 3)
         #expect(provider.scope.contains("email"))
@@ -130,8 +130,8 @@ struct FederatedProviderStructTests {
 
     // MARK: - Credentials Pattern Matching Tests
 
-    @Test("Can pattern match conventional credentials")
-    func conventionalPatternMatching() {
+    @Test
+    func `Can pattern match conventional credentials`() {
         let provider = FederatedProvider.google()
 
         switch provider.credentials {
@@ -143,8 +143,8 @@ struct FederatedProviderStructTests {
         }
     }
 
-    @Test("Can pattern match client credentials")
-    func clientPatternMatching() {
+    @Test
+    func `Can pattern match client credentials`() {
         let provider = FederatedProvider.google(
             credentials: .client(id: "test-id", secret: "test-secret")
         )

@@ -2,34 +2,34 @@ import Testing
 import Vapor
 @testable import Passage
 
-@Suite("PassageGuard Tests")
-struct PassageGuardTests {
+@Suite
+struct `PassageGuard Tests` {
 
     // MARK: - Structure Tests
 
-    @Test("PassageGuard can be initialized with default error")
-    func canBeInitializedWithDefaultError() {
+    @Test
+    func `PassageGuard can be initialized with default error`() {
         let guard_ = PassageGuard()
         #expect(guard_ != nil)
     }
 
-    @Test("PassageGuard can be initialized with custom error")
-    func canBeInitializedWithCustomError() {
+    @Test
+    func `PassageGuard can be initialized with custom error`() {
         let customError = Abort(.forbidden, reason: "Custom forbidden error")
         let guard_ = PassageGuard(throwing: customError)
         #expect(guard_ != nil)
     }
 
-    @Test("PassageGuard type name is correct")
-    func typeNameIsCorrect() {
+    @Test
+    func `PassageGuard type name is correct`() {
         let typeName = String(describing: PassageGuard.self)
         #expect(typeName == "PassageGuard")
     }
 
     // MARK: - Protocol Conformance Tests
 
-    @Test("PassageGuard conforms to AsyncMiddleware")
-    func conformsToAsyncMiddleware() {
+    @Test
+    func `PassageGuard conforms to AsyncMiddleware`() {
         let guard_ = PassageGuard()
         #expect(guard_ is any AsyncMiddleware)
     }
@@ -41,8 +41,8 @@ struct PassageGuardTests {
     /// will cause a compile-time error.
     private func assertSendable<T: Sendable>(_ value: T) {}
 
-    @Test("PassageGuard conforms to Sendable")
-    func conformsToSendable() {
+    @Test
+    func `PassageGuard conforms to Sendable`() {
         assertSendable(PassageGuard())
         assertSendable(PassageGuard(throwing: Abort(.unauthorized)))
     }

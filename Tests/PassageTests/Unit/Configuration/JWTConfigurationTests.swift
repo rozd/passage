@@ -2,13 +2,13 @@ import Testing
 import Foundation
 @testable import Passage
 
-@Suite("JWT Configuration Tests")
-struct JWTConfigurationTests {
+@Suite
+struct `JWT Configuration Tests` {
 
     // MARK: - JWKS Tests
 
-    @Test("JWKS initialization with JSON string")
-    func jwksInitialization() {
+    @Test
+    func `JWKS initialization with JSON string`() {
         let jwksJSON = """
         {"keys":[{"kty":"RSA","kid":"test-key","use":"sig","n":"test","e":"AQAB"}]}
         """
@@ -17,8 +17,8 @@ struct JWTConfigurationTests {
         #expect(jwks.json == jwksJSON)
     }
 
-    @Test("JWKS from environment variable")
-    func jwksFromEnvironment() throws {
+    @Test
+    func `JWKS from environment variable`() throws {
         let jwksJSON = """
         {"keys":[{"kty":"RSA","kid":"env-key"}]}
         """
@@ -31,15 +31,15 @@ struct JWTConfigurationTests {
         #expect(jwks.json == jwksJSON)
     }
 
-    @Test("JWKS from missing environment variable throws error")
-    func jwksFromMissingEnvironment() {
+    @Test
+    func `JWKS from missing environment variable throws error`() {
         #expect(throws: PassageError.self) {
             try Passage.Configuration.JWT.JWKS.environment(name: "NONEXISTENT_JWKS")
         }
     }
 
-    @Test("JWKS from file")
-    func jwksFromFile() throws {
+    @Test
+    func `JWKS from file`() throws {
         // Create temporary file
         let tempDir = FileManager.default.temporaryDirectory
         let tempFile = tempDir.appendingPathComponent("test-jwks-\(UUID().uuidString).json")
@@ -55,15 +55,15 @@ struct JWTConfigurationTests {
         #expect(jwks.json == jwksJSON)
     }
 
-    @Test("JWKS from file with invalid path throws error")
-    func jwksFromInvalidFile() {
+    @Test
+    func `JWKS from file with invalid path throws error`() {
         #expect(throws: (any Error).self) {
             try Passage.Configuration.JWT.JWKS.file(path: "/nonexistent/path/to/jwks.json")
         }
     }
 
-    @Test("JWKS from file path environment variable")
-    func jwksFromFilePathEnvironment() throws {
+    @Test
+    func `JWKS from file path environment variable`() throws {
         // Create temporary file
         let tempDir = FileManager.default.temporaryDirectory
         let tempFile = tempDir.appendingPathComponent("test-jwks-env-\(UUID().uuidString).json")
@@ -83,8 +83,8 @@ struct JWTConfigurationTests {
         #expect(jwks.json == jwksJSON)
     }
 
-    @Test("JWKS from file path with missing environment variable throws error")
-    func jwksFromFilePathMissingEnvironment() {
+    @Test
+    func `JWKS from file path with missing environment variable throws error`() {
         #expect(throws: PassageError.self) {
             try Passage.Configuration.JWT.JWKS.fileFromEnvironment(name: "NONEXISTENT_FILE_PATH")
         }
@@ -92,8 +92,8 @@ struct JWTConfigurationTests {
 
     // MARK: - JWT Configuration Tests
 
-    @Test("JWT configuration initialization")
-    func jwtInitialization() {
+    @Test
+    func `JWT configuration initialization`() {
         let jwksJSON = """
         {"keys":[{"kty":"RSA"}]}
         """
@@ -103,8 +103,8 @@ struct JWTConfigurationTests {
         #expect(jwt.jwks.json == jwksJSON)
     }
 
-    @Test("JWT Sendable conformance")
-    func jwtSendableConformance() {
+    @Test
+    func `JWT Sendable conformance`() {
         let jwks = Passage.Configuration.JWT.JWKS(json: "{}")
         let jwt = Passage.Configuration.JWT(jwks: jwks)
 

@@ -2,8 +2,8 @@ import Testing
 import Vapor
 @testable import Passage
 
-@Suite("User Protocol Tests")
-struct UserProtocolTests {
+@Suite
+struct `User Protocol Tests` {
 
     // MARK: - Mock User Implementation
 
@@ -29,8 +29,8 @@ struct UserProtocolTests {
 
     // MARK: - Protocol Extension Tests
 
-    @Test("User requiredIdAsString returns string representation of ID")
-    func requiredIdAsStringSuccess() throws {
+    @Test
+    func `User requiredIdAsString returns string representation of ID`() throws {
         let userId = UUID()
         let user = MockUser(
             id: userId,
@@ -47,8 +47,8 @@ struct UserProtocolTests {
         #expect(idString == userId.uuidString)
     }
 
-    @Test("User requiredIdAsString throws when ID is nil")
-    func requiredIdAsStringThrowsWhenNil() {
+    @Test
+    func `User requiredIdAsString throws when ID is nil`() {
         let user = MockUser(
             id: nil,
             email: nil,
@@ -67,8 +67,8 @@ struct UserProtocolTests {
 
     // MARK: - Email Verification Check Tests
 
-    @Test("User check succeeds for verified email")
-    func checkVerifiedEmail() throws {
+    @Test
+    func `User check succeeds for verified email`() throws {
         let user = MockUser(
             id: UUID(),
             email: "test@example.com",
@@ -84,8 +84,8 @@ struct UserProtocolTests {
         try user.check(identifier: identifier)
     }
 
-    @Test("User check throws for unverified email")
-    func checkUnverifiedEmail() {
+    @Test
+    func `User check throws for unverified email`() {
         let user = MockUser(
             id: UUID(),
             email: "test@example.com",
@@ -105,8 +105,8 @@ struct UserProtocolTests {
 
     // MARK: - Phone Verification Check Tests
 
-    @Test("User check succeeds for verified phone")
-    func checkVerifiedPhone() throws {
+    @Test
+    func `User check succeeds for verified phone`() throws {
         let user = MockUser(
             id: UUID(),
             email: nil,
@@ -122,8 +122,8 @@ struct UserProtocolTests {
         try user.check(identifier: identifier)
     }
 
-    @Test("User check throws for unverified phone")
-    func checkUnverifiedPhone() {
+    @Test
+    func `User check throws for unverified phone`() {
         let user = MockUser(
             id: UUID(),
             email: nil,
@@ -143,30 +143,30 @@ struct UserProtocolTests {
 
     // MARK: - equals() Tests
 
-    @Test("User equals returns true when both users have the same ID")
-    func equalsReturnsTrueForSameId() {
+    @Test
+    func `User equals returns true when both users have the same ID`() {
         let id = UUID()
         let user1 = MockUser(id: id, email: "a@example.com", phone: nil, username: nil, passwordHash: nil, isAnonymous: false, isEmailVerified: false, isPhoneVerified: false)
         let user2 = MockUser(id: id, email: "b@example.com", phone: nil, username: nil, passwordHash: nil, isAnonymous: false, isEmailVerified: false, isPhoneVerified: false)
         #expect(user1.equals(to: user2))
     }
 
-    @Test("User equals returns false when users have different IDs")
-    func equalsReturnsFalseForDifferentIds() {
+    @Test
+    func `User equals returns false when users have different IDs`() {
         let user1 = MockUser(id: UUID(), email: nil, phone: nil, username: nil, passwordHash: nil, isAnonymous: false, isEmailVerified: false, isPhoneVerified: false)
         let user2 = MockUser(id: UUID(), email: nil, phone: nil, username: nil, passwordHash: nil, isAnonymous: false, isEmailVerified: false, isPhoneVerified: false)
         #expect(!user1.equals(to: user2))
     }
 
-    @Test("User equals returns false when self has nil ID")
-    func equalsReturnsFalseWhenSelfHasNilId() {
+    @Test
+    func `User equals returns false when self has nil ID`() {
         let user1 = MockUser(id: nil, email: nil, phone: nil, username: nil, passwordHash: nil, isAnonymous: false, isEmailVerified: false, isPhoneVerified: false)
         let user2 = MockUser(id: UUID(), email: nil, phone: nil, username: nil, passwordHash: nil, isAnonymous: false, isEmailVerified: false, isPhoneVerified: false)
         #expect(!user1.equals(to: user2))
     }
 
-    @Test("User equals returns false when other has nil ID")
-    func equalsReturnsFalseWhenOtherHasNilId() {
+    @Test
+    func `User equals returns false when other has nil ID`() {
         let user1 = MockUser(id: UUID(), email: nil, phone: nil, username: nil, passwordHash: nil, isAnonymous: false, isEmailVerified: false, isPhoneVerified: false)
         let user2 = MockUser(id: nil, email: nil, phone: nil, username: nil, passwordHash: nil, isAnonymous: false, isEmailVerified: false, isPhoneVerified: false)
         #expect(!user1.equals(to: user2))
@@ -174,8 +174,8 @@ struct UserProtocolTests {
 
     // MARK: - Username Check Tests
 
-    @Test("User check succeeds for username without verification")
-    func checkUsername() throws {
+    @Test
+    func `User check succeeds for username without verification`() throws {
         let user = MockUser(
             id: UUID(),
             email: nil,
@@ -191,8 +191,8 @@ struct UserProtocolTests {
         try user.check(identifier: identifier)
     }
 
-    @Test("User check succeeds for federated identifier without requiring verification")
-    func checkFederatedIdentifier() throws {
+    @Test
+    func `User check succeeds for federated identifier without requiring verification`() throws {
         let user = MockUser(
             id: UUID(),
             email: nil,
@@ -209,8 +209,8 @@ struct UserProtocolTests {
 
     // MARK: - Protocol Conformance Tests
 
-    @Test("MockUser conforms to User protocol")
-    func mockUserConformsToProtocol() {
+    @Test
+    func `MockUser conforms to User protocol`() {
         let user: any User = MockUser(
             id: UUID(),
             email: nil,
@@ -224,8 +224,8 @@ struct UserProtocolTests {
         #expect(user is MockUser)
     }
 
-    @Test("User protocol conforms to Sendable")
-    func userProtocolIsSendable() {
+    @Test
+    func `User protocol conforms to Sendable`() {
         let user: any Sendable = MockUser(
             id: UUID(),
             email: nil,
@@ -241,8 +241,8 @@ struct UserProtocolTests {
 
     // MARK: - User Properties Tests
 
-    @Test("User with all properties set")
-    func userWithAllProperties() {
+    @Test
+    func `User with all properties set`() {
         let userId = UUID()
         let user = MockUser(
             id: userId,
@@ -265,8 +265,8 @@ struct UserProtocolTests {
         #expect(user.isPhoneVerified == true)
     }
 
-    @Test("User with minimal properties")
-    func userWithMinimalProperties() {
+    @Test
+    func `User with minimal properties`() {
         let user = MockUser(
             id: nil,
             email: nil,
@@ -290,8 +290,8 @@ struct UserProtocolTests {
 
     // MARK: - ID Type Tests
 
-    @Test("User ID type is CustomStringConvertible")
-    func userIdTypeIsCustomStringConvertible() {
+    @Test
+    func `User ID type is CustomStringConvertible`() {
         let userId = UUID()
         let user = MockUser(
             id: userId,
@@ -311,8 +311,8 @@ struct UserProtocolTests {
 
     // MARK: - SessionAuthenticatable Conformance Tests
 
-    @Test("User protocol conforms to SessionAuthenticatable")
-    func userProtocolConformsToSessionAuthenticatable() {
+    @Test
+    func `User protocol conforms to SessionAuthenticatable`() {
         let user = MockUser(
             id: UUID(),
             email: nil,
@@ -326,8 +326,8 @@ struct UserProtocolTests {
         #expect(user is any SessionAuthenticatable)
     }
 
-    @Test("User sessionID returns string representation of ID")
-    func sessionIDReturnsStringId() {
+    @Test
+    func `User sessionID returns string representation of ID`() {
         let userId = UUID()
         let user = MockUser(
             id: userId,
@@ -343,8 +343,8 @@ struct UserProtocolTests {
         #expect(user.sessionID == userId.uuidString)
     }
 
-    @Test("User conforms to Authenticatable")
-    func userProtocolConformsToAuthenticatable() {
+    @Test
+    func `User conforms to Authenticatable`() {
         let user = MockUser(
             id: UUID(),
             email: nil,

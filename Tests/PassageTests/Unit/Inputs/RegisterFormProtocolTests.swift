@@ -2,8 +2,8 @@ import Testing
 import Vapor
 @testable import Passage
 
-@Suite("RegisterForm Protocol Tests")
-struct RegisterFormProtocolTests {
+@Suite
+struct `RegisterForm Protocol Tests` {
 
     // MARK: - Mock Implementation
 
@@ -29,8 +29,8 @@ struct RegisterFormProtocolTests {
 
     // MARK: - asIdentifier() Tests
 
-    @Test("RegisterForm asIdentifier returns email identifier")
-    func asIdentifierWithEmail() throws {
+    @Test
+    func `RegisterForm asIdentifier returns email identifier`() throws {
         let form = MockRegisterForm(
             email: "test@example.com",
             phone: nil,
@@ -44,8 +44,8 @@ struct RegisterFormProtocolTests {
         #expect(identifier.value == "test@example.com")
     }
 
-    @Test("RegisterForm asIdentifier returns phone identifier")
-    func asIdentifierWithPhone() throws {
+    @Test
+    func `RegisterForm asIdentifier returns phone identifier`() throws {
         let form = MockRegisterForm(
             email: nil,
             phone: "+1234567890",
@@ -59,8 +59,8 @@ struct RegisterFormProtocolTests {
         #expect(identifier.value == "+1234567890")
     }
 
-    @Test("RegisterForm asIdentifier returns username identifier")
-    func asIdentifierWithUsername() throws {
+    @Test
+    func `RegisterForm asIdentifier returns username identifier`() throws {
         let form = MockRegisterForm(
             email: nil,
             phone: nil,
@@ -74,8 +74,8 @@ struct RegisterFormProtocolTests {
         #expect(identifier.value == "johndoe")
     }
 
-    @Test("RegisterForm asIdentifier prefers email over phone")
-    func asIdentifierPrefersEmail() throws {
+    @Test
+    func `RegisterForm asIdentifier prefers email over phone`() throws {
         let form = MockRegisterForm(
             email: "test@example.com",
             phone: "+1234567890",
@@ -89,8 +89,8 @@ struct RegisterFormProtocolTests {
         #expect(identifier.value == "test@example.com")
     }
 
-    @Test("RegisterForm asIdentifier throws when no identifier provided")
-    func asIdentifierThrowsWhenNoIdentifier() {
+    @Test
+    func `RegisterForm asIdentifier throws when no identifier provided`() {
         let form = MockRegisterForm(
             email: nil,
             phone: nil,
@@ -106,8 +106,8 @@ struct RegisterFormProtocolTests {
 
     // MARK: - Protocol Conformance Tests
 
-    @Test("RegisterForm conforms to Form protocol")
-    func registerFormConformsToForm() {
+    @Test
+    func `RegisterForm conforms to Form protocol`() {
         let form: any Form = MockRegisterForm(
             email: "test@example.com",
             phone: nil,
@@ -118,8 +118,8 @@ struct RegisterFormProtocolTests {
         #expect(form is MockRegisterForm)
     }
 
-    @Test("RegisterForm has required properties")
-    func registerFormRequiredProperties() {
+    @Test
+    func `RegisterForm has required properties`() {
         let form = MockRegisterForm(
             email: "test@example.com",
             phone: nil,
@@ -137,8 +137,8 @@ struct RegisterFormProtocolTests {
 
     // MARK: - Password Validation Tests
 
-    @Test("RegisterForm validate succeeds when passwords match")
-    func validateSucceedsWhenPasswordsMatch() throws {
+    @Test
+    func `RegisterForm validate succeeds when passwords match`() throws {
         let form = MockRegisterForm(
             email: "test@example.com",
             phone: nil,
@@ -150,8 +150,8 @@ struct RegisterFormProtocolTests {
         try form.validate() // Should not throw
     }
 
-    @Test("RegisterForm validate throws when passwords don't match")
-    func validateThrowsWhenPasswordsDontMatch() {
+    @Test
+    func `RegisterForm validate throws when passwords don't match`() {
         let form = MockRegisterForm(
             email: "test@example.com",
             phone: nil,

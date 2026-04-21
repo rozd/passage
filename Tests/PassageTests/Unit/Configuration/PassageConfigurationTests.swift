@@ -3,13 +3,13 @@ import RoutingKit
 @testable import Passage
 import Testing
 
-@Suite("Passage Configuration Tests")
-struct PassageConfigurationTests {
+@Suite
+struct `Passage Configuration Tests` {
 
     // MARK: - Configuration Initialization Tests
 
-    @Test("Configuration with minimal required parameters")
-    func configurationMinimal() throws {
+    @Test
+    func `Configuration with minimal required parameters`() throws {
         let config = try Passage.Configuration(
             origin: URL(string: "https://example.com")!,
             jwt: .init(jwks: .init(json: "{}"))
@@ -25,8 +25,8 @@ struct PassageConfigurationTests {
         #expect(config.views.enabled == false)
     }
 
-    @Test("Configuration with custom routes")
-    func configurationWithCustomRoutes() throws {
+    @Test
+    func `Configuration with custom routes`() throws {
         let config = try Passage.Configuration(
             origin: URL(string: "https://example.com")!,
             routes: .init(
@@ -41,8 +41,8 @@ struct PassageConfigurationTests {
         #expect(config.routes.register.path[0].description == "signup")
     }
 
-    @Test("Configuration with custom tokens")
-    func configurationWithCustomTokens() throws {
+    @Test
+    func `Configuration with custom tokens`() throws {
         let config = try Passage.Configuration(
             origin: URL(string: "https://example.com")!,
             tokens: .init(
@@ -56,8 +56,8 @@ struct PassageConfigurationTests {
         #expect(config.tokens.accessToken.timeToLive == 600)
     }
 
-    @Test("Configuration with custom verification")
-    func configurationWithCustomVerification() throws {
+    @Test
+    func `Configuration with custom verification`() throws {
         let config = try Passage.Configuration(
             origin: URL(string: "https://example.com")!,
             jwt: .init(jwks: .init(json: "{}")),
@@ -73,8 +73,8 @@ struct PassageConfigurationTests {
         #expect(config.verification.useQueues == true)
     }
 
-    @Test("Configuration with custom restoration")
-    func configurationWithCustomRestoration() throws {
+    @Test
+    func `Configuration with custom restoration`() throws {
         let config = try Passage.Configuration(
             origin: URL(string: "https://example.com")!,
             jwt: .init(jwks: .init(json: "{}")),
@@ -90,8 +90,8 @@ struct PassageConfigurationTests {
         #expect(config.restoration.useQueues == true)
     }
 
-    @Test("Configuration with OAuth providers")
-    func configurationWithOAuth() throws {
+    @Test
+    func `Configuration with OAuth providers`() throws {
         let config = try Passage.Configuration(
             origin: URL(string: "https://example.com")!,
             jwt: .init(jwks: .init(json: "{}")),
@@ -108,8 +108,8 @@ struct PassageConfigurationTests {
         #expect(config.federatedLogin.routes.group[0].description == "social")
     }
 
-    @Test("Configuration with views enabled")
-    func configurationWithViews() throws {
+    @Test
+    func `Configuration with views enabled`() throws {
         let theme = Passage.Views.Theme(colors: .defaultLight)
         let config = try Passage.Configuration(
             origin: URL(string: "https://example.com")!,
@@ -123,8 +123,8 @@ struct PassageConfigurationTests {
         #expect(config.views.login != nil)
     }
 
-    @Test("Configuration with all custom settings")
-    func configurationFull() throws {
+    @Test
+    func `Configuration with all custom settings`() throws {
         let theme = Passage.Views.Theme(colors: .defaultLight)
         let config = try Passage.Configuration(
             origin: URL(string: "https://example.com")!,
@@ -165,8 +165,8 @@ struct PassageConfigurationTests {
         #expect(config.views.enabled == true)
     }
 
-    @Test("Configuration default JWT from environment")
-    func configurationDefaultJWT() throws {
+    @Test
+    func `Configuration default JWT from environment`() throws {
         // Create temporary JWKS file
         let tempDir = FileManager.default.temporaryDirectory
         let tempFile = tempDir.appendingPathComponent("test-jwks-\(UUID().uuidString).json")
@@ -189,8 +189,8 @@ struct PassageConfigurationTests {
         #expect(config.jwt.jwks.json.contains("test"))
     }
 
-    @Test("Configuration fails with missing JWKS environment")
-    func configurationMissingJWKS() {
+    @Test
+    func `Configuration fails with missing JWKS environment`() {
         // Ensure JWKS and JWKS_FILE_PATH are not set
         unsetenv("JWKS")
         unsetenv("JWKS_FILE_PATH")
@@ -202,8 +202,8 @@ struct PassageConfigurationTests {
         }
     }
 
-    @Test("Configuration Sendable conformance")
-    func configurationSendableConformance() throws {
+    @Test
+    func `Configuration Sendable conformance`() throws {
         let config = try Passage.Configuration(
             origin: URL(string: "https://example.com")!,
             jwt: .init(jwks: .init(json: "{}"))
@@ -214,8 +214,8 @@ struct PassageConfigurationTests {
 
     // MARK: - URL Construction Tests
 
-    @Test("Configuration constructs correct URLs")
-    func configurationURLConstruction() throws {
+    @Test
+    func `Configuration constructs correct URLs`() throws {
         let config = try Passage.Configuration(
             origin: URL(string: "https://example.com")!,
             jwt: .init(jwks: .init(json: "{}"))
@@ -234,8 +234,8 @@ struct PassageConfigurationTests {
         #expect(config.phonePasswordResetURL.absoluteString == "https://example.com/auth/password/reset/phone/verify")
     }
 
-    @Test("Configuration constructs email reset link with query parameters")
-    func configurationEmailResetLink() throws {
+    @Test
+    func `Configuration constructs email reset link with query parameters`() throws {
         let config = try Passage.Configuration(
             origin: URL(string: "https://example.com")!,
             jwt: .init(jwks: .init(json: "{}"))

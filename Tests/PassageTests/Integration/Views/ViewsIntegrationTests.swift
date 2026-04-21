@@ -9,8 +9,8 @@ import Vapor
 import VaporTesting
 import XCTQueues
 
-@Suite("Views Integration Tests", .tags(.integration))
-struct ViewsIntegrationTests {
+@Suite(.tags(.integration))
+struct `Views Integration Tests` {
 
     // MARK: - Helpers
 
@@ -119,8 +119,8 @@ struct ViewsIntegrationTests {
 
     // MARK: - Login View 404 Tests
 
-    @Test("Login view returns 404 when not configured")
-    func loginViewNotConfigured() async throws {
+    @Test
+    func `Login view returns 404 when not configured`() async throws {
         let viewsConfig = Passage.Configuration.Views()
 
         try await withApp(configure: { app in try await configure(app, viewsConfig: viewsConfig) }) { app in
@@ -132,8 +132,8 @@ struct ViewsIntegrationTests {
 
     // MARK: - Login View Rendering Tests
 
-    @Test("Login view renders login-minimalism template with email identifier")
-    func loginViewRendersWithEmail() async throws {
+    @Test
+    func `Login view renders login-minimalism template with email identifier`() async throws {
         let theme = Passage.Views.Theme(colors: .defaultLight)
         let loginView = Passage.Configuration.Views.LoginView(
             style: .minimalism,
@@ -161,8 +161,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Login view renders with phone identifier context")
-    func loginViewRendersWithPhone() async throws {
+    @Test
+    func `Login view renders with phone identifier context`() async throws {
         let theme = Passage.Views.Theme(colors: .oceanLight)
         let loginView = Passage.Configuration.Views.LoginView(
             style: .minimalism,
@@ -189,8 +189,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Login view captures query parameters in context")
-    func loginViewRendersWithParams() async throws {
+    @Test
+    func `Login view captures query parameters in context`() async throws {
         let loginView = Passage.Configuration.Views.LoginView(
             style: .minimalism,
             theme: Passage.Views.Theme(colors: .defaultLight),
@@ -215,8 +215,8 @@ struct ViewsIntegrationTests {
 
     // MARK: - Login Form Submission Tests
 
-    @Test("Login form submission succeeds and redirects to login page with success message")
-    func loginFormSubmissionSucceeds() async throws {
+    @Test
+    func `Login form submission succeeds and redirects to login page with success message`() async throws {
         let loginView = Passage.Configuration.Views.LoginView(
             style: .minimalism,
             theme: Passage.Views.Theme(colors: .defaultLight),
@@ -261,8 +261,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Login form submission fails and redirects to login page with error message")
-    func loginFormSubmissionFails() async throws {
+    @Test
+    func `Login form submission fails and redirects to login page with error message`() async throws {
         let loginView = Passage.Configuration.Views.LoginView(
             style: .minimalism,
             theme: Passage.Views.Theme(colors: .defaultLight),
@@ -292,8 +292,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Login form submission with custom redirect on success")
-    func loginFormSubmissionWithCustomSuccessRedirect() async throws {
+    @Test
+    func `Login form submission with custom redirect on success`() async throws {
         let redirect = Passage.Configuration.Views.Redirect(
             onSuccess: "/dashboard",
             onFailure: nil
@@ -337,8 +337,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Login form submission with custom redirect on failure")
-    func loginFormSubmissionWithCustomFailureRedirect() async throws {
+    @Test
+    func `Login form submission with custom redirect on failure`() async throws {
         let redirect = Passage.Configuration.Views.Redirect(
             onSuccess: nil,
             onFailure: "/error"
@@ -371,8 +371,8 @@ struct ViewsIntegrationTests {
 
     // MARK: - Register View 404 Tests
 
-    @Test("Register view returns 404 when not configured")
-    func registerViewNotConfigured() async throws {
+    @Test
+    func `Register view returns 404 when not configured`() async throws {
         let viewsConfig = Passage.Configuration.Views()
 
         try await withApp(configure: { app in try await configure(app, viewsConfig: viewsConfig) }) { app in
@@ -384,8 +384,8 @@ struct ViewsIntegrationTests {
 
     // MARK: - Register View Rendering Tests
 
-    @Test("Register view renders register-minimalism template with email identifier")
-    func registerViewRendersMinimalism() async throws {
+    @Test
+    func `Register view renders register-minimalism template with email identifier`() async throws {
         let registerView = Passage.Configuration.Views.RegisterView(
             style: .minimalism,
             theme: Passage.Views.Theme(colors: .defaultLight),
@@ -409,8 +409,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Register view renders register-neobrutalism template with phone identifier")
-    func registerViewRendersNeobrutalism() async throws {
+    @Test
+    func `Register view renders register-neobrutalism template with phone identifier`() async throws {
         let registerView = Passage.Configuration.Views.RegisterView(
             style: .neobrutalism,
             theme: Passage.Views.Theme(colors: .oceanLight),
@@ -436,8 +436,8 @@ struct ViewsIntegrationTests {
 
     // MARK: - Register Form Submission Tests
 
-    @Test("Register form submission succeeds and redirects to register page with success message")
-    func registerFormSubmissionSucceeds() async throws {
+    @Test
+    func `Register form submission succeeds and redirects to register page with success message`() async throws {
         let registerView = Passage.Configuration.Views.RegisterView(
             style: .minimalism,
             theme: Passage.Views.Theme(colors: .defaultLight),
@@ -471,8 +471,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Register form submission fails and redirects to register page with error message")
-    func registerFormSubmissionFails() async throws {
+    @Test
+    func `Register form submission fails and redirects to register page with error message`() async throws {
         let registerView = Passage.Configuration.Views.RegisterView(
             style: .minimalism,
             theme: Passage.Views.Theme(colors: .defaultLight),
@@ -511,8 +511,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Register form submission with custom redirect on success")
-    func registerFormSubmissionWithCustomSuccessRedirect() async throws {
+    @Test
+    func `Register form submission with custom redirect on success`() async throws {
         let redirect = Passage.Configuration.Views.Redirect(
             onSuccess: "/welcome",
             onFailure: nil
@@ -546,8 +546,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Register form submission with custom redirect on failure")
-    func registerFormSubmissionWithCustomFailureRedirect() async throws {
+    @Test
+    func `Register form submission with custom redirect on failure`() async throws {
         let redirect = Passage.Configuration.Views.Redirect(
             onSuccess: nil,
             onFailure: "/signup-error"
@@ -589,8 +589,8 @@ struct ViewsIntegrationTests {
 
     // MARK: - Password Reset Request View 404 Tests
 
-    @Test("Password reset request view returns 404 when not configured for email")
-    func passwordResetRequestEmailNotConfigured() async throws {
+    @Test
+    func `Password reset request view returns 404 when not configured for email`() async throws {
         let viewsConfig = Passage.Configuration.Views()
 
         try await withApp(configure: { app in try await configure(app, viewsConfig: viewsConfig) }) { app in
@@ -600,8 +600,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Password reset request view returns 404 when not configured for phone")
-    func passwordResetRequestPhoneNotConfigured() async throws {
+    @Test
+    func `Password reset request view returns 404 when not configured for phone`() async throws {
         let viewsConfig = Passage.Configuration.Views()
 
         try await withApp(configure: { app in try await configure(app, viewsConfig: viewsConfig) }) { app in
@@ -613,8 +613,8 @@ struct ViewsIntegrationTests {
 
     // MARK: - Password Reset Request View Rendering Tests
 
-    @Test("Password reset request view renders for email")
-    func passwordResetRequestEmailRenders() async throws {
+    @Test
+    func `Password reset request view renders for email`() async throws {
         let resetView = Passage.Configuration.Views.PasswordResetRequestView(
             style: .minimalism,
             theme: Passage.Views.Theme(colors: .defaultLight)
@@ -636,8 +636,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Password reset request view renders with material style for phone")
-    func passwordResetRequestPhoneRenders() async throws {
+    @Test
+    func `Password reset request view renders with material style for phone`() async throws {
         let resetView = Passage.Configuration.Views.PasswordResetRequestView(
             style: .material,
             theme: Passage.Views.Theme(colors: .forestLight)
@@ -661,8 +661,8 @@ struct ViewsIntegrationTests {
 
     // MARK: - Password Reset Request Form Submission Tests
 
-    @Test("Password reset request form submission succeeds for email")
-    func passwordResetRequestFormSubmissionSucceedsForEmail() async throws {
+    @Test
+    func `Password reset request form submission succeeds for email`() async throws {
         let resetView = Passage.Configuration.Views.PasswordResetRequestView(
             style: .minimalism,
             theme: Passage.Views.Theme(colors: .defaultLight)
@@ -700,8 +700,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Password reset request form submission fails with invalid email format")
-    func passwordResetRequestFormSubmissionFailsWithInvalidEmail() async throws {
+    @Test
+    func `Password reset request form submission fails with invalid email format`() async throws {
         let resetView = Passage.Configuration.Views.PasswordResetRequestView(
             style: .minimalism,
             theme: Passage.Views.Theme(colors: .defaultLight)
@@ -730,8 +730,8 @@ struct ViewsIntegrationTests {
 
     // MARK: - Password Reset Confirm View 404 Tests
 
-    @Test("Password reset confirm view returns 404 when not configured for email")
-    func passwordResetConfirmEmailNotConfigured() async throws {
+    @Test
+    func `Password reset confirm view returns 404 when not configured for email`() async throws {
         let viewsConfig = Passage.Configuration.Views()
 
         try await withApp(configure: { app in try await configure(app, viewsConfig: viewsConfig) }) { app in
@@ -741,8 +741,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Password reset confirm view returns 404 when not configured for phone")
-    func passwordResetConfirmPhoneNotConfigured() async throws {
+    @Test
+    func `Password reset confirm view returns 404 when not configured for phone`() async throws {
         let viewsConfig = Passage.Configuration.Views()
 
         try await withApp(configure: { app in try await configure(app, viewsConfig: viewsConfig) }) { app in
@@ -754,8 +754,8 @@ struct ViewsIntegrationTests {
 
     // MARK: - Password Reset Request View Rendering Tests
 
-    @Test("Password reset confirm view renders for email")
-    func passwordResetConfirmEmailRenders() async throws {
+    @Test
+    func `Password reset confirm view renders for email`() async throws {
         let resetView = Passage.Configuration.Views.PasswordResetConfirmView(
             style: .minimalism,
             theme: Passage.Views.Theme(colors: .defaultLight)
@@ -777,8 +777,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Password reset confirm view renders for phone")
-    func passwordResetConfirmPhoneRenders() async throws {
+    @Test
+    func `Password reset confirm view renders for phone`() async throws {
         let resetView = Passage.Configuration.Views.PasswordResetConfirmView(
             style: .minimalism,
             theme: Passage.Views.Theme(colors: .defaultLight)
@@ -802,8 +802,8 @@ struct ViewsIntegrationTests {
 
     // MARK: - Password Reset Confirm Form Submission Tests
 
-    @Test("Password reset confirm form submission succeeds for email")
-    func passwordResetConfirmFormSubmissionSucceedsForEmail() async throws {
+    @Test
+    func `Password reset confirm form submission succeeds for email`() async throws {
         let captured = CapturedMessages()
         let confirmView = Passage.Configuration.Views.PasswordResetConfirmView(
             style: .minimalism,
@@ -853,8 +853,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Password reset confirm form submission fails with invalid code")
-    func passwordResetConfirmFormSubmissionFailsWithInvalidCode() async throws {
+    @Test
+    func `Password reset confirm form submission fails with invalid code`() async throws {
         let confirmView = Passage.Configuration.Views.PasswordResetConfirmView(
             style: .minimalism,
             theme: Passage.Views.Theme(colors: .defaultLight)
@@ -890,8 +890,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Password reset confirm form submission with custom redirect on success")
-    func passwordResetConfirmFormSubmissionWithCustomSuccessRedirect() async throws {
+    @Test
+    func `Password reset confirm form submission with custom redirect on success`() async throws {
         let captured = CapturedMessages()
         let redirect = Passage.Configuration.Views.Redirect(
             onSuccess: "/login",
@@ -942,8 +942,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Password reset confirm form submission with custom redirect on failure")
-    func passwordResetConfirmFormSubmissionWithCustomFailureRedirect() async throws {
+    @Test
+    func `Password reset confirm form submission with custom redirect on failure`() async throws {
         let redirect = Passage.Configuration.Views.Redirect(
             onSuccess: nil,
             onFailure: "/reset-error"
@@ -984,8 +984,8 @@ struct ViewsIntegrationTests {
 
     // MARK: - Configuration Integration Tests
 
-    @Test("Views configuration is properly integrated with Passage configuration")
-    func viewsConfigurationIntegration() async throws {
+    @Test
+    func `Views configuration is properly integrated with Passage configuration`() async throws {
         let theme = Passage.Views.Theme(colors: .defaultLight)
         let loginView = Passage.Configuration.Views.LoginView(
             style: .minimalism,
@@ -1020,8 +1020,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Views configuration is properly disabled when no views configured")
-    func viewsConfigurationDisabled() async throws {
+    @Test
+    func `Views configuration is properly disabled when no views configured`() async throws {
         let viewsConfig = Passage.Configuration.Views()
 
         // Verify views are disabled when not configured
@@ -1037,8 +1037,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Different view styles and themes can be configured")
-    func differentStylesAndThemes() async throws {
+    @Test
+    func `Different view styles and themes can be configured`() async throws {
         let loginView = Passage.Configuration.Views.LoginView(
             style: .minimalism,
             theme: Passage.Views.Theme(colors: .defaultLight),
@@ -1072,8 +1072,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("View redirect configuration is properly stored")
-    func viewRedirectConfiguration() async throws {
+    @Test
+    func `View redirect configuration is properly stored`() async throws {
         let redirect = Passage.Configuration.Views.Redirect(
             onSuccess: "/dashboard",
             onFailure: "/error"
@@ -1096,8 +1096,8 @@ struct ViewsIntegrationTests {
 
     // MARK: - Magic Link Request View 404 Tests
 
-    @Test("Magic link request view returns 404 when not configured")
-    func magicLinkRequestViewNotConfigured() async throws {
+    @Test
+    func `Magic link request view returns 404 when not configured`() async throws {
         let viewsConfig = Passage.Configuration.Views()
 
         try await withApp(configure: { app in try await configure(app, viewsConfig: viewsConfig) }) { app in
@@ -1109,8 +1109,8 @@ struct ViewsIntegrationTests {
 
     // MARK: - Magic Link Request View Rendering Tests
 
-    @Test("Magic link request view renders magic-link-request-minimalism template")
-    func magicLinkRequestViewRendersMinimalism() async throws {
+    @Test
+    func `Magic link request view renders magic-link-request-minimalism template`() async throws {
         let magicLinkRequestView = Passage.Configuration.Views.MagicLinkRequestView(
             style: .minimalism,
             theme: Passage.Views.Theme(colors: .defaultLight)
@@ -1131,8 +1131,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Magic link request view renders magic-link-request-neobrutalism template")
-    func magicLinkRequestViewRendersNeobrutalism() async throws {
+    @Test
+    func `Magic link request view renders magic-link-request-neobrutalism template`() async throws {
         let magicLinkRequestView = Passage.Configuration.Views.MagicLinkRequestView(
             style: .neobrutalism,
             theme: Passage.Views.Theme(colors: .oceanLight)
@@ -1153,8 +1153,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Magic link request view captures query parameters in context")
-    func magicLinkRequestViewRendersWithParams() async throws {
+    @Test
+    func `Magic link request view captures query parameters in context`() async throws {
         let magicLinkRequestView = Passage.Configuration.Views.MagicLinkRequestView(
             style: .minimalism,
             theme: Passage.Views.Theme(colors: .defaultLight)
@@ -1177,8 +1177,8 @@ struct ViewsIntegrationTests {
 
     // MARK: - Magic Link Request Form Submission Tests
 
-    @Test("Magic link request form submission succeeds and redirects with success message")
-    func magicLinkRequestFormSubmissionSucceeds() async throws {
+    @Test
+    func `Magic link request form submission succeeds and redirects with success message`() async throws {
         let magicLinkRequestView = Passage.Configuration.Views.MagicLinkRequestView(
             style: .minimalism,
             theme: Passage.Views.Theme(colors: .defaultLight)
@@ -1206,8 +1206,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Magic link request form submission fails with invalid email format")
-    func magicLinkRequestFormSubmissionFailsWithInvalidEmail() async throws {
+    @Test
+    func `Magic link request form submission fails with invalid email format`() async throws {
         let magicLinkRequestView = Passage.Configuration.Views.MagicLinkRequestView(
             style: .minimalism,
             theme: Passage.Views.Theme(colors: .defaultLight)
@@ -1231,8 +1231,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Magic link request form submission with custom redirect on success")
-    func magicLinkRequestFormSubmissionWithCustomSuccessRedirect() async throws {
+    @Test
+    func `Magic link request form submission with custom redirect on success`() async throws {
         let redirect = Passage.Configuration.Views.Redirect(
             onSuccess: "/check-email",
             onFailure: nil
@@ -1261,8 +1261,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Magic link request form submission with custom redirect on failure")
-    func magicLinkRequestFormSubmissionWithCustomFailureRedirect() async throws {
+    @Test
+    func `Magic link request form submission with custom redirect on failure`() async throws {
         let redirect = Passage.Configuration.Views.Redirect(
             onSuccess: nil,
             onFailure: "/magic-link-error"
@@ -1291,8 +1291,8 @@ struct ViewsIntegrationTests {
 
     // MARK: - Magic Link Verify View 404 Tests
 
-    @Test("Magic link verify view returns API response when views not configured")
-    func magicLinkVerifyViewNotConfigured() async throws {
+    @Test
+    func `Magic link verify view returns API response when views not configured`() async throws {
         let viewsConfig = Passage.Configuration.Views()
 
         try await withApp(configure: { app in try await configure(app, viewsConfig: viewsConfig) }) { app in
@@ -1306,8 +1306,8 @@ struct ViewsIntegrationTests {
 
     // MARK: - Magic Link Verify View Rendering Tests
 
-    @Test("Magic link verify view renders magic-link-verify-minimalism template")
-    func magicLinkVerifyViewRendersMinimalism() async throws {
+    @Test
+    func `Magic link verify view renders magic-link-verify-minimalism template`() async throws {
         let magicLinkVerifyView = Passage.Configuration.Views.MagicLinkVerifyView(
             style: .minimalism,
             theme: Passage.Views.Theme(colors: .defaultLight),
@@ -1329,8 +1329,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Magic link verify view renders magic-link-verify-neobrutalism template")
-    func magicLinkVerifyViewRendersNeobrutalism() async throws {
+    @Test
+    func `Magic link verify view renders magic-link-verify-neobrutalism template`() async throws {
         let magicLinkVerifyView = Passage.Configuration.Views.MagicLinkVerifyView(
             style: .neobrutalism,
             theme: Passage.Views.Theme(colors: .oceanLight),
@@ -1354,8 +1354,8 @@ struct ViewsIntegrationTests {
 
     // MARK: - Magic Link Verify Success/Error Redirection Tests
 
-    @Test("Magic link verify renders success view on valid token")
-    func magicLinkVerifyRendersSuccessOnValidToken() async throws {
+    @Test
+    func `Magic link verify renders success view on valid token`() async throws {
         let captured = CapturedMessages()
         let magicLinkVerifyView = Passage.Configuration.Views.MagicLinkVerifyView(
             style: .minimalism,
@@ -1401,8 +1401,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Magic link verify renders error view on invalid token")
-    func magicLinkVerifyRendersErrorOnInvalidToken() async throws {
+    @Test
+    func `Magic link verify renders error view on invalid token`() async throws {
         let magicLinkVerifyView = Passage.Configuration.Views.MagicLinkVerifyView(
             style: .minimalism,
             theme: Passage.Views.Theme(colors: .defaultLight),
@@ -1439,8 +1439,8 @@ struct ViewsIntegrationTests {
 
     // MARK: - Login View Magic Link Button Tests
 
-    @Test("Login view includes magic link button when magic link is configured")
-    func loginViewIncludesMagicLinkButton() async throws {
+    @Test
+    func `Login view includes magic link button when magic link is configured`() async throws {
         let loginView = Passage.Configuration.Views.LoginView(
             style: .minimalism,
             theme: Passage.Views.Theme(colors: .defaultLight),
@@ -1471,8 +1471,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Login view does not include magic link button when magic link is not configured")
-    func loginViewExcludesMagicLinkButtonWhenNotConfigured() async throws {
+    @Test
+    func `Login view does not include magic link button when magic link is not configured`() async throws {
         let loginView = Passage.Configuration.Views.LoginView(
             style: .minimalism,
             theme: Passage.Views.Theme(colors: .defaultLight),
@@ -1496,8 +1496,8 @@ struct ViewsIntegrationTests {
 
     // MARK: - Magic Link Configuration Integration Tests
 
-    @Test("Magic link views configuration is properly integrated")
-    func magicLinkViewsConfigurationIntegration() async throws {
+    @Test
+    func `Magic link views configuration is properly integrated`() async throws {
         let magicLinkRequestView = Passage.Configuration.Views.MagicLinkRequestView(
             style: .minimalism,
             theme: Passage.Views.Theme(colors: .defaultLight)
@@ -1680,8 +1680,8 @@ struct ViewsIntegrationTests {
         return nil
     }
 
-    @Test("Link Account select view returns 404 when not configured")
-    func linkAccountSelectViewNotConfigured() async throws {
+    @Test
+    func `Link Account select view returns 404 when not configured`() async throws {
         let viewsConfig = Passage.Configuration.Views()
 
         try await withApp(configure: { app in
@@ -1693,8 +1693,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Link Account select view returns error when no linking session exists")
-    func linkAccountSelectViewNoSession() async throws {
+    @Test
+    func `Link Account select view returns error when no linking session exists`() async throws {
         let theme = Passage.Views.Theme(colors: .defaultLight)
         let viewsConfig = Passage.Configuration.Views(
             linkAccountSelect: .init(style: .minimalism, theme: theme),
@@ -1711,8 +1711,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Link Account select view renders with valid session and candidates")
-    func linkAccountSelectViewRendersWithCandidates() async throws {
+    @Test
+    func `Link Account select view renders with valid session and candidates`() async throws {
         let theme = Passage.Views.Theme(colors: .defaultLight)
         let viewsConfig = Passage.Configuration.Views(
             linkAccountSelect: .init(style: .minimalism, theme: theme),
@@ -1781,8 +1781,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Link Account select view renders with multiple candidates")
-    func linkAccountSelectViewRendersWithMultipleCandidates() async throws {
+    @Test
+    func `Link Account select view renders with multiple candidates`() async throws {
         let theme = Passage.Views.Theme(colors: .oceanLight)
         let viewsConfig = Passage.Configuration.Views(
             linkAccountSelect: .init(style: .neobrutalism, theme: theme),
@@ -1854,8 +1854,8 @@ struct ViewsIntegrationTests {
 
     // MARK: - OAuth Link Account Verify View Tests (lines 422-451)
 
-    @Test("Link Account verify view returns 404 when not configured")
-    func linkAccountVerifyViewNotConfigured() async throws {
+    @Test
+    func `Link Account verify view returns 404 when not configured`() async throws {
         let viewsConfig = Passage.Configuration.Views()
 
         try await withApp(configure: { app in
@@ -1867,8 +1867,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Link Account verify view returns error when no linking session exists")
-    func linkAccountVerifyViewNoSession() async throws {
+    @Test
+    func `Link Account verify view returns error when no linking session exists`() async throws {
         let theme = Passage.Views.Theme(colors: .defaultLight)
         let viewsConfig = Passage.Configuration.Views(
             linkAccountSelect: .init(style: .minimalism, theme: theme),
@@ -1885,8 +1885,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Link Account verify view returns bad request when no user selected")
-    func linkAccountVerifyViewNoUserSelected() async throws {
+    @Test
+    func `Link Account verify view returns bad request when no user selected`() async throws {
         let theme = Passage.Views.Theme(colors: .defaultLight)
         let viewsConfig = Passage.Configuration.Views(
             linkAccountSelect: .init(style: .minimalism, theme: theme),
@@ -1945,8 +1945,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Link Account verify view renders with valid session and selected user with password")
-    func linkAccountVerifyViewRendersWithPasswordUser() async throws {
+    @Test
+    func `Link Account verify view renders with valid session and selected user with password`() async throws {
         let theme = Passage.Views.Theme(colors: .defaultLight)
         let viewsConfig = Passage.Configuration.Views(
             linkAccountSelect: .init(style: .minimalism, theme: theme),
@@ -2037,8 +2037,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Link Account verify view renders with user who can use email code")
-    func linkAccountVerifyViewRendersWithEmailCodeUser() async throws {
+    @Test
+    func `Link Account verify view renders with user who can use email code`() async throws {
         let theme = Passage.Views.Theme(colors: .forestLight)
         let viewsConfig = Passage.Configuration.Views(
             linkAccountSelect: .init(style: .material, theme: theme),
@@ -2128,8 +2128,8 @@ struct ViewsIntegrationTests {
         }
     }
 
-    @Test("Link Account select and verify views configuration integration")
-    func linkAccountViewsConfigurationIntegration() async throws {
+    @Test
+    func `Link Account select and verify views configuration integration`() async throws {
         let theme = Passage.Views.Theme(colors: .defaultLight)
         let linkSelectView = Passage.Configuration.Views.LinkAccountSelectView(
             style: .minimalism,

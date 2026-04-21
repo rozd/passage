@@ -2,13 +2,13 @@ import Testing
 import Vapor
 @testable import Passage
 
-@Suite("Account Route Collection Tests", .tags(.unit))
-struct AccountRouteCollectionTests {
+@Suite(.tags(.unit))
+struct `Account Route Collection Tests` {
 
     // MARK: - Initialization Tests
 
-    @Test("Passage.Account.RouteCollection initialization with default routes")
-    func routeCollectionInitialization() {
+    @Test
+    func `Passage.Account.RouteCollection initialization with default routes`() {
         let routes = Passage.Configuration.Routes()
         let collection = Passage.Account.RouteCollection(routes: routes)
 
@@ -18,8 +18,8 @@ struct AccountRouteCollectionTests {
         #expect(collection.routes.currentUser.path.count == 1)
     }
 
-    @Test("Passage.Account.RouteCollection initialization with custom routes")
-    func routeCollectionWithCustomRoutes() {
+    @Test
+    func `Passage.Account.RouteCollection initialization with custom routes`() {
         let routes = Passage.Configuration.Routes(
             register: .init(path: "signup"),
             login: .init(path: "signin"),
@@ -35,8 +35,8 @@ struct AccountRouteCollectionTests {
         #expect(collection.routes.currentUser.path.count == 2)
     }
 
-    @Test("Passage.Account.RouteCollection stores routes configuration")
-    func routeCollectionStoresConfiguration() {
+    @Test
+    func `Passage.Account.RouteCollection stores routes configuration`() {
         let routes = Passage.Configuration.Routes(
             group: "api", "v1"
         )
@@ -49,8 +49,8 @@ struct AccountRouteCollectionTests {
 
     // MARK: - Protocol Conformance Tests
 
-    @Test("Passage.Account.RouteCollection conforms to RouteCollection")
-    func routeCollectionConformsToProtocol() {
+    @Test
+    func `Passage.Account.RouteCollection conforms to RouteCollection`() {
         let routes = Passage.Configuration.Routes()
         let collection = Passage.Account.RouteCollection(routes: routes)
 
@@ -59,8 +59,8 @@ struct AccountRouteCollectionTests {
 
     // MARK: - Route Path Configuration Tests
 
-    @Test("Passage.Account.RouteCollection with no group")
-    func routeCollectionWithNoGroup() {
+    @Test
+    func `Passage.Account.RouteCollection with no group`() {
         let routes = Passage.Configuration.Routes()
         let collection = Passage.Account.RouteCollection(routes: routes)
 
@@ -68,8 +68,8 @@ struct AccountRouteCollectionTests {
         #expect(collection.routes.group[0] == PathComponent.constant("auth"))
     }
 
-    @Test("Passage.Account.RouteCollection with auth group")
-    func routeCollectionWithAuthGroup() {
+    @Test
+    func `Passage.Account.RouteCollection with auth group`() {
         let routes = Passage.Configuration.Routes(group: "auth")
         let collection = Passage.Account.RouteCollection(routes: routes)
 
@@ -77,8 +77,8 @@ struct AccountRouteCollectionTests {
         #expect(collection.routes.group[0] == PathComponent.constant("auth"))
     }
 
-    @Test("Passage.Account.RouteCollection with nested group")
-    func routeCollectionWithNestedGroup() {
+    @Test
+    func `Passage.Account.RouteCollection with nested group`() {
         let routes = Passage.Configuration.Routes(group: "api", "auth")
         let collection = Passage.Account.RouteCollection(routes: routes)
 
@@ -87,8 +87,8 @@ struct AccountRouteCollectionTests {
         #expect(collection.routes.group[1] == PathComponent.constant("auth"))
     }
 
-    @Test("Passage.Account.RouteCollection with versioned group")
-    func routeCollectionWithVersionedGroup() {
+    @Test
+    func `Passage.Account.RouteCollection with versioned group`() {
         let routes = Passage.Configuration.Routes(group: "v1", "account")
         let collection = Passage.Account.RouteCollection(routes: routes)
 
@@ -97,8 +97,8 @@ struct AccountRouteCollectionTests {
         #expect(collection.routes.group[1] == PathComponent.constant("account"))
     }
 
-    @Test("Passage.Account.RouteCollection default route paths")
-    func routeCollectionDefaultPaths() {
+    @Test
+    func `Passage.Account.RouteCollection default route paths`() {
         let routes = Passage.Configuration.Routes()
         let collection = Passage.Account.RouteCollection(routes: routes)
 
@@ -109,8 +109,8 @@ struct AccountRouteCollectionTests {
         #expect(collection.routes.currentUser.path == [PathComponent.constant("me")])
     }
 
-    @Test("Passage.Account.RouteCollection with custom path components")
-    func routeCollectionWithCustomPaths() {
+    @Test
+    func `Passage.Account.RouteCollection with custom path components`() {
         let routes = Passage.Configuration.Routes(
             register: .init(path: "users", "create"),
             login: .init(path: "auth", "login"),
@@ -125,8 +125,8 @@ struct AccountRouteCollectionTests {
         #expect(collection.routes.currentUser.path.count == 2)
     }
 
-    @Test("Passage.Account.RouteCollection preserves route configuration")
-    func routeCollectionPreservesConfiguration() {
+    @Test
+    func `Passage.Account.RouteCollection preserves route configuration`() {
         let customRegister = Passage.Configuration.Routes.Register(path: "custom", "register")
         let customLogin = Passage.Configuration.Routes.Login(path: "custom", "login")
 
@@ -143,8 +143,8 @@ struct AccountRouteCollectionTests {
 
     // MARK: - Multiple Instance Tests
 
-    @Test("Passage.Account.RouteCollection can be instantiated multiple times")
-    func multipleRouteCollectionInstances() {
+    @Test
+    func `Passage.Account.RouteCollection can be instantiated multiple times`() {
         let routes1 = Passage.Configuration.Routes(group: "api")
         let routes2 = Passage.Configuration.Routes(group: "admin")
 
@@ -155,8 +155,8 @@ struct AccountRouteCollectionTests {
         #expect(collection2.routes.group[0] == PathComponent.constant("admin"))
     }
 
-    @Test("Passage.Account.RouteCollection instances are independent")
-    func routeCollectionIndependence() {
+    @Test
+    func `Passage.Account.RouteCollection instances are independent`() {
         let routes1 = Passage.Configuration.Routes(
             register: .init(path: "register1")
         )
@@ -176,8 +176,8 @@ struct AccountRouteCollectionTests {
     /// Helper function that requires Sendable conformance.
     private func assertSendable<T: Sendable>(_ value: T) {}
 
-    @Test("Account.RouteCollection conforms to Sendable")
-    func conformsToSendable() {
+    @Test
+    func `Account.RouteCollection conforms to Sendable`() {
         let routes = Passage.Configuration.Routes()
         assertSendable(Passage.Account.RouteCollection(routes: routes))
     }

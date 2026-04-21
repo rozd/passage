@@ -12,8 +12,8 @@ import VaporTesting
 /// There are two branches:
 ///  • Base URL without an existing query string → appends `?code=<value>`
 ///  • Base URL that already contains `?` → appends `&code=<value>`
-@Suite("FederatedLogin buildRedirectURL Tests", .tags(.unit, .federatedLogin))
-struct FederatedLoginBuildRedirectURLTests {
+@Suite(.tags(.unit, .federatedLogin))
+struct `FederatedLogin buildRedirectURL Tests` {
 
     @Sendable private func configureApp(_ app: Application, redirectLocation: String) async throws {
         await app.jwt.keys.add(
@@ -52,8 +52,8 @@ struct FederatedLoginBuildRedirectURLTests {
 
     // MARK: - Clean base URL (no existing query string)
 
-    @Test("buildRedirectURL appends ?code= when base has no query string")
-    func appendsQueryParamWhenBaseIsClean() async throws {
+    @Test
+    func `buildRedirectURL appends ?code= when base has no query string`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configureApp(app, redirectLocation: "/dashboard")
@@ -77,8 +77,8 @@ struct FederatedLoginBuildRedirectURLTests {
 
     // MARK: - Base URL with existing query string
 
-    @Test("buildRedirectURL appends &code= when base already contains a query string")
-    func appendsAmpersandParamWhenBaseHasQuery() async throws {
+    @Test
+    func `buildRedirectURL appends &code= when base already contains a query string`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configureApp(app, redirectLocation: "/dashboard?from=oauth")

@@ -19,8 +19,8 @@ import VaporTesting
 /// The mock `PasskeyService` bypasses cryptographic verification — real
 /// swift-webauthn verification is covered by `passage-webauthn`'s own tests
 /// and by end-to-end browser flows, not here.
-@Suite("Passkey Finish Signup Integration Tests", .tags(.integration, .passkey))
-struct FinishSignupIntegrationTests {
+@Suite(.tags(.integration, .passkey))
+struct `Passkey Finish Signup Integration Tests` {
 
     // MARK: - Fixtures
 
@@ -150,8 +150,8 @@ struct FinishSignupIntegrationTests {
 
     // MARK: - Happy path
 
-    @Test("POST finish returns 201 with credentialID JSON")
-    func finishReturns201() async throws {
+    @Test
+    func `POST finish returns 201 with credentialID JSON`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder)
@@ -170,8 +170,8 @@ struct FinishSignupIntegrationTests {
         }
     }
 
-    @Test("POST finish persists the credential for the matched user")
-    func finishPersistsCredential() async throws {
+    @Test
+    func `POST finish persists the credential for the matched user`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder)
@@ -192,8 +192,8 @@ struct FinishSignupIntegrationTests {
         }
     }
 
-    @Test("POST finish consumes the matched challenge (one-shot)")
-    func finishConsumesChallenge() async throws {
+    @Test
+    func `POST finish consumes the matched challenge (one-shot)`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder)
@@ -216,8 +216,8 @@ struct FinishSignupIntegrationTests {
         }
     }
 
-    @Test("POST finish forwards the raw body to the service verbatim")
-    func finishForwardsRawBody() async throws {
+    @Test
+    func `POST finish forwards the raw body to the service verbatim`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder)
@@ -239,8 +239,8 @@ struct FinishSignupIntegrationTests {
 
     // MARK: - Challenge resolution failures (HTTP 401)
 
-    @Test("POST finish returns 401 when no challenge is stored for the bytes")
-    func noMatchingChallengeReturns401() async throws {
+    @Test
+    func `POST finish returns 401 when no challenge is stored for the bytes`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder, seedValidChallenge: false)
@@ -255,8 +255,8 @@ struct FinishSignupIntegrationTests {
         }
     }
 
-    @Test("POST finish returns 401 when the stored challenge is already consumed")
-    func consumedChallengeReturns401() async throws {
+    @Test
+    func `POST finish returns 401 when the stored challenge is already consumed`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder, seedConsumedChallenge: true)
@@ -271,8 +271,8 @@ struct FinishSignupIntegrationTests {
         }
     }
 
-    @Test("POST finish returns 401 when the credential ID is already registered")
-    func duplicateCredentialIDReturns401() async throws {
+    @Test
+    func `POST finish returns 401 when the credential ID is already registered`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder, seedExistingCredential: true)
@@ -292,8 +292,8 @@ struct FinishSignupIntegrationTests {
 
     // MARK: - Service / configuration errors
 
-    @Test("POST finish returns 404 when passkey service is nil (routes not registered)")
-    func serviceNilReturns404() async throws {
+    @Test
+    func `POST finish returns 404 when passkey service is nil (routes not registered)`() async throws {
         try await withApp(configure: { app in
             await app.jwt.keys.add(
                 hmac: HMACKey(from: "test-secret-key-for-jwt-signing"),
@@ -341,8 +341,8 @@ struct FinishSignupIntegrationTests {
         }
     }
 
-    @Test("POST finish returns 404 when passkey config is absent")
-    func passkeyConfigAbsentReturns404() async throws {
+    @Test
+    func `POST finish returns 404 when passkey config is absent`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder, includePasskeyConfig: false)
@@ -358,8 +358,8 @@ struct FinishSignupIntegrationTests {
         }
     }
 
-    @Test("POST finish propagates service-level errors")
-    func finishPropagatesServiceError() async throws {
+    @Test
+    func `POST finish propagates service-level errors`() async throws {
         struct BoomError: AbortError {
             var status: HTTPResponseStatus { .internalServerError }
             var reason: String { "boom" }
@@ -382,8 +382,8 @@ struct FinishSignupIntegrationTests {
 
     // MARK: - Route registration gating
 
-    @Test("Finish route honors custom signupFinish path override")
-    func finishRouteRespectsCustomPath() async throws {
+    @Test
+    func `Finish route honors custom signupFinish path override`() async throws {
         // Using the default configure method but with a slightly different
         // route path. We inline the whole config here to isolate the
         // customization.

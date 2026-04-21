@@ -4,8 +4,8 @@ import JWT
 import Testing
 import Vapor
 
-@Suite("Tokens Methods Unit Tests", .tags(.unit))
-struct TokensMethodsTests {
+@Suite(.tags(.unit))
+struct `Tokens Methods Unit Tests` {
 
     // MARK: - Helper Methods
 
@@ -83,8 +83,8 @@ struct TokensMethodsTests {
 
     // MARK: - issue() Tests
 
-    @Test("issue creates access and refresh tokens for user")
-    func issueCreatesTokensForUser() async throws {
+    @Test
+    func `issue creates access and refresh tokens for user`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configure(app)
@@ -103,8 +103,8 @@ struct TokensMethodsTests {
         #expect(authUser.user.email == "user@example.com")
     }
 
-    @Test("issue revokes existing tokens by default")
-    func issueRevokesExistingTokensByDefault() async throws {
+    @Test
+    func `issue revokes existing tokens by default`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configure(app)
@@ -124,8 +124,8 @@ struct TokensMethodsTests {
         }
     }
 
-    @Test("issue does not revoke existing tokens when revokeExisting is false")
-    func issuePreservesExistingTokensWhenConfigured() async throws {
+    @Test
+    func `issue does not revoke existing tokens when revokeExisting is false`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configure(app)
@@ -144,8 +144,8 @@ struct TokensMethodsTests {
         #expect(!authUser.accessToken.isEmpty)
     }
 
-    @Test("issue stores refresh token in database")
-    func issueStoresRefreshTokenInDatabase() async throws {
+    @Test
+    func `issue stores refresh token in database`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configure(app)
@@ -169,8 +169,8 @@ struct TokensMethodsTests {
 
     // MARK: - refresh() Tests
 
-    @Test("refresh succeeds with valid token")
-    func refreshSucceedsWithValidToken() async throws {
+    @Test
+    func `refresh succeeds with valid token`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configure(app)
@@ -191,8 +191,8 @@ struct TokensMethodsTests {
         #expect(authUser.user.id == expectedUserId)
     }
 
-    @Test("refresh throws error when token not found")
-    func refreshThrowsWhenTokenNotFound() async throws {
+    @Test
+    func `refresh throws error when token not found`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configure(app)
@@ -205,8 +205,8 @@ struct TokensMethodsTests {
         }
     }
 
-    @Test("refresh throws error when token is expired")
-    func refreshThrowsWhenTokenExpired() async throws {
+    @Test
+    func `refresh throws error when token is expired`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configure(app)
@@ -226,8 +226,8 @@ struct TokensMethodsTests {
         }
     }
 
-    @Test("refresh succeeds after token rotation")
-    func refreshSucceedsAfterRotation() async throws {
+    @Test
+    func `refresh succeeds after token rotation`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configure(app)
@@ -248,8 +248,8 @@ struct TokensMethodsTests {
         #expect(!authUser2.accessToken.isEmpty)
     }
 
-    @Test("refresh creates new token with correct expiration")
-    func refreshCreatesNewTokenWithCorrectExpiration() async throws {
+    @Test
+    func `refresh creates new token with correct expiration`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configure(app)
@@ -268,8 +268,8 @@ struct TokensMethodsTests {
 
     // MARK: - revoke() Tests
 
-    @Test("revoke invalidates all refresh tokens for user")
-    func revokeInvalidatesAllTokensForUser() async throws {
+    @Test
+    func `revoke invalidates all refresh tokens for user`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configure(app)
@@ -294,8 +294,8 @@ struct TokensMethodsTests {
         }
     }
 
-    @Test("revoke succeeds when user has no tokens")
-    func revokeSucceedsWithNoTokens() async throws {
+    @Test
+    func `revoke succeeds when user has no tokens`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configure(app)
@@ -311,8 +311,8 @@ struct TokensMethodsTests {
 
     // MARK: - Request Extension Tests
 
-    @Test("Request.tokens returns Passage.Tokens instance")
-    func requestTokensExtension() async throws {
+    @Test
+    func `Request.tokens returns Passage.Tokens instance`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configure(app)

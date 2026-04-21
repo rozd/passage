@@ -5,8 +5,8 @@ import Testing
 import Vapor
 import VaporTesting
 
-@Suite("PassageBearerAuthenticator Integration Tests", .tags(.integration))
-struct PassageBearerAuthenticatorIntegrationTests {
+@Suite(.tags(.integration))
+struct `PassageBearerAuthenticator Integration Tests` {
 
     // MARK: - Configuration Helper
 
@@ -111,8 +111,8 @@ struct PassageBearerAuthenticatorIntegrationTests {
 
     // MARK: - Authentication Success Tests
 
-    @Test("Authenticator authenticates valid JWT and logs in user")
-    func authenticatesValidJWT() async throws {
+    @Test
+    func `Authenticator authenticates valid JWT and logs in user`() async throws {
         try await withApp(configure: configure) { app in
             let userId = try await createTestUser(app: app)
             let token = try await createAccessToken(app: app, userId: userId)
@@ -127,8 +127,8 @@ struct PassageBearerAuthenticatorIntegrationTests {
         }
     }
 
-    @Test("Authenticated user is accessible via request.auth.get()")
-    func authenticatedUserIsAccessible() async throws {
+    @Test
+    func `Authenticated user is accessible via request.auth.get()`() async throws {
         try await withApp(configure: configure) { app in
             let userId = try await createTestUser(app: app)
             let token = try await createAccessToken(app: app, userId: userId)
@@ -146,8 +146,8 @@ struct PassageBearerAuthenticatorIntegrationTests {
 
     // MARK: - Authentication Failure Tests
 
-    @Test("Authenticator does not authenticate without token")
-    func doesNotAuthenticateWithoutToken() async throws {
+    @Test
+    func `Authenticator does not authenticate without token`() async throws {
         try await withApp(configure: configure) { app in
             try await app.testing().test(.GET, "test-auth", afterResponse: { res async in
                 #expect(res.status == .ok)
@@ -157,8 +157,8 @@ struct PassageBearerAuthenticatorIntegrationTests {
         }
     }
 
-    @Test("Authenticator does not authenticate with invalid JWT")
-    func doesNotAuthenticateWithInvalidJWT() async throws {
+    @Test
+    func `Authenticator does not authenticate with invalid JWT`() async throws {
         try await withApp(configure: configure) { app in
             try await app.testing().test(.GET, "test-auth", beforeRequest: { req in
                 req.headers.bearerAuthorization = BearerAuthorization(token: "invalid-token")
@@ -169,8 +169,8 @@ struct PassageBearerAuthenticatorIntegrationTests {
         }
     }
 
-    @Test("Authenticator does not authenticate with expired JWT")
-    func doesNotAuthenticateWithExpiredJWT() async throws {
+    @Test
+    func `Authenticator does not authenticate with expired JWT`() async throws {
         try await withApp(configure: configure) { app in
             let userId = try await createTestUser(app: app)
             // Create a token that expired 1 hour ago
@@ -188,8 +188,8 @@ struct PassageBearerAuthenticatorIntegrationTests {
         }
     }
 
-    @Test("Authenticator fails when user not found in store")
-    func failsWhenUserNotFound() async throws {
+    @Test
+    func `Authenticator fails when user not found in store`() async throws {
         try await withApp(configure: configure) { app in
             // Create token for non-existent user
             let token = try await createAccessToken(app: app, userId: "non-existent-user-id")

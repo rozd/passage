@@ -2,8 +2,8 @@ import Testing
 import Vapor
 @testable import Passage
 
-@Suite("Authentication Error Tests")
-struct AuthenticationErrorTests {
+@Suite
+struct `Authentication Error Tests` {
 
     // MARK: - HTTP Status Code Tests
 
@@ -39,8 +39,8 @@ struct AuthenticationErrorTests {
         #expect(error.status == expectedStatus)
     }
 
-    @Test("User error status codes")
-    func userErrorStatusCodes() {
+    @Test
+    func `User error status codes`() {
         let error = AuthenticationError.userNotFound
         #expect(error.status == .notFound)
     }
@@ -123,8 +123,8 @@ struct AuthenticationErrorTests {
         #expect(error.reason == expectedReason)
     }
 
-    @Test("User error reason")
-    func userErrorReason() {
+    @Test
+    func `User error reason`() {
         let error = AuthenticationError.userNotFound
         #expect(error.reason == "User not found.")
     }
@@ -175,14 +175,14 @@ struct AuthenticationErrorTests {
 
     // MARK: - Error Protocol Conformance Tests
 
-    @Test("AuthenticationError conforms to Error protocol")
-    func errorProtocolConformance() {
+    @Test
+    func `AuthenticationError conforms to Error protocol`() {
         let error: any Error = AuthenticationError.invalidEmailOrPassword
         #expect(error is AuthenticationError)
     }
 
-    @Test("AuthenticationError conforms to AbortError protocol")
-    func abortErrorConformance() {
+    @Test
+    func `AuthenticationError conforms to AbortError protocol`() {
         let error: any AbortError = AuthenticationError.invalidEmailOrPassword
         #expect(error.status == .unauthorized)
         #expect(!error.reason.isEmpty)
@@ -190,8 +190,8 @@ struct AuthenticationErrorTests {
 
     // MARK: - Error Categorization Tests
 
-    @Test("Registration errors use appropriate HTTP status codes")
-    func registrationErrorsUseAppropriateStatusCodes() {
+    @Test
+    func `Registration errors use appropriate HTTP status codes`() {
         // Validation errors should be 400 Bad Request
         #expect(AuthenticationError.identifierNotSpecified.status == .badRequest)
         #expect(AuthenticationError.passwordsDoNotMatch.status == .badRequest)
@@ -202,8 +202,8 @@ struct AuthenticationErrorTests {
         #expect(AuthenticationError.usernameAlreadyRegistered.status == .conflict)
     }
 
-    @Test("Login errors use appropriate HTTP status codes")
-    func loginErrorsUseAppropriateStatusCodes() {
+    @Test
+    func `Login errors use appropriate HTTP status codes`() {
         // Invalid credentials should be 401 Unauthorized
         #expect(AuthenticationError.invalidEmailOrPassword.status == .unauthorized)
         #expect(AuthenticationError.invalidPhoneOrPassword.status == .unauthorized)
@@ -214,8 +214,8 @@ struct AuthenticationErrorTests {
         #expect(AuthenticationError.phoneIsNotVerified.status == .forbidden)
     }
 
-    @Test("Token errors use appropriate HTTP status codes")
-    func tokenErrorsUseAppropriateStatusCodes() {
+    @Test
+    func `Token errors use appropriate HTTP status codes`() {
         // Invalid/expired tokens should be 401 Unauthorized
         #expect(AuthenticationError.invalidRefreshToken.status == .unauthorized)
         #expect(AuthenticationError.refreshTokenExpired.status == .unauthorized)
@@ -224,8 +224,8 @@ struct AuthenticationErrorTests {
         #expect(AuthenticationError.refreshTokenNotFound.status == .notFound)
     }
 
-    @Test("Verification errors use appropriate HTTP status codes")
-    func verificationErrorsUseAppropriateStatusCodes() {
+    @Test
+    func `Verification errors use appropriate HTTP status codes`() {
         // Invalid code should be 401 Unauthorized
         #expect(AuthenticationError.invalidVerificationCode.status == .unauthorized)
 
@@ -233,8 +233,8 @@ struct AuthenticationErrorTests {
         #expect(AuthenticationError.verificationCodeExpiredOrMaxAttempts.status == .gone)
     }
 
-    @Test("Restoration errors use appropriate HTTP status codes")
-    func restorationErrorsUseAppropriateStatusCodes() {
+    @Test
+    func `Restoration errors use appropriate HTTP status codes`() {
         // Invalid code should be 401 Unauthorized
         #expect(AuthenticationError.restorationCodeInvalid.status == .unauthorized)
 
@@ -251,8 +251,8 @@ struct AuthenticationErrorTests {
 
     // MARK: - Error Message Quality Tests
 
-    @Test("All error reasons are non-empty")
-    func allErrorReasonsAreNonEmpty() {
+    @Test
+    func `All error reasons are non-empty`() {
         let allErrors: [AuthenticationError] = [
             .identifierNotSpecified,
             .emailAlreadyRegistered,
@@ -290,8 +290,8 @@ struct AuthenticationErrorTests {
         }
     }
 
-    @Test("Error reasons end with proper punctuation")
-    func errorReasonsEndWithProperPunctuation() {
+    @Test
+    func `Error reasons end with proper punctuation`() {
         let allErrors: [AuthenticationError] = [
             .identifierNotSpecified,
             .emailAlreadyRegistered,
@@ -336,8 +336,8 @@ struct AuthenticationErrorTests {
     /// will cause a compile-time error.
     private func assertSendable<T: Sendable>(_ value: T) {}
 
-    @Test("AuthenticationError conforms to Sendable")
-    func conformsToSendable() {
+    @Test
+    func `AuthenticationError conforms to Sendable`() {
         assertSendable(AuthenticationError.invalidEmailOrPassword)
         assertSendable(AuthenticationError.userNotFound)
         assertSendable(AuthenticationError.emailAlreadyRegistered)

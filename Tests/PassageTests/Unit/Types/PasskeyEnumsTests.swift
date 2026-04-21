@@ -13,8 +13,8 @@ import Foundation
 ///
 /// `COSEAlgorithmIdentifier` uses an `Int` raw value with no unknown case; its
 /// tests cover the ↔ raw-value mapping and the COSE identifiers Passage ships.
-@Suite("Passkey Enums Tests", .tags(.unit))
-struct PasskeyEnumsTests {
+@Suite(.tags(.unit))
+struct `Passkey Enums Tests` {
 
     // MARK: - AuthenticatorTransport
 
@@ -34,8 +34,8 @@ struct PasskeyEnumsTests {
         #expect(expected.rawValue == raw)
     }
 
-    @Test("AuthenticatorTransport decodes unknown raw value as .unknown")
-    func transportUnknownRawValue() throws {
+    @Test
+    func `AuthenticatorTransport decodes unknown raw value as .unknown`() throws {
         let value = AuthenticatorTransport(rawValue: "future-transport")
         if case .unknown(let s) = value {
             #expect(s == "future-transport")
@@ -45,8 +45,8 @@ struct PasskeyEnumsTests {
         #expect(value.rawValue == "future-transport")
     }
 
-    @Test("AuthenticatorTransport Codable survives JSON round-trip")
-    func transportCodableRoundTrip() throws {
+    @Test
+    func `AuthenticatorTransport Codable survives JSON round-trip`() throws {
         let original: [AuthenticatorTransport] = [.usb, .ble, .unknown("xyz")]
         let data = try JSONEncoder().encode(original)
         let decoded = try JSONDecoder().decode([AuthenticatorTransport].self, from: data)
@@ -68,8 +68,8 @@ struct PasskeyEnumsTests {
         #expect(expected.rawValue == raw)
     }
 
-    @Test("UserVerificationRequirement unknown raw value")
-    func uvrUnknownRawValue() {
+    @Test
+    func `UserVerificationRequirement unknown raw value`() {
         let value = UserVerificationRequirement(rawValue: "mandatory-in-2030")
         if case .unknown(let s) = value {
             #expect(s == "mandatory-in-2030")
@@ -94,8 +94,8 @@ struct PasskeyEnumsTests {
         #expect(expected.rawValue == raw)
     }
 
-    @Test("AttestationConveyancePreference unknown raw value")
-    func attestationUnknownRawValue() {
+    @Test
+    func `AttestationConveyancePreference unknown raw value`() {
         let value = AttestationConveyancePreference(rawValue: "exotic")
         if case .unknown(let s) = value {
             #expect(s == "exotic")
@@ -106,16 +106,16 @@ struct PasskeyEnumsTests {
 
     // MARK: - PasskeyChallengeKind
 
-    @Test("PasskeyChallengeKind round-trips its two cases")
-    func passkeyChallengeKindRawValues() throws {
+    @Test
+    func `PasskeyChallengeKind round-trips its two cases`() throws {
         #expect(PasskeyChallengeKind(rawValue: "registration") == .registration)
         #expect(PasskeyChallengeKind(rawValue: "authentication") == .authentication)
         #expect(PasskeyChallengeKind.registration.rawValue == "registration")
         #expect(PasskeyChallengeKind.authentication.rawValue == "authentication")
     }
 
-    @Test("PasskeyChallengeKind rejects unknown raw values")
-    func passkeyChallengeKindRejectsUnknown() {
+    @Test
+    func `PasskeyChallengeKind rejects unknown raw values`() {
         #expect(PasskeyChallengeKind(rawValue: "verification") == nil)
     }
 
@@ -145,29 +145,29 @@ struct PasskeyEnumsTests {
         #expect(COSEAlgorithmIdentifier(rawValue: expectedRaw) == alg)
     }
 
-    @Test("COSEAlgorithmIdentifier JSON encodes as bare integer")
-    func coseEncodesAsInt() throws {
+    @Test
+    func `COSEAlgorithmIdentifier JSON encodes as bare integer`() throws {
         let data = try JSONEncoder().encode(COSEAlgorithmIdentifier.ES256)
         let text = String(data: data, encoding: .utf8)
         #expect(text == "-7")
     }
 
-    @Test("COSEAlgorithmIdentifier decodes from integer")
-    func coseDecodesFromInt() throws {
+    @Test
+    func `COSEAlgorithmIdentifier decodes from integer`() throws {
         let data = "-257".data(using: .utf8)!
         let alg = try JSONDecoder().decode(COSEAlgorithmIdentifier.self, from: data)
         #expect(alg == .RS256)
     }
 
-    @Test("COSEAlgorithmIdentifier returns nil for unknown raw value")
-    func coseUnknownRawValueReturnsNil() {
+    @Test
+    func `COSEAlgorithmIdentifier returns nil for unknown raw value`() {
         #expect(COSEAlgorithmIdentifier(rawValue: 99) == nil)
     }
 
     // MARK: - Sendable
 
-    @Test("All passkey enums are Sendable")
-    func allEnumsAreSendable() {
+    @Test
+    func `All passkey enums are Sendable`() {
         let _: any Sendable = AuthenticatorTransport.usb
         let _: any Sendable = UserVerificationRequirement.preferred
         let _: any Sendable = AttestationConveyancePreference.none

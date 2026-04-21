@@ -5,8 +5,8 @@ import Testing
 import Vapor
 import VaporTesting
 
-@Suite("Refresh Token Integration Tests", .tags(.integration))
-struct RefreshTokenIntegrationTests {
+@Suite(.tags(.integration))
+struct `Refresh Token Integration Tests` {
 
     // MARK: - Configuration Helper
 
@@ -115,8 +115,8 @@ struct RefreshTokenIntegrationTests {
 
     // MARK: - Successful Refresh Tests
 
-    @Test("Refresh token endpoint returns new tokens")
-    func refreshTokenEndpointReturnsNewTokens() async throws {
+    @Test
+    func `Refresh token endpoint returns new tokens`() async throws {
         try await withApp(configure: configure) { app in
             // Create user and login to get refresh token
             try await createTestUser(
@@ -158,8 +158,8 @@ struct RefreshTokenIntegrationTests {
         }
     }
 
-    @Test("Refresh token rotation invalidates old token")
-    func refreshTokenRotationInvalidatesOldToken() async throws {
+    @Test
+    func `Refresh token rotation invalidates old token`() async throws {
         try await withApp(configure: configure) { app in
             try await createTestUser(
                 app: app,
@@ -206,8 +206,8 @@ struct RefreshTokenIntegrationTests {
 
     // MARK: - Error Cases
 
-    @Test("Refresh token fails with invalid token")
-    func refreshTokenFailsWithInvalidToken() async throws {
+    @Test
+    func `Refresh token fails with invalid token`() async throws {
         try await withApp(configure: configure) { app in
             try await app.testing().test(.POST, "auth/refresh-token", beforeRequest: { req in
                 try req.content.encode([
@@ -220,8 +220,8 @@ struct RefreshTokenIntegrationTests {
         }
     }
 
-    @Test("Refresh token fails with empty token")
-    func refreshTokenFailsWithEmptyToken() async throws {
+    @Test
+    func `Refresh token fails with empty token`() async throws {
         try await withApp(configure: configure) { app in
             try await app.testing().test(.POST, "auth/refresh-token", beforeRequest: { req in
                 try req.content.encode([
@@ -234,8 +234,8 @@ struct RefreshTokenIntegrationTests {
         }
     }
 
-    @Test("Refresh token fails without token in request")
-    func refreshTokenFailsWithoutToken() async throws {
+    @Test
+    func `Refresh token fails without token in request`() async throws {
         try await withApp(configure: configure) { app in
             try await app.testing().test(.POST, "auth/refresh-token", beforeRequest: { req in
                 try req.content.encode([String: String]())
@@ -247,8 +247,8 @@ struct RefreshTokenIntegrationTests {
 
     // MARK: - Token Reuse Detection
 
-    @Test("Reusing old refresh token after rotation fails")
-    func reusingOldRefreshTokenAfterRotationFails() async throws {
+    @Test
+    func `Reusing old refresh token after rotation fails`() async throws {
         try await withApp(configure: configure) { app in
             try await createTestUser(
                 app: app,
@@ -295,8 +295,8 @@ struct RefreshTokenIntegrationTests {
 
     // MARK: - Access Token Validation
 
-    @Test("New access token from refresh is valid")
-    func newAccessTokenFromRefreshIsValid() async throws {
+    @Test
+    func `New access token from refresh is valid`() async throws {
         try await withApp(configure: configure) { app in
             try await createTestUser(
                 app: app,
@@ -341,8 +341,8 @@ struct RefreshTokenIntegrationTests {
 
     // MARK: - User Data Consistency
 
-    @Test("Refresh token returns correct user data")
-    func refreshTokenReturnsCorrectUserData() async throws {
+    @Test
+    func `Refresh token returns correct user data`() async throws {
         try await withApp(configure: configure) { app in
             try await createTestUser(
                 app: app,

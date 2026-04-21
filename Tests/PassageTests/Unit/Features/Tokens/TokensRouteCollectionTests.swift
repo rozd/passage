@@ -2,21 +2,21 @@ import Testing
 import Vapor
 @testable import Passage
 
-@Suite("Tokens Route Collection Tests", .tags(.unit))
-struct TokensRouteCollectionTests {
+@Suite(.tags(.unit))
+struct `Tokens Route Collection Tests` {
 
     // MARK: - Initialization Tests
 
-    @Test("Passage.Tokens.RouteCollection initialization with default routes")
-    func routeCollectionInitialization() {
+    @Test
+    func `Passage.Tokens.RouteCollection initialization with default routes`() {
         let routes = Passage.Configuration.Routes()
         let collection = Passage.Tokens.RouteCollection(routes: routes)
 
         #expect(collection.routes.refreshToken.path.count == 1)
     }
 
-    @Test("Passage.Tokens.RouteCollection initialization with custom routes")
-    func routeCollectionWithCustomRoutes() {
+    @Test
+    func `Passage.Tokens.RouteCollection initialization with custom routes`() {
         let routes = Passage.Configuration.Routes(
             refreshToken: .init(path: "token", "refresh")
         )
@@ -27,8 +27,8 @@ struct TokensRouteCollectionTests {
         #expect(collection.routes.refreshToken.path[1] == PathComponent.constant("refresh"))
     }
 
-    @Test("Passage.Tokens.RouteCollection stores routes configuration")
-    func routeCollectionStoresConfiguration() {
+    @Test
+    func `Passage.Tokens.RouteCollection stores routes configuration`() {
         let routes = Passage.Configuration.Routes(
             group: "api", "v1"
         )
@@ -41,8 +41,8 @@ struct TokensRouteCollectionTests {
 
     // MARK: - Protocol Conformance Tests
 
-    @Test("Passage.Tokens.RouteCollection conforms to RouteCollection")
-    func routeCollectionConformsToProtocol() {
+    @Test
+    func `Passage.Tokens.RouteCollection conforms to RouteCollection`() {
         let routes = Passage.Configuration.Routes()
         let collection = Passage.Tokens.RouteCollection(routes: routes)
 
@@ -51,8 +51,8 @@ struct TokensRouteCollectionTests {
 
     // MARK: - Route Path Configuration Tests
 
-    @Test("Passage.Tokens.RouteCollection with no group")
-    func routeCollectionWithNoGroup() {
+    @Test
+    func `Passage.Tokens.RouteCollection with no group`() {
         let routes = Passage.Configuration.Routes()
         let collection = Passage.Tokens.RouteCollection(routes: routes)
 
@@ -60,8 +60,8 @@ struct TokensRouteCollectionTests {
         #expect(collection.routes.group[0] == PathComponent.constant("auth"))
     }
 
-    @Test("Passage.Tokens.RouteCollection with auth group")
-    func routeCollectionWithAuthGroup() {
+    @Test
+    func `Passage.Tokens.RouteCollection with auth group`() {
         let routes = Passage.Configuration.Routes(group: "auth")
         let collection = Passage.Tokens.RouteCollection(routes: routes)
 
@@ -69,8 +69,8 @@ struct TokensRouteCollectionTests {
         #expect(collection.routes.group[0] == PathComponent.constant("auth"))
     }
 
-    @Test("Passage.Tokens.RouteCollection with nested group")
-    func routeCollectionWithNestedGroup() {
+    @Test
+    func `Passage.Tokens.RouteCollection with nested group`() {
         let routes = Passage.Configuration.Routes(group: "api", "auth")
         let collection = Passage.Tokens.RouteCollection(routes: routes)
 
@@ -79,8 +79,8 @@ struct TokensRouteCollectionTests {
         #expect(collection.routes.group[1] == PathComponent.constant("auth"))
     }
 
-    @Test("Passage.Tokens.RouteCollection default route paths")
-    func routeCollectionDefaultPaths() {
+    @Test
+    func `Passage.Tokens.RouteCollection default route paths`() {
         let routes = Passage.Configuration.Routes()
         let collection = Passage.Tokens.RouteCollection(routes: routes)
 
@@ -88,8 +88,8 @@ struct TokensRouteCollectionTests {
         #expect(collection.routes.refreshToken.path == [PathComponent.constant("refresh-token")])
     }
 
-    @Test("Passage.Tokens.RouteCollection with custom path components")
-    func routeCollectionWithCustomPaths() {
+    @Test
+    func `Passage.Tokens.RouteCollection with custom path components`() {
         let routes = Passage.Configuration.Routes(
             refreshToken: .init(path: "auth", "refresh")
         )
@@ -98,8 +98,8 @@ struct TokensRouteCollectionTests {
         #expect(collection.routes.refreshToken.path.count == 2)
     }
 
-    @Test("Passage.Tokens.RouteCollection preserves route configuration")
-    func routeCollectionPreservesConfiguration() {
+    @Test
+    func `Passage.Tokens.RouteCollection preserves route configuration`() {
         let customRefreshToken = Passage.Configuration.Routes.RefreshToken(path: "custom", "refresh")
 
         let routes = Passage.Configuration.Routes(
@@ -113,8 +113,8 @@ struct TokensRouteCollectionTests {
 
     // MARK: - Multiple Instance Tests
 
-    @Test("Passage.Tokens.RouteCollection can be instantiated multiple times")
-    func multipleRouteCollectionInstances() {
+    @Test
+    func `Passage.Tokens.RouteCollection can be instantiated multiple times`() {
         let routes1 = Passage.Configuration.Routes(group: "api")
         let routes2 = Passage.Configuration.Routes(group: "admin")
 
@@ -125,8 +125,8 @@ struct TokensRouteCollectionTests {
         #expect(collection2.routes.group[0] == PathComponent.constant("admin"))
     }
 
-    @Test("Passage.Tokens.RouteCollection instances are independent")
-    func routeCollectionIndependence() {
+    @Test
+    func `Passage.Tokens.RouteCollection instances are independent`() {
         let routes1 = Passage.Configuration.Routes(
             refreshToken: .init(path: "refresh1")
         )
@@ -143,8 +143,8 @@ struct TokensRouteCollectionTests {
 
     // MARK: - Exchange Code Route Tests
 
-    @Test("Passage.Tokens.RouteCollection default exchange code path")
-    func routeCollectionDefaultExchangeCodePath() {
+    @Test
+    func `Passage.Tokens.RouteCollection default exchange code path`() {
         let routes = Passage.Configuration.Routes()
         let collection = Passage.Tokens.RouteCollection(routes: routes)
 
@@ -153,8 +153,8 @@ struct TokensRouteCollectionTests {
         #expect(collection.routes.exchangeCode.path[1] == PathComponent.constant("exchange"))
     }
 
-    @Test("Passage.Tokens.RouteCollection with custom exchange code path")
-    func routeCollectionWithCustomExchangeCodePath() {
+    @Test
+    func `Passage.Tokens.RouteCollection with custom exchange code path`() {
         let routes = Passage.Configuration.Routes(
             exchangeCode: .init(path: "oauth", "callback", "exchange")
         )
@@ -166,8 +166,8 @@ struct TokensRouteCollectionTests {
         #expect(collection.routes.exchangeCode.path[2] == PathComponent.constant("exchange"))
     }
 
-    @Test("Passage.Tokens.RouteCollection preserves exchange code with other routes")
-    func routeCollectionPreservesExchangeCodeWithOtherRoutes() {
+    @Test
+    func `Passage.Tokens.RouteCollection preserves exchange code with other routes`() {
         let customRefreshToken = Passage.Configuration.Routes.RefreshToken(path: "custom", "refresh")
         let customExchangeCode = Passage.Configuration.Routes.ExchangeCode(path: "custom", "exchange")
 
@@ -181,8 +181,8 @@ struct TokensRouteCollectionTests {
         #expect(collection.routes.exchangeCode.path == customExchangeCode.path)
     }
 
-    @Test("Passage.Tokens.RouteCollection exchange code with group")
-    func routeCollectionExchangeCodeWithGroup() {
+    @Test
+    func `Passage.Tokens.RouteCollection exchange code with group`() {
         let routes = Passage.Configuration.Routes(
             group: "api", "auth"
         )
@@ -197,8 +197,8 @@ struct TokensRouteCollectionTests {
     /// Helper function that requires Sendable conformance.
     private func assertSendable<T: Sendable>(_ value: T) {}
 
-    @Test("Tokens.RouteCollection conforms to Sendable")
-    func conformsToSendable() {
+    @Test
+    func `Tokens.RouteCollection conforms to Sendable`() {
         let routes = Passage.Configuration.Routes()
         assertSendable(Passage.Tokens.RouteCollection(routes: routes))
     }

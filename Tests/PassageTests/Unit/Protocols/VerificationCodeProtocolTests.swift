@@ -2,8 +2,8 @@ import Testing
 import Foundation
 @testable import Passage
 
-@Suite("VerificationCode Protocol Tests")
-struct VerificationCodeProtocolTests {
+@Suite
+struct `VerificationCode Protocol Tests` {
 
     // MARK: - Mock Implementations
 
@@ -46,8 +46,8 @@ struct VerificationCodeProtocolTests {
 
     // MARK: - isExpired Tests
 
-    @Test("VerificationCode isExpired returns true when expired")
-    func isExpiredWhenExpired() {
+    @Test
+    func `VerificationCode isExpired returns true when expired`() {
         let code = MockEmailVerificationCode(
             user: MockUser(
                 id: UUID(),
@@ -68,8 +68,8 @@ struct VerificationCodeProtocolTests {
         #expect(code.isExpired == true)
     }
 
-    @Test("VerificationCode isExpired returns false when not expired")
-    func isExpiredWhenNotExpired() {
+    @Test
+    func `VerificationCode isExpired returns false when not expired`() {
         let code = MockEmailVerificationCode(
             user: MockUser(
                 id: UUID(),
@@ -92,8 +92,8 @@ struct VerificationCodeProtocolTests {
 
     // MARK: - isValid Tests
 
-    @Test("VerificationCode isValid returns true when not expired and under max attempts")
-    func isValidWhenValid() {
+    @Test
+    func `VerificationCode isValid returns true when not expired and under max attempts`() {
         let code = MockEmailVerificationCode(
             user: MockUser(
                 id: UUID(),
@@ -114,8 +114,8 @@ struct VerificationCodeProtocolTests {
         #expect(code.isValid(maxAttempts: 3) == true)
     }
 
-    @Test("VerificationCode isValid returns false when expired")
-    func isValidWhenExpired() {
+    @Test
+    func `VerificationCode isValid returns false when expired`() {
         let code = MockEmailVerificationCode(
             user: MockUser(
                 id: UUID(),
@@ -136,8 +136,8 @@ struct VerificationCodeProtocolTests {
         #expect(code.isValid(maxAttempts: 3) == false)
     }
 
-    @Test("VerificationCode isValid returns false when max attempts reached")
-    func isValidWhenMaxAttemptsReached() {
+    @Test
+    func `VerificationCode isValid returns false when max attempts reached`() {
         let code = MockEmailVerificationCode(
             user: MockUser(
                 id: UUID(),
@@ -158,8 +158,8 @@ struct VerificationCodeProtocolTests {
         #expect(code.isValid(maxAttempts: 3) == false)
     }
 
-    @Test("VerificationCode isValid at boundary of max attempts")
-    func isValidAtBoundary() {
+    @Test
+    func `VerificationCode isValid at boundary of max attempts`() {
         let code = MockEmailVerificationCode(
             user: MockUser(
                 id: UUID(),
@@ -183,8 +183,8 @@ struct VerificationCodeProtocolTests {
 
     // MARK: - EmailVerificationCode Tests
 
-    @Test("EmailVerificationCode stores email correctly")
-    func emailVerificationCodeEmail() {
+    @Test
+    func `EmailVerificationCode stores email correctly`() {
         let email = "test@example.com"
         let code = MockEmailVerificationCode(
             user: MockUser(
@@ -206,8 +206,8 @@ struct VerificationCodeProtocolTests {
         #expect(code.email == email)
     }
 
-    @Test("EmailVerificationCode conforms to VerificationCode")
-    func emailVerificationCodeConformance() {
+    @Test
+    func `EmailVerificationCode conforms to VerificationCode`() {
         let code: any VerificationCode = MockEmailVerificationCode(
             user: MockUser(
                 id: UUID(),
@@ -230,8 +230,8 @@ struct VerificationCodeProtocolTests {
 
     // MARK: - PhoneVerificationCode Tests
 
-    @Test("PhoneVerificationCode stores phone correctly")
-    func phoneVerificationCodePhone() {
+    @Test
+    func `PhoneVerificationCode stores phone correctly`() {
         let phone = "+1234567890"
         let code = MockPhoneVerificationCode(
             user: MockUser(
@@ -253,8 +253,8 @@ struct VerificationCodeProtocolTests {
         #expect(code.phone == phone)
     }
 
-    @Test("PhoneVerificationCode conforms to VerificationCode")
-    func phoneVerificationCodeConformance() {
+    @Test
+    func `PhoneVerificationCode conforms to VerificationCode`() {
         let code: any VerificationCode = MockPhoneVerificationCode(
             user: MockUser(
                 id: UUID(),
@@ -277,8 +277,8 @@ struct VerificationCodeProtocolTests {
 
     // MARK: - Protocol Conformance Tests
 
-    @Test("VerificationCode protocol conforms to Sendable")
-    func verificationCodeProtocolIsSendable() {
+    @Test
+    func `VerificationCode protocol conforms to Sendable`() {
         let code: any Sendable = MockEmailVerificationCode(
             user: MockUser(
                 id: UUID(),
@@ -300,8 +300,8 @@ struct VerificationCodeProtocolTests {
 
     // MARK: - Properties Tests
 
-    @Test("VerificationCode stores codeHash correctly")
-    func codeHashStorage() {
+    @Test
+    func `VerificationCode stores codeHash correctly`() {
         let hash = "abc123hash"
         let code = MockEmailVerificationCode(
             user: MockUser(
@@ -323,8 +323,8 @@ struct VerificationCodeProtocolTests {
         #expect(code.codeHash == hash)
     }
 
-    @Test("VerificationCode tracks failed attempts")
-    func failedAttemptsTracking() {
+    @Test
+    func `VerificationCode tracks failed attempts`() {
         let code = MockEmailVerificationCode(
             user: MockUser(
                 id: UUID(),
@@ -345,8 +345,8 @@ struct VerificationCodeProtocolTests {
         #expect(code.failedAttempts == 2)
     }
 
-    @Test("VerificationCode stores user reference")
-    func userReference() {
+    @Test
+    func `VerificationCode stores user reference`() {
         let userId = UUID()
         let user = MockUser(
             id: userId,

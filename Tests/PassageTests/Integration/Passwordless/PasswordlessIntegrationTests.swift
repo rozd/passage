@@ -7,8 +7,8 @@ import Vapor
 import VaporTesting
 import XCTQueues
 
-@Suite("Passwordless Authentication Integration Tests", .tags(.integration, .passwordless))
-struct PasswordlessIntegrationTests {
+@Suite(.tags(.integration, .passwordless))
+struct `Passwordless Authentication Integration Tests` {
 
     // MARK: - Helpers
 
@@ -159,8 +159,8 @@ struct PasswordlessIntegrationTests {
 
     // MARK: - Email Magic Link Request Tests
 
-    @Test("Request magic link via email succeeds for new user")
-    func requestMagicLinkEmailNewUser() async throws {
+    @Test
+    func `Request magic link via email succeeds for new user`() async throws {
         let captured = CapturedMessages()
 
         try await withApp(configure: { app in try await configureWithCapture(app, captured: captured) }) { app in
@@ -183,8 +183,8 @@ struct PasswordlessIntegrationTests {
         }
     }
 
-    @Test("Request magic link via email succeeds for existing user")
-    func requestMagicLinkEmailExistingUser() async throws {
+    @Test
+    func `Request magic link via email succeeds for existing user`() async throws {
         let captured = CapturedMessages()
 
         try await withApp(configure: { app in try await configureWithCapture(app, captured: captured) }) { app in
@@ -209,8 +209,8 @@ struct PasswordlessIntegrationTests {
         }
     }
 
-    @Test("Request magic link fails when auto-create disabled and user doesn't exist")
-    func requestMagicLinkEmailFailsWhenAutoCreateDisabled() async throws {
+    @Test
+    func `Request magic link fails when auto-create disabled and user doesn't exist`() async throws {
         try await withApp(configure: { app in
             try await configureWithCapture(app, captured: nil, autoCreateUser: false)
         }) { app in
@@ -222,8 +222,8 @@ struct PasswordlessIntegrationTests {
         }
     }
 
-    @Test("Request magic link fails with invalid email format")
-    func requestMagicLinkEmailFailsWithInvalidEmail() async throws {
+    @Test
+    func `Request magic link fails with invalid email format`() async throws {
         try await withApp(configure: configure) { app in
             try await app.testing().test(.POST, "/auth/magic-link/email", beforeRequest: { req in
                 try req.content.encode(["email": "invalid-email"])
@@ -233,8 +233,8 @@ struct PasswordlessIntegrationTests {
         }
     }
 
-    @Test("Request magic link fails with missing email")
-    func requestMagicLinkEmailFailsWithMissingEmail() async throws {
+    @Test
+    func `Request magic link fails with missing email`() async throws {
         try await withApp(configure: configure) { app in
             try await app.testing().test(.POST, "/auth/magic-link/email", beforeRequest: { req in
                 try req.content.encode([:] as [String: String])
@@ -246,8 +246,8 @@ struct PasswordlessIntegrationTests {
 
     // MARK: - Email Magic Link Verify Tests
 
-    @Test("Verify magic link succeeds and returns tokens for new user")
-    func verifyMagicLinkEmailNewUser() async throws {
+    @Test
+    func `Verify magic link succeeds and returns tokens for new user`() async throws {
         let captured = CapturedMessages()
         let email = "newuser@example.com"
 
@@ -282,8 +282,8 @@ struct PasswordlessIntegrationTests {
         }
     }
 
-    @Test("Verify magic link succeeds for existing user and marks email verified")
-    func verifyMagicLinkEmailExistingUnverifiedUser() async throws {
+    @Test
+    func `Verify magic link succeeds for existing user and marks email verified`() async throws {
         let captured = CapturedMessages()
         let email = "existing@example.com"
 
@@ -313,8 +313,8 @@ struct PasswordlessIntegrationTests {
         }
     }
 
-    @Test("Verify magic link fails with invalid token")
-    func verifyMagicLinkEmailFailsWithInvalidToken() async throws {
+    @Test
+    func `Verify magic link fails with invalid token`() async throws {
         try await withApp(configure: configure) { app in
             try await app.testing().test(.GET, "/auth/magic-link/email/verify?token=invalid-token", afterResponse: { res in
                 #expect(res.status == .unauthorized)
@@ -322,8 +322,8 @@ struct PasswordlessIntegrationTests {
         }
     }
 
-    @Test("Verify magic link fails when token is expired")
-    func verifyMagicLinkEmailFailsWhenExpired() async throws {
+    @Test
+    func `Verify magic link fails when token is expired`() async throws {
         let captured = CapturedMessages()
         let email = "expired@example.com"
 
@@ -351,8 +351,8 @@ struct PasswordlessIntegrationTests {
         }
     }
 
-    @Test("Magic link can only be used once")
-    func magicLinkCanOnlyBeUsedOnce() async throws {
+    @Test
+    func `Magic link can only be used once`() async throws {
         let captured = CapturedMessages()
         let email = "onetime@example.com"
 
@@ -381,8 +381,8 @@ struct PasswordlessIntegrationTests {
 
     // MARK: - Resend Tests
 
-    @Test("Resend magic link succeeds and invalidates previous link")
-    func resendMagicLinkInvalidatesPrevious() async throws {
+    @Test
+    func `Resend magic link succeeds and invalidates previous link`() async throws {
         let captured = CapturedMessages()
         let email = "resend@example.com"
 
@@ -425,8 +425,8 @@ struct PasswordlessIntegrationTests {
 
     // MARK: - Token Revocation Tests
 
-    @Test("Magic link verification revokes existing tokens when configured")
-    func magicLinkRevokesExistingTokens() async throws {
+    @Test
+    func `Magic link verification revokes existing tokens when configured`() async throws {
         let captured = CapturedMessages()
         let email = "revoke@example.com"
 
@@ -470,8 +470,8 @@ struct PasswordlessIntegrationTests {
 
     // MARK: - User Creation Tests
 
-    @Test("Passwordless user has no password set by default")
-    func passwordlessUserHasNoPassword() async throws {
+    @Test
+    func `Passwordless user has no password set by default`() async throws {
         let captured = CapturedMessages()
         let email = "nopassword@example.com"
 
@@ -507,8 +507,8 @@ struct PasswordlessIntegrationTests {
         }
     }
 
-    @Test("Magic link creates user with verified email")
-    func magicLinkCreatesUserWithVerifiedEmail() async throws {
+    @Test
+    func `Magic link creates user with verified email`() async throws {
         let captured = CapturedMessages()
         let email = "verified@example.com"
 
@@ -535,8 +535,8 @@ struct PasswordlessIntegrationTests {
 
     // MARK: - Full Flow Tests
 
-    @Test("Full flow: request magic link -> verify -> use access token")
-    func fullMagicLinkFlow() async throws {
+    @Test
+    func `Full flow: request magic link -> verify -> use access token`() async throws {
         let captured = CapturedMessages()
         let email = "fullflow@example.com"
 

@@ -6,28 +6,28 @@ import Foundation
 /// and `PublicKeyCredentialUserEntity`). The user entity has a custom Codable
 /// that base64url-encodes its binary `id` field on the wire — that's the thing
 /// most worth pinning down.
-@Suite("PublicKeyCredential Entity Tests", .tags(.unit))
-struct PublicKeyCredentialEntityTests {
+@Suite(.tags(.unit))
+struct `PublicKeyCredential Entity Tests` {
 
     // MARK: - PublicKeyCredentialRpEntity
 
-    @Test("RpEntity initialization preserves name and id")
-    func rpInitialization() {
+    @Test
+    func `RpEntity initialization preserves name and id`() {
         let rp = PublicKeyCredentialRpEntity(name: "Example Corp", id: "example.com")
         #expect(rp.name == "Example Corp")
         #expect(rp.id == "example.com")
     }
 
-    @Test("RpEntity Codable round-trip preserves both fields as plain strings")
-    func rpCodableRoundTrip() throws {
+    @Test
+    func `RpEntity Codable round-trip preserves both fields as plain strings`() throws {
         let rp = PublicKeyCredentialRpEntity(name: "Acme", id: "acme.io")
         let data = try JSONEncoder().encode(rp)
         let decoded = try JSONDecoder().decode(PublicKeyCredentialRpEntity.self, from: data)
         #expect(decoded == rp)
     }
 
-    @Test("RpEntity JSON shape matches W3C dictionary layout")
-    func rpJSONShape() throws {
+    @Test
+    func `RpEntity JSON shape matches W3C dictionary layout`() throws {
         let rp = PublicKeyCredentialRpEntity(name: "Acme", id: "acme.io")
         let data = try JSONEncoder().encode(rp)
         let json = try #require(try JSONSerialization.jsonObject(with: data) as? [String: Any])
@@ -35,8 +35,8 @@ struct PublicKeyCredentialEntityTests {
         #expect(json["id"] as? String == "acme.io")
     }
 
-    @Test("RpEntity equality")
-    func rpEquality() {
+    @Test
+    func `RpEntity equality`() {
         let a = PublicKeyCredentialRpEntity(name: "A", id: "a.com")
         let b = PublicKeyCredentialRpEntity(name: "A", id: "a.com")
         let c = PublicKeyCredentialRpEntity(name: "A", id: "different.com")
@@ -46,8 +46,8 @@ struct PublicKeyCredentialEntityTests {
 
     // MARK: - PublicKeyCredentialUserEntity
 
-    @Test("UserEntity initialization preserves all fields including raw id bytes")
-    func userInitialization() {
+    @Test
+    func `UserEntity initialization preserves all fields including raw id bytes`() {
         let id = Data([0xDE, 0xAD, 0xBE, 0xEF])
         let user = PublicKeyCredentialUserEntity(
             name: "alice@example.com",
@@ -59,8 +59,8 @@ struct PublicKeyCredentialEntityTests {
         #expect(user.displayName == "Alice")
     }
 
-    @Test("UserEntity encodes id as base64url (no + / = padding)")
-    func userEncodesIdAsBase64URL() throws {
+    @Test
+    func `UserEntity encodes id as base64url (no + / = padding)`() throws {
         // Bytes chosen so plain base64 would produce `+`, `/`, and `=` characters.
         // Standard base64(ÿÿ?) = //8/ ; base64url should be "__8_" without padding.
         let id = Data([0xFF, 0xFF, 0x3F])
@@ -73,8 +73,8 @@ struct PublicKeyCredentialEntityTests {
         #expect(!encodedId.contains("="))
     }
 
-    @Test("UserEntity Codable JSON round-trip preserves binary id")
-    func userCodableRoundTripPreservesId() throws {
+    @Test
+    func `UserEntity Codable JSON round-trip preserves binary id`() throws {
         let id = Data((0..<32).map { _ in UInt8.random(in: 0...255) })
         let original = PublicKeyCredentialUserEntity(
             name: "bob@example.com",
@@ -88,8 +88,8 @@ struct PublicKeyCredentialEntityTests {
         #expect(decoded.displayName == original.displayName)
     }
 
-    @Test("UserEntity decoding fails for non-base64url id")
-    func userDecodingRejectsInvalidId() throws {
+    @Test
+    func `UserEntity decoding fails for non-base64url id`() throws {
         // The letters/digits here are base64url-valid; the space and exclamation
         // are not, which should make `Data(base64URLEncoded:)` return nil and
         // trigger a DecodingError.
@@ -99,8 +99,8 @@ struct PublicKeyCredentialEntityTests {
         }
     }
 
-    @Test("UserEntity equality compares every field")
-    func userEquality() {
+    @Test
+    func `UserEntity equality compares every field`() {
         let a = PublicKeyCredentialUserEntity(
             name: "a", id: Data([0x01]), displayName: "A"
         )
@@ -116,8 +116,8 @@ struct PublicKeyCredentialEntityTests {
 
     // MARK: - Base protocol
 
-    @Test("Both entity types conform to PublicKeyCredentialEntity")
-    func bothConformToBaseProtocol() {
+    @Test
+    func `Both entity types conform to PublicKeyCredentialEntity`() {
         let rp: any PublicKeyCredentialEntity = PublicKeyCredentialRpEntity(name: "n", id: "i")
         let user: any PublicKeyCredentialEntity = PublicKeyCredentialUserEntity(
             name: "n", id: Data(), displayName: "d"
@@ -126,8 +126,8 @@ struct PublicKeyCredentialEntityTests {
         #expect(user.name == "n")
     }
 
-    @Test("Both entity types are Sendable")
-    func bothAreSendable() {
+    @Test
+    func `Both entity types are Sendable`() {
         let _: any Sendable = PublicKeyCredentialRpEntity(name: "n", id: "i")
         let _: any Sendable = PublicKeyCredentialUserEntity(
             name: "n", id: Data(), displayName: "d"

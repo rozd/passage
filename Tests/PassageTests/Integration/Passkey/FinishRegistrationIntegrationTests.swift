@@ -14,8 +14,8 @@ import VaporTesting
 /// matches the user the challenge was issued to at `begin` time; a mismatch
 /// is surfaced as `invalidPasskeyChallenge` (401) rather than being silently
 /// attributed to the wrong account.
-@Suite("Passkey Finish Registration (authenticated) Integration Tests", .tags(.integration, .passkey))
-struct FinishRegistrationIntegrationTests {
+@Suite(.tags(.integration, .passkey))
+struct `Passkey Finish Registration (authenticated) Integration Tests` {
 
     private static let minimalFinishBody = #"{"id":"any","type":"public-key","rawId":"any","response":{"clientDataJSON":"","attestationObject":"","transports":["internal"]}}"#
 
@@ -100,8 +100,8 @@ struct FinishRegistrationIntegrationTests {
 
     // MARK: - Authentication gating
 
-    @Test("POST finish returns 401 when the request carries no auth")
-    func unauthenticatedReturns401() async throws {
+    @Test
+    func `POST finish returns 401 when the request carries no auth`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder)
@@ -118,8 +118,8 @@ struct FinishRegistrationIntegrationTests {
 
     // MARK: - Happy path
 
-    @Test("POST finish with matching session persists a credential bound to the session user")
-    func finishPersistsCredentialForSessionUser() async throws {
+    @Test
+    func `POST finish with matching session persists a credential bound to the session user`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder)
@@ -160,8 +160,8 @@ struct FinishRegistrationIntegrationTests {
 
     // MARK: - User-mismatch rejection
 
-    @Test("POST finish returns 401 when a different authenticated user completes the ceremony")
-    func crossUserFinishIsRejected() async throws {
+    @Test
+    func `POST finish returns 401 when a different authenticated user completes the ceremony`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder)

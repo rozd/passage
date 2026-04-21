@@ -2,27 +2,27 @@ import Testing
 import Vapor
 @testable import Passage
 
-@Suite("Verification Struct Tests")
-struct VerificationStructTests {
+@Suite
+struct `Verification Struct Tests` {
 
     // MARK: - Verification Struct Tests
 
-    @Test("Verification struct is properly namespaced in Passage")
-    func verificationNamespace() {
+    @Test
+    func `Verification struct is properly namespaced in Passage`() {
         let typeName = String(reflecting: Passage.Verification.self)
         #expect(typeName.contains("Passage.Verification"))
     }
 
-    @Test("Verification struct conforms to Sendable")
-    func verificationSendable() {
+    @Test
+    func `Verification struct conforms to Sendable`() {
         let _: any Sendable.Type = Passage.Verification.self
-        #expect(Passage.Verification.self is Sendable.Type)
+        #expect(Passage.Verification.self is (any Sendable).Type)
     }
 
     // MARK: - SendEmailCodePayload Tests
 
-    @Test("SendEmailCodePayload initialization")
-    func sendEmailCodePayloadInitialization() throws {
+    @Test
+    func `SendEmailCodePayload initialization`() throws {
         let url = try #require(URL(string: "https://example.com/verify?code=123456"))
         let payload = Passage.Verification.SendEmailCodePayload(
             email: "test@example.com",
@@ -37,8 +37,8 @@ struct VerificationStructTests {
         #expect(payload.verificationCode == "123456")
     }
 
-    @Test("SendEmailCodePayload conforms to Codable")
-    func sendEmailCodePayloadCodable() throws {
+    @Test
+    func `SendEmailCodePayload conforms to Codable`() throws {
         let url = try #require(URL(string: "https://example.com/verify"))
         let payload = Passage.Verification.SendEmailCodePayload(
             email: "test@example.com",
@@ -60,8 +60,8 @@ struct VerificationStructTests {
         #expect(decoded.verificationCode == payload.verificationCode)
     }
 
-    @Test("SendEmailCodePayload with different verification URLs")
-    func sendEmailCodePayloadDifferentURLs() throws {
+    @Test
+    func `SendEmailCodePayload with different verification URLs`() throws {
         let urls = [
             "https://example.com/verify",
             "https://myapp.com/auth/verify",
@@ -80,8 +80,8 @@ struct VerificationStructTests {
         }
     }
 
-    @Test("SendEmailCodePayload encodes and decodes correctly")
-    func sendEmailCodePayloadRoundTrip() throws {
+    @Test
+    func `SendEmailCodePayload encodes and decodes correctly`() throws {
         let url = try #require(URL(string: "https://example.com/verify?code=ABC123"))
         let original = Passage.Verification.SendEmailCodePayload(
             email: "user@example.com",
@@ -104,8 +104,8 @@ struct VerificationStructTests {
 
     // MARK: - SendPhoneCodePayload Tests
 
-    @Test("SendPhoneCodePayload initialization")
-    func sendPhoneCodePayloadInitialization() {
+    @Test
+    func `SendPhoneCodePayload initialization`() {
         let payload = Passage.Verification.SendPhoneCodePayload(
             phone: "+1234567890",
             code: "123456",
@@ -117,8 +117,8 @@ struct VerificationStructTests {
         #expect(payload.userId == "user123")
     }
 
-    @Test("SendPhoneCodePayload conforms to Codable")
-    func sendPhoneCodePayloadCodable() throws {
+    @Test
+    func `SendPhoneCodePayload conforms to Codable`() throws {
         let payload = Passage.Verification.SendPhoneCodePayload(
             phone: "+1234567890",
             code: "ABC123",
@@ -152,8 +152,8 @@ struct VerificationStructTests {
         #expect(payload.phone == phone)
     }
 
-    @Test("SendPhoneCodePayload encodes and decodes correctly")
-    func sendPhoneCodePayloadRoundTrip() throws {
+    @Test
+    func `SendPhoneCodePayload encodes and decodes correctly`() throws {
         let original = Passage.Verification.SendPhoneCodePayload(
             phone: "+19876543210",
             code: "XYZ789",
@@ -173,8 +173,8 @@ struct VerificationStructTests {
 
     // MARK: - Payload Independence Tests
 
-    @Test("Email and phone payloads are independent")
-    func payloadsAreIndependent() throws {
+    @Test
+    func `Email and phone payloads are independent`() throws {
         let url = try #require(URL(string: "https://example.com/verify"))
         let emailPayload = Passage.Verification.SendEmailCodePayload(
             email: "test@example.com",
@@ -193,8 +193,8 @@ struct VerificationStructTests {
         #expect(emailPayload.verificationCode != phonePayload.code)
     }
 
-    @Test("Multiple email payloads can coexist")
-    func multipleEmailPayloads() throws {
+    @Test
+    func `Multiple email payloads can coexist`() throws {
         let url1 = try #require(URL(string: "https://example.com/verify1"))
         let url2 = try #require(URL(string: "https://example.com/verify2"))
 
@@ -217,8 +217,8 @@ struct VerificationStructTests {
         #expect(payload1.verificationCode != payload2.verificationCode)
     }
 
-    @Test("Multiple phone payloads can coexist")
-    func multiplePhonePayloads() {
+    @Test
+    func `Multiple phone payloads can coexist`() {
         let payload1 = Passage.Verification.SendPhoneCodePayload(
             phone: "+1234567890",
             code: "CODE1",
@@ -238,8 +238,8 @@ struct VerificationStructTests {
 
     // MARK: - JSON Encoding Tests
 
-    @Test("SendEmailCodePayload JSON encoding format")
-    func sendEmailCodePayloadJSONFormat() throws {
+    @Test
+    func `SendEmailCodePayload JSON encoding format`() throws {
         let url = try #require(URL(string: "https://example.com/verify"))
         let payload = Passage.Verification.SendEmailCodePayload(
             email: "test@example.com",
@@ -260,8 +260,8 @@ struct VerificationStructTests {
         #expect(json!.contains("\"verificationCode\""))
     }
 
-    @Test("SendPhoneCodePayload JSON encoding format")
-    func sendPhoneCodePayloadJSONFormat() throws {
+    @Test
+    func `SendPhoneCodePayload JSON encoding format`() throws {
         let payload = Passage.Verification.SendPhoneCodePayload(
             phone: "+1234567890",
             code: "123456",
@@ -315,8 +315,8 @@ struct VerificationStructTests {
 
     // MARK: - URL Query Parameters Tests
 
-    @Test("SendEmailCodePayload with URL containing query parameters")
-    func sendEmailCodePayloadWithQueryParams() throws {
+    @Test
+    func `SendEmailCodePayload with URL containing query parameters`() throws {
         let url = try #require(URL(string: "https://example.com/verify?code=123456&email=test@example.com"))
         let payload = Passage.Verification.SendEmailCodePayload(
             email: "test@example.com",

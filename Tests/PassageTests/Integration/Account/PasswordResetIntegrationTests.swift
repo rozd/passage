@@ -7,8 +7,8 @@ import Vapor
 import VaporTesting
 import XCTQueues
 
-@Suite("Password Reset Integration Tests", .tags(.integration, .resetPassword))
-struct PasswordResetIntegrationTests {
+@Suite(.tags(.integration, .resetPassword))
+struct `Password Reset Integration Tests` {
 
     // MARK: - Helpers
 
@@ -132,8 +132,8 @@ struct PasswordResetIntegrationTests {
 
     // MARK: - Email Password Reset Tests
 
-    @Test("Request password reset via email sends reset code")
-    func requestPasswordResetEmail() async throws {
+    @Test
+    func `Request password reset via email sends reset code`() async throws {
         let captured = CapturedMessages()
 
         try await withApp(configure: { app in try await configureWithCapture(app, captured: captured) }) { app in
@@ -157,8 +157,8 @@ struct PasswordResetIntegrationTests {
         }
     }
 
-    @Test("Request password reset via phone sends SMS code")
-    func requestPasswordResetPhone() async throws {
+    @Test
+    func `Request password reset via phone sends SMS code`() async throws {
         let captured = CapturedMessages()
 
         try await withApp(configure: { app in try await configureWithCapture(app, captured: captured) }) { app in
@@ -181,8 +181,8 @@ struct PasswordResetIntegrationTests {
         }
     }
 
-    @Test("Successful password reset via email with valid code")
-    func successfulPasswordResetViaEmail() async throws {
+    @Test
+    func `Successful password reset via email with valid code`() async throws {
         let captured = CapturedMessages()
         let email = "user@example.com"
         let oldPassword = "oldPassword123"
@@ -235,8 +235,8 @@ struct PasswordResetIntegrationTests {
         }
     }
 
-    @Test("Successful password reset via phone with valid code")
-    func successfulPasswordResetViaPhone() async throws {
+    @Test
+    func `Successful password reset via phone with valid code`() async throws {
         let captured = CapturedMessages()
         let phone = "+1234567890"
         let oldPassword = "oldPassword123"
@@ -289,8 +289,8 @@ struct PasswordResetIntegrationTests {
         }
     }
 
-    @Test("Password reset fails with invalid code")
-    func passwordResetFailsWithInvalidCode() async throws {
+    @Test
+    func `Password reset fails with invalid code`() async throws {
         let captured = CapturedMessages()
 
         try await withApp(configure: { app in try await configureWithCapture(app, captured: captured) }) { app in
@@ -317,8 +317,8 @@ struct PasswordResetIntegrationTests {
         }
     }
 
-    @Test("Password reset fails with expired code")
-    func passwordResetFailsWithExpiredCode() async throws {
+    @Test
+    func `Password reset fails with expired code`() async throws {
         let captured = CapturedMessages()
 
         try await withApp(configure: { app in
@@ -353,8 +353,8 @@ struct PasswordResetIntegrationTests {
         }
     }
 
-    @Test("Password reset request fails for non-existent email")
-    func passwordResetFailsForNonExistentEmail() async throws {
+    @Test
+    func `Password reset request fails for non-existent email`() async throws {
         try await withApp(configure: configure) { app in
             try await app.testing().test(.POST, "/auth/password/reset/email", beforeRequest: { req in
                 try req.content.encode(["email": "nonexistent@example.com"])
@@ -364,8 +364,8 @@ struct PasswordResetIntegrationTests {
         }
     }
 
-    @Test("Password reset request fails for non-existent phone")
-    func passwordResetFailsForNonExistentPhone() async throws {
+    @Test
+    func `Password reset request fails for non-existent phone`() async throws {
         try await withApp(configure: configure) { app in
             try await app.testing().test(.POST, "/auth/password/reset/phone", beforeRequest: { req in
                 try req.content.encode(["phone": "+9999999999"])
@@ -375,8 +375,8 @@ struct PasswordResetIntegrationTests {
         }
     }
 
-    @Test("Email password reset link URL contains code and email")
-    func emailResetLinkContainsCodeAndEmail() async throws {
+    @Test
+    func `Email password reset link URL contains code and email`() async throws {
         let captured = CapturedMessages()
 
         try await withApp(configure: { app in try await configureWithCapture(app, captured: captured) }) { app in
@@ -403,8 +403,8 @@ struct PasswordResetIntegrationTests {
         }
     }
 
-    @Test("Resend email password reset code invalidates old code")
-    func resendEmailResetCodeInvalidatesOldCode() async throws {
+    @Test
+    func `Resend email password reset code invalidates old code`() async throws {
         let captured = CapturedMessages()
 
         try await withApp(configure: { app in try await configureWithCapture(app, captured: captured) }) { app in
@@ -461,8 +461,8 @@ struct PasswordResetIntegrationTests {
         }
     }
 
-    @Test("Resend phone password reset code invalidates old code")
-    func resendPhoneResetCodeInvalidatesOldCode() async throws {
+    @Test
+    func `Resend phone password reset code invalidates old code`() async throws {
         let captured = CapturedMessages()
 
         try await withApp(configure: { app in try await configureWithCapture(app, captured: captured) }) { app in
@@ -519,8 +519,8 @@ struct PasswordResetIntegrationTests {
         }
     }
 
-    @Test("Password reset invalidates code after successful use")
-    func passwordResetInvalidatesCodeAfterUse() async throws {
+    @Test
+    func `Password reset invalidates code after successful use`() async throws {
         let captured = CapturedMessages()
 
         try await withApp(configure: { app in try await configureWithCapture(app, captured: captured) }) { app in
@@ -563,8 +563,8 @@ struct PasswordResetIntegrationTests {
         }
     }
 
-    @Test("Password reset request fails with invalid email format")
-    func passwordResetFailsWithInvalidEmailFormat() async throws {
+    @Test
+    func `Password reset request fails with invalid email format`() async throws {
         try await withApp(configure: configure) { app in
             try await app.testing().test(.POST, "/auth/password/reset/email", beforeRequest: { req in
                 try req.content.encode(["email": "invalid-email"])
@@ -574,8 +574,8 @@ struct PasswordResetIntegrationTests {
         }
     }
 
-    @Test("Password reset verify fails with missing fields")
-    func passwordResetVerifyFailsWithMissingFields() async throws {
+    @Test
+    func `Password reset verify fails with missing fields`() async throws {
         try await withApp(configure: configure) { app in
             // Missing newPassword
             try await app.testing().test(.POST, "/auth/password/reset/email/verify", beforeRequest: { req in
@@ -599,8 +599,8 @@ struct PasswordResetIntegrationTests {
         }
     }
 
-    @Test("Password reset verify fails with short password")
-    func passwordResetVerifyFailsWithShortPassword() async throws {
+    @Test
+    func `Password reset verify fails with short password`() async throws {
         let captured = CapturedMessages()
 
         try await withApp(configure: { app in try await configureWithCapture(app, captured: captured) }) { app in
@@ -632,8 +632,8 @@ struct PasswordResetIntegrationTests {
         }
     }
 
-    @Test("Password reset revokes all refresh tokens")
-    func passwordResetRevokesAllRefreshTokens() async throws {
+    @Test
+    func `Password reset revokes all refresh tokens`() async throws {
         let captured = CapturedMessages()
         let email = "user@example.com"
         let oldPassword = "oldPassword123"

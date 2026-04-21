@@ -2,8 +2,8 @@ import Testing
 import Foundation
 @testable import Passage
 
-@Suite("Tokens Configuration Tests")
-struct TokensConfigurationTests {
+@Suite
+struct `Tokens Configuration Tests` {
 
     // MARK: - IdToken Configuration Tests
 
@@ -45,8 +45,8 @@ struct TokensConfigurationTests {
 
     // MARK: - Tokens Configuration Tests
 
-    @Test("Tokens default configuration")
-    func tokensDefaultConfiguration() {
+    @Test
+    func `Tokens default configuration`() {
         let tokens = Passage.Configuration.Tokens()
 
         #expect(tokens.issuer == nil)
@@ -55,15 +55,15 @@ struct TokensConfigurationTests {
         #expect(tokens.refreshToken.timeToLive == 7 * 24 * 3600)
     }
 
-    @Test("Tokens configuration with issuer")
-    func tokensWithIssuer() {
+    @Test
+    func `Tokens configuration with issuer`() {
         let tokens = Passage.Configuration.Tokens(issuer: "https://example.com")
 
         #expect(tokens.issuer == "https://example.com")
     }
 
-    @Test("Tokens configuration with custom TTLs")
-    func tokensWithCustomTTLs() {
+    @Test
+    func `Tokens configuration with custom TTLs`() {
         let tokens = Passage.Configuration.Tokens(
             issuer: "https://auth.example.com",
             idToken: .init(timeToLive: 7200),
@@ -77,8 +77,8 @@ struct TokensConfigurationTests {
         #expect(tokens.refreshToken.timeToLive == 2592000)
     }
 
-    @Test("Tokens Sendable conformance")
-    func tokensSendableConformance() {
+    @Test
+    func `Tokens Sendable conformance`() {
         let tokens: Passage.Configuration.Tokens = .init()
 
         // Verify all nested types are Sendable

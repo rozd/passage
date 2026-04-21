@@ -3,13 +3,13 @@ import JWT
 @testable import Passage
 import Testing
 
-@Suite("ID Token Tests")
-struct IdTokenTests {
+@Suite
+struct `ID Token Tests` {
 
     // MARK: - Structure Tests
 
-    @Test("ID token initialization with all properties")
-    func initializationWithAllProperties() {
+    @Test
+    func `ID token initialization with all properties`() {
         let subject = SubjectClaim(value: "user123")
         let expiration = ExpirationClaim(value: Date(timeIntervalSinceNow: 3600))
         let issuedAt = IssuedAtClaim(value: Date())
@@ -61,8 +61,8 @@ struct IdTokenTests {
 
     // MARK: - UserInfo Protocol Conformance Tests
 
-    @Test("ID token conforms to UserInfo")
-    func conformsToUserInfo() {
+    @Test
+    func `ID token conforms to UserInfo`() {
         let subject = SubjectClaim(value: "user123")
         let expiration = ExpirationClaim(value: Date(timeIntervalSinceNow: 3600))
         let issuedAt = IssuedAtClaim(value: Date())
@@ -84,8 +84,8 @@ struct IdTokenTests {
         #expect(userInfo.phone == "+1234567890")
     }
 
-    @Test("ID token UserInfo with nil values")
-    func userInfoWithNilValues() {
+    @Test
+    func `ID token UserInfo with nil values`() {
         let subject = SubjectClaim(value: "user123")
         let expiration = ExpirationClaim(value: Date(timeIntervalSinceNow: 3600))
         let issuedAt = IssuedAtClaim(value: Date())
@@ -131,8 +131,8 @@ struct IdTokenTests {
         #expect(token.subject.value == userId)
     }
 
-    @Test("ID token expiration claim")
-    func expirationClaim() {
+    @Test
+    func `ID token expiration claim`() {
         let expirationDate = Date(timeIntervalSinceNow: 7200)
         let subject = SubjectClaim(value: "user123")
         let expiration = ExpirationClaim(value: expirationDate)
@@ -151,8 +151,8 @@ struct IdTokenTests {
         #expect(token.expiration.value.timeIntervalSince1970 == expirationDate.timeIntervalSince1970)
     }
 
-    @Test("ID token issuedAt claim")
-    func issuedAtClaim() {
+    @Test
+    func `ID token issuedAt claim`() {
         let issuedAtDate = Date(timeIntervalSinceNow: -100)
         let subject = SubjectClaim(value: "user123")
         let expiration = ExpirationClaim(value: Date(timeIntervalSinceNow: 3600))
@@ -221,8 +221,8 @@ struct IdTokenTests {
 
     // MARK: - JWT Encoding/Decoding Tests
 
-    @Test("ID token JWT encoding and decoding")
-    func jwtEncodingDecoding() async throws {
+    @Test
+    func `ID token JWT encoding and decoding`() async throws {
         let keys = JWTKeyCollection()
         await keys.add(hmac: "secret-test-key-that-is-long-enough-for-hs256", digestAlgorithm: .sha256)
 
@@ -250,8 +250,8 @@ struct IdTokenTests {
         #expect(decodedToken.audience?.value.first == originalToken.audience?.value.first)
     }
 
-    @Test("ID token JWT encoding with nil optional fields")
-    func jwtEncodingWithNilFields() async throws {
+    @Test
+    func `ID token JWT encoding with nil optional fields`() async throws {
         let keys = JWTKeyCollection()
         await keys.add(hmac: "secret-test-key-that-is-long-enough-for-hs256", digestAlgorithm: .sha256)
 
@@ -277,8 +277,8 @@ struct IdTokenTests {
 
     // MARK: - JWT Verification Tests
 
-    @Test("ID token expiration verification succeeds for valid token")
-    func expirationVerificationSucceeds() {
+    @Test
+    func `ID token expiration verification succeeds for valid token`() {
         let token = IdToken(
             subject: SubjectClaim(value: "user123"),
             expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
@@ -295,8 +295,8 @@ struct IdTokenTests {
         }
     }
 
-    @Test("ID token expiration verification fails for expired token")
-    func expirationVerificationFails() {
+    @Test
+    func `ID token expiration verification fails for expired token`() {
         let expiredToken = IdToken(
             subject: SubjectClaim(value: "user123"),
             expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: -100)),
@@ -313,8 +313,8 @@ struct IdTokenTests {
         }
     }
 
-    @Test("ID token round-trip with verification")
-    func roundTripWithVerification() async throws {
+    @Test
+    func `ID token round-trip with verification`() async throws {
         let keys = JWTKeyCollection()
         await keys.add(hmac: "secret-test-key-that-is-long-enough-for-hs256", digestAlgorithm: .sha256)
 

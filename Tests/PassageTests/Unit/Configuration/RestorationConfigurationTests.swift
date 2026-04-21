@@ -3,13 +3,13 @@ import Foundation
 import Vapor
 @testable import Passage
 
-@Suite("Restoration Configuration Tests")
-struct RestorationConfigurationTests {
+@Suite
+struct `Restoration Configuration Tests` {
 
     // MARK: - Email Restoration Route Tests
 
-    @Test("Email restoration request route default")
-    func emailRequestRouteDefault() {
+    @Test
+    func `Email restoration request route default`() {
         let route = Passage.Configuration.Restoration.Email.Routes.Request.default
         #expect(route.path.count == 3)
         #expect(route.path[0].description == "password")
@@ -17,8 +17,8 @@ struct RestorationConfigurationTests {
         #expect(route.path[2].description == "email")
     }
 
-    @Test("Email restoration verify route default")
-    func emailVerifyRouteDefault() {
+    @Test
+    func `Email restoration verify route default`() {
         let route = Passage.Configuration.Restoration.Email.Routes.Verify.default
         #expect(route.path.count == 4)
         #expect(route.path[0].description == "password")
@@ -27,8 +27,8 @@ struct RestorationConfigurationTests {
         #expect(route.path[3].description == "verify")
     }
 
-    @Test("Email restoration resend route default")
-    func emailResendRouteDefault() {
+    @Test
+    func `Email restoration resend route default`() {
         let route = Passage.Configuration.Restoration.Email.Routes.Resend.default
         #expect(route.path.count == 4)
         #expect(route.path[0].description == "password")
@@ -37,8 +37,8 @@ struct RestorationConfigurationTests {
         #expect(route.path[3].description == "resend")
     }
 
-    @Test("Email restoration routes custom paths")
-    func emailRoutesCustomPaths() {
+    @Test
+    func `Email restoration routes custom paths`() {
         let routes = Passage.Configuration.Restoration.Email.Routes(
             request: .init(path: "forgot"),
             verify: .init(path: "reset"),
@@ -52,8 +52,8 @@ struct RestorationConfigurationTests {
 
     // MARK: - Email Restoration Configuration Tests
 
-    @Test("Email restoration default configuration")
-    func emailRestorationDefault() {
+    @Test
+    func `Email restoration default configuration`() {
         let email = Passage.Configuration.Restoration.Email()
 
         #expect(email.codeLength == 6)
@@ -61,8 +61,8 @@ struct RestorationConfigurationTests {
         #expect(email.maxAttempts == 3)
     }
 
-    @Test("Email restoration custom configuration")
-    func emailRestorationCustom() {
+    @Test
+    func `Email restoration custom configuration`() {
         let email = Passage.Configuration.Restoration.Email(
             routes: .init(),
             codeLength: 8,
@@ -77,8 +77,8 @@ struct RestorationConfigurationTests {
 
     // MARK: - Phone Restoration Route Tests
 
-    @Test("Phone restoration request route default")
-    func phoneRequestRouteDefault() {
+    @Test
+    func `Phone restoration request route default`() {
         let route = Passage.Configuration.Restoration.Phone.Routes.Request.default
         #expect(route.path.count == 3)
         #expect(route.path[0].description == "password")
@@ -86,8 +86,8 @@ struct RestorationConfigurationTests {
         #expect(route.path[2].description == "phone")
     }
 
-    @Test("Phone restoration verify route default")
-    func phoneVerifyRouteDefault() {
+    @Test
+    func `Phone restoration verify route default`() {
         let route = Passage.Configuration.Restoration.Phone.Routes.Verify.default
         #expect(route.path.count == 4)
         #expect(route.path[0].description == "password")
@@ -96,8 +96,8 @@ struct RestorationConfigurationTests {
         #expect(route.path[3].description == "verify")
     }
 
-    @Test("Phone restoration resend route default")
-    func phoneResendRouteDefault() {
+    @Test
+    func `Phone restoration resend route default`() {
         let route = Passage.Configuration.Restoration.Phone.Routes.Resend.default
         #expect(route.path.count == 4)
         #expect(route.path[0].description == "password")
@@ -106,8 +106,8 @@ struct RestorationConfigurationTests {
         #expect(route.path[3].description == "resend")
     }
 
-    @Test("Phone restoration routes custom paths")
-    func phoneRoutesCustomPaths() {
+    @Test
+    func `Phone restoration routes custom paths`() {
         let routes = Passage.Configuration.Restoration.Phone.Routes(
             request: .init(path: "forgot", "sms"),
             verify: .init(path: "reset", "sms"),
@@ -121,8 +121,8 @@ struct RestorationConfigurationTests {
 
     // MARK: - Phone Restoration Configuration Tests
 
-    @Test("Phone restoration default configuration")
-    func phoneRestorationDefault() {
+    @Test
+    func `Phone restoration default configuration`() {
         let phone = Passage.Configuration.Restoration.Phone()
 
         #expect(phone.codeLength == 6)
@@ -130,8 +130,8 @@ struct RestorationConfigurationTests {
         #expect(phone.maxAttempts == 3)
     }
 
-    @Test("Phone restoration custom configuration")
-    func phoneRestorationCustom() {
+    @Test
+    func `Phone restoration custom configuration`() {
         let phone = Passage.Configuration.Restoration.Phone(
             routes: .init(),
             codeLength: 4,
@@ -146,8 +146,8 @@ struct RestorationConfigurationTests {
 
     // MARK: - Restoration Configuration Tests
 
-    @Test("Restoration default configuration")
-    func restorationDefault() {
+    @Test
+    func `Restoration default configuration`() {
         let restoration = Passage.Configuration.Restoration()
 
         #expect(restoration.preferredDelivery == .email)
@@ -156,22 +156,22 @@ struct RestorationConfigurationTests {
         #expect(restoration.phone.codeLength == 6)
     }
 
-    @Test("Restoration with phone preferred delivery")
-    func restorationPhonePreferred() {
+    @Test
+    func `Restoration with phone preferred delivery`() {
         let restoration = Passage.Configuration.Restoration(preferredDelivery: .phone)
 
         #expect(restoration.preferredDelivery == .phone)
     }
 
-    @Test("Restoration with queues enabled")
-    func restorationWithQueues() {
+    @Test
+    func `Restoration with queues enabled`() {
         let restoration = Passage.Configuration.Restoration(useQueues: true)
 
         #expect(restoration.useQueues == true)
     }
 
-    @Test("Restoration with custom email and phone")
-    func restorationCustom() {
+    @Test
+    func `Restoration with custom email and phone`() {
         let restoration = Passage.Configuration.Restoration(
             preferredDelivery: .phone,
             email: .init(codeLength: 8),
@@ -185,8 +185,8 @@ struct RestorationConfigurationTests {
         #expect(restoration.useQueues == true)
     }
 
-    @Test("Restoration Sendable conformance")
-    func restorationSendableConformance() {
+    @Test
+    func `Restoration Sendable conformance`() {
         let restoration: Passage.Configuration.Restoration = .init()
 
         let _: any Sendable = restoration
@@ -196,8 +196,8 @@ struct RestorationConfigurationTests {
 
     // MARK: - Restoration URL Tests
 
-    @Test("Email password reset URL construction")
-    func emailPasswordResetURL() throws {
+    @Test
+    func `Email password reset URL construction`() throws {
         let config = try Passage.Configuration(
             origin: URL(string: "https://example.com")!,
             jwt: .init(jwks: .init(json: "{}"))
@@ -208,8 +208,8 @@ struct RestorationConfigurationTests {
         #expect(url.absoluteString == "https://example.com/auth/password/reset/email/verify")
     }
 
-    @Test("Email password reset link URL with code and email")
-    func emailPasswordResetLinkURL() throws {
+    @Test
+    func `Email password reset link URL with code and email`() throws {
         let config = try Passage.Configuration(
             origin: URL(string: "https://example.com")!,
             jwt: .init(jwks: .init(json: "{}"))
@@ -222,8 +222,8 @@ struct RestorationConfigurationTests {
         #expect(url.absoluteString.hasPrefix("https://example.com/auth/password/reset/email/verify"))
     }
 
-    @Test("Phone password reset URL construction")
-    func phonePasswordResetURL() throws {
+    @Test
+    func `Phone password reset URL construction`() throws {
         let config = try Passage.Configuration(
             origin: URL(string: "https://example.com")!,
             jwt: .init(jwks: .init(json: "{}"))
@@ -234,8 +234,8 @@ struct RestorationConfigurationTests {
         #expect(url.absoluteString == "https://example.com/auth/password/reset/phone/verify")
     }
 
-    @Test("Restoration URLs with custom routes")
-    func restorationURLsCustomRoutes() throws {
+    @Test
+    func `Restoration URLs with custom routes`() throws {
         let config = try Passage.Configuration(
             origin: URL(string: "https://example.com")!,
             routes: .init(group: "api"),

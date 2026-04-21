@@ -2,8 +2,8 @@ import Testing
 import Foundation
 @testable import Passage
 
-@Suite("Services Tests")
-struct ServicesTests {
+@Suite
+struct `Services Tests` {
 
     // MARK: - Mock Implementations
 
@@ -136,8 +136,8 @@ struct ServicesTests {
 
     // MARK: - Services Initialization Tests
 
-    @Test("Services initialization with all parameters")
-    func servicesInitializationFull() {
+    @Test
+    func `Services initialization with all parameters`() {
         let store = MockStore()
         let random = MockRandomGenerator()
         let emailDelivery = MockEmailDelivery()
@@ -158,8 +158,8 @@ struct ServicesTests {
         #expect(services.federatedLogin == nil)
     }
 
-    @Test("Services initialization with default random generator")
-    func servicesInitializationWithDefaultRandom() {
+    @Test
+    func `Services initialization with default random generator`() {
         let store = MockStore()
         let emailDelivery = MockEmailDelivery()
         let phoneDelivery = MockPhoneDelivery()
@@ -177,8 +177,8 @@ struct ServicesTests {
         #expect(services.phoneDelivery != nil)
     }
 
-    @Test("Services with nil email delivery")
-    func servicesWithNilEmailDelivery() {
+    @Test
+    func `Services with nil email delivery`() {
         let store = MockStore()
         let random = MockRandomGenerator()
 
@@ -193,8 +193,8 @@ struct ServicesTests {
         #expect(services.phoneDelivery == nil)
     }
 
-    @Test("Services conforms to Sendable")
-    func servicesIsSendable() {
+    @Test
+    func `Services conforms to Sendable`() {
         let store = MockStore()
         let random = MockRandomGenerator()
 
@@ -210,26 +210,26 @@ struct ServicesTests {
 
     // MARK: - DeliveryType Tests
 
-    @Test("DeliveryType enum has email case")
-    func deliveryTypeEmail() {
+    @Test
+    func `DeliveryType enum has email case`() {
         let deliveryType = Passage.DeliveryType.email
         #expect(deliveryType == .email)
     }
 
-    @Test("DeliveryType enum has phone case")
-    func deliveryTypePhone() {
+    @Test
+    func `DeliveryType enum has phone case`() {
         let deliveryType = Passage.DeliveryType.phone
         #expect(deliveryType == .phone)
     }
 
-    @Test("DeliveryType conforms to Sendable")
-    func deliveryTypeIsSendable() {
+    @Test
+    func `DeliveryType conforms to Sendable`() {
         let deliveryType: any Sendable = Passage.DeliveryType.email
         #expect(deliveryType is Passage.DeliveryType)
     }
 
-    @Test("DeliveryType cases are distinct")
-    func deliveryTypeCasesAreDistinct() {
+    @Test
+    func `DeliveryType cases are distinct`() {
         let email = Passage.DeliveryType.email
         let phone = Passage.DeliveryType.phone
         #expect(email != phone)
@@ -237,8 +237,8 @@ struct ServicesTests {
 
     // MARK: - Services Properties Access Tests
 
-    @Test("Services stores references correctly")
-    func servicesStoresReferences() {
+    @Test
+    func `Services stores references correctly`() {
         let store = MockStore()
         let random = MockRandomGenerator()
         let emailDelivery = MockEmailDelivery()

@@ -5,8 +5,8 @@ import Testing
 import Vapor
 import VaporTesting
 
-@Suite("Manual Linking Tests", .tags(.integration, .federatedLogin))
-struct ManualLinkingTests {
+@Suite(.tags(.integration, .federatedLogin))
+struct `Manual Linking Tests` {
 
     // MARK: - Configuration Helper
 
@@ -122,8 +122,8 @@ struct ManualLinkingTests {
 
     // MARK: - Initiate Tests
 
-    @Test("Manual linking initiate returns skipped when no candidates found")
-    func initiateReturnsSkippedWhenNoCandidates() async throws {
+    @Test
+    func `Manual linking initiate returns skipped when no candidates found`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app)
         }) { app in
@@ -150,8 +150,8 @@ struct ManualLinkingTests {
         }
     }
 
-    @Test("Manual linking initiate returns conflict when views not configured")
-    func initiateReturnsConflictWhenNoViews() async throws {
+    @Test
+    func `Manual linking initiate returns conflict when views not configured`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: false)
         }) { app in
@@ -188,8 +188,8 @@ struct ManualLinkingTests {
         }
     }
 
-    @Test("Manual linking initiate returns initiated when candidates found and views configured")
-    func initiateReturnsInitiatedWhenCandidatesAndViews() async throws {
+    @Test
+    func `Manual linking initiate returns initiated when candidates found and views configured`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: true)
         }) { app in
@@ -226,8 +226,8 @@ struct ManualLinkingTests {
 
     // MARK: - Candidate Detection Tests
 
-    @Test("Manual linking only includes users who can be verified")
-    func onlyIncludesVerifiableUsers() async throws {
+    @Test
+    func `Manual linking only includes users who can be verified`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: true)
         }) { app in
@@ -290,8 +290,8 @@ struct ManualLinkingTests {
 
     // MARK: - Advance Flow Tests
 
-    @Test("Advance throws error for invalid user selection")
-    func advanceThrowsForInvalidSelection() async throws {
+    @Test
+    func `Advance throws error for invalid user selection`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: true)
         }) { app in
@@ -329,8 +329,8 @@ struct ManualLinkingTests {
 
     // MARK: - Complete Flow Tests
 
-    @Test("Complete throws error when no user selected")
-    func completeThrowsWhenNoUserSelected() async throws {
+    @Test
+    func `Complete throws error when no user selected`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: true)
         }) { app in
@@ -368,8 +368,8 @@ struct ManualLinkingTests {
         }
     }
 
-    @Test("Complete throws error with no verification method provided")
-    func completeThrowsWithNoVerificationMethod() async throws {
+    @Test
+    func `Complete throws error with no verification method provided`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: true)
         }) { app in
@@ -412,8 +412,8 @@ struct ManualLinkingTests {
 
     // MARK: - State Management Tests
 
-    @Test("Load linking state throws when no session exists")
-    func loadStateThrowsWhenNoSession() async throws {
+    @Test
+    func `Load linking state throws when no session exists`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app)
         }) { app in
@@ -427,8 +427,8 @@ struct ManualLinkingTests {
 
     // MARK: - Password Verification Tests
 
-    @Test("Complete with correct password succeeds")
-    func completeWithCorrectPasswordSucceeds() async throws {
+    @Test
+    func `Complete with correct password succeeds`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: true)
         }) { app in
@@ -469,8 +469,8 @@ struct ManualLinkingTests {
         }
     }
 
-    @Test("Complete with wrong password fails")
-    func completeWithWrongPasswordFails() async throws {
+    @Test
+    func `Complete with wrong password fails`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: true)
         }) { app in

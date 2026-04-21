@@ -7,13 +7,13 @@ import Vapor
 /// `Linking` structs. These values drive the runtime behavior of the Passkey
 /// feature — initializer defaults, option forwarding, route path composition,
 /// and explicit enablement via `Passage.Configuration.passkey`.
-@Suite("Passkey Configuration Tests", .tags(.unit))
-struct PasskeyConfigurationTests {
+@Suite(.tags(.unit))
+struct `Passkey Configuration Tests` {
 
     // MARK: - Top-level values
 
-    @Test("Passkey initialization with explicit values")
-    func configExplicit() {
+    @Test
+    func `Passkey initialization with explicit values`() {
         let config = Passage.Configuration.Passkey(
             policy: .init(userVerification: .required),
             challengeTTL: 600
@@ -22,14 +22,14 @@ struct PasskeyConfigurationTests {
         #expect(config.policy.userVerification == .required)
     }
 
-    @Test("challengeTTL defaults to 300 seconds")
-    func configChallengeTTLDefault() {
+    @Test
+    func `challengeTTL defaults to 300 seconds`() {
         let config = Passage.Configuration.Passkey()
         #expect(config.challengeTTL == 300)
     }
 
-    @Test("policy defaults to Policy.init()")
-    func configPolicyDefault() {
+    @Test
+    func `policy defaults to Policy.init()`() {
         let config = Passage.Configuration.Passkey()
         #expect(config.policy.userVerification == .preferred)
         #expect(config.policy.attestation == .none)
@@ -38,8 +38,8 @@ struct PasskeyConfigurationTests {
 
     // MARK: - Policy
 
-    @Test("Policy defaults match WebAuthn recommended settings")
-    func policyDefaults() {
+    @Test
+    func `Policy defaults match WebAuthn recommended settings`() {
         let policy = Passage.Configuration.Passkey.Policy()
         #expect(policy.timeout == nil)
         #expect(policy.attestation == .none)
@@ -48,8 +48,8 @@ struct PasskeyConfigurationTests {
         #expect(policy.allowDiscoverableLogin == true)
     }
 
-    @Test("Policy with all fields customized")
-    func policyCustomized() {
+    @Test
+    func `Policy with all fields customized`() {
         let policy = Passage.Configuration.Passkey.Policy(
             timeout: .seconds(90),
             attestation: .direct,
@@ -66,8 +66,8 @@ struct PasskeyConfigurationTests {
 
     // MARK: - Routes
 
-    @Test("Routes defaults: group=passkey, signup and register both have [begin]/[finish]")
-    func routesDefaults() {
+    @Test
+    func `Routes defaults: group=passkey, signup and register both have [begin]/[finish]`() {
         let routes = Passage.Configuration.Passkey.Routes()
         #expect(routes.group.map { $0.description } == ["passkey"])
         #expect(routes.signupBegin.path.map { $0.description } == ["signup", "begin"])
@@ -78,8 +78,8 @@ struct PasskeyConfigurationTests {
         #expect(routes.authenticateFinish.path.map { $0.description } == ["authenticate", "finish"])
     }
 
-    @Test("Routes custom group and paths")
-    func routesCustom() {
+    @Test
+    func `Routes custom group and paths`() {
         let routes = Passage.Configuration.Passkey.Routes(
             group: ["pk"],
             signupBegin: .init(path: "start"),
@@ -94,8 +94,8 @@ struct PasskeyConfigurationTests {
         #expect(routes.registerFinish.path.map { $0.description } == ["add-done"])
     }
 
-    @Test("Composed paths include group prefix for signup, register, and authenticate")
-    func routesComposedPaths() {
+    @Test
+    func `Composed paths include group prefix for signup, register, and authenticate`() {
         let routes = Passage.Configuration.Passkey.Routes(
             group: ["pk"],
             signupBegin: .init(path: "s-begin"),
@@ -115,22 +115,22 @@ struct PasskeyConfigurationTests {
 
     // MARK: - Linking
 
-    @Test("Linking.allowAutoRegistration defaults to true")
-    func linkingDefaults() {
+    @Test
+    func `Linking.allowAutoRegistration defaults to true`() {
         let linking = Passage.Configuration.Passkey.Linking()
         #expect(linking.allowAutoRegistration == true)
     }
 
-    @Test("Linking can disable auto-registration")
-    func linkingDisabled() {
+    @Test
+    func `Linking can disable auto-registration`() {
         let linking = Passage.Configuration.Passkey.Linking(allowAutoRegistration: false)
         #expect(linking.allowAutoRegistration == false)
     }
 
     // MARK: - Passkey aggregate
 
-    @Test("Configuration.Passkey initialization composes nested values")
-    func passkeyComposition() {
+    @Test
+    func `Configuration.Passkey initialization composes nested values`() {
         let passkey = Passage.Configuration.Passkey(
             routes: .init(group: ["custom"]),
             linking: .init(allowAutoRegistration: false),
@@ -143,8 +143,8 @@ struct PasskeyConfigurationTests {
 
     // MARK: - Root Configuration
 
-    @Test("Configuration.passkey defaults to Passkey.init()")
-    func rootConfigurationPasskeyDefaults() throws {
+    @Test
+    func `Configuration.passkey defaults to Passkey.init()`() throws {
         let config = try Passage.Configuration(
             origin: URL(string: "https://example.com")!,
             jwt: .init(jwks: .init(json: "{}"))
@@ -152,8 +152,8 @@ struct PasskeyConfigurationTests {
         #expect(config.passkey.challengeTTL == 300)
     }
 
-    @Test("Configuration.passkey round-trips through the initializer")
-    func rootConfigurationPasskeySet() throws {
+    @Test
+    func `Configuration.passkey round-trips through the initializer`() throws {
         let passkey = Passage.Configuration.Passkey(challengeTTL: 42)
         let config = try Passage.Configuration(
             origin: URL(string: "https://example.com")!,
@@ -165,8 +165,8 @@ struct PasskeyConfigurationTests {
 
     // MARK: - Sendable
 
-    @Test("Every configuration struct is Sendable")
-    func allAreSendable() {
+    @Test
+    func `Every configuration struct is Sendable`() {
         let _: any Sendable = Passage.Configuration.Passkey.Routes()
         let _: any Sendable = Passage.Configuration.Passkey.Policy()
         let _: any Sendable = Passage.Configuration.Passkey.Linking()

@@ -2,13 +2,13 @@ import Testing
 import Vapor
 @testable import Passage
 
-@Suite("Email Restoration Route Collection Tests")
-struct EmailRestorationRouteCollectionTests {
+@Suite
+struct `Email Restoration Route Collection Tests` {
 
     // MARK: - Initialization Tests
 
-    @Test("Passage.Restoration.EmailRouteCollection initialization with default group")
-    func initializationWithDefaultGroup() {
+    @Test
+    func `Passage.Restoration.EmailRouteCollection initialization with default group`() {
         let routes = Passage.Configuration.Restoration.Email.Routes()
         let collection = Passage.Restoration.EmailRouteCollection(
             routes: routes,
@@ -18,8 +18,8 @@ struct EmailRestorationRouteCollectionTests {
         #expect(collection.group.isEmpty)
     }
 
-    @Test("Passage.Restoration.EmailRouteCollection initialization with custom group")
-    func initializationWithCustomGroup() {
+    @Test
+    func `Passage.Restoration.EmailRouteCollection initialization with custom group`() {
         let routes = Passage.Configuration.Restoration.Email.Routes()
         let group: [PathComponent] = ["auth", "password-reset"]
         let collection = Passage.Restoration.EmailRouteCollection(
@@ -30,8 +30,8 @@ struct EmailRestorationRouteCollectionTests {
         #expect(collection.group.count == 2)
     }
 
-    @Test("Passage.Restoration.EmailRouteCollection stores routes configuration")
-    func storesRoutesConfiguration() {
+    @Test
+    func `Passage.Restoration.EmailRouteCollection stores routes configuration`() {
         let requestRoute = Passage.Configuration.Restoration.Email.Routes.Request(path: "request")
         let verifyRoute = Passage.Configuration.Restoration.Email.Routes.Verify(path: "verify")
         let resendRoute = Passage.Configuration.Restoration.Email.Routes.Resend(path: "resend")
@@ -53,8 +53,8 @@ struct EmailRestorationRouteCollectionTests {
 
     // MARK: - Group Path Tests
 
-    @Test("Passage.Restoration.EmailRouteCollection with empty group")
-    func emptyGroup() {
+    @Test
+    func `Passage.Restoration.EmailRouteCollection with empty group`() {
         let routes = Passage.Configuration.Restoration.Email.Routes()
         let collection = Passage.Restoration.EmailRouteCollection(
             routes: routes,
@@ -64,8 +64,8 @@ struct EmailRestorationRouteCollectionTests {
         #expect(collection.group.isEmpty)
     }
 
-    @Test("Passage.Restoration.EmailRouteCollection with single component group")
-    func singleComponentGroup() {
+    @Test
+    func `Passage.Restoration.EmailRouteCollection with single component group`() {
         let routes = Passage.Configuration.Restoration.Email.Routes()
         let collection = Passage.Restoration.EmailRouteCollection(
             routes: routes,
@@ -75,8 +75,8 @@ struct EmailRestorationRouteCollectionTests {
         #expect(collection.group.count == 1)
     }
 
-    @Test("Passage.Restoration.EmailRouteCollection with multiple components")
-    func multipleComponentsGroup() {
+    @Test
+    func `Passage.Restoration.EmailRouteCollection with multiple components`() {
         let routes = Passage.Configuration.Restoration.Email.Routes()
         let collection = Passage.Restoration.EmailRouteCollection(
             routes: routes,
@@ -86,8 +86,8 @@ struct EmailRestorationRouteCollectionTests {
         #expect(collection.group.count == 5)
     }
 
-    @Test("Passage.Restoration.EmailRouteCollection with versioned group")
-    func versionedGroup() {
+    @Test
+    func `Passage.Restoration.EmailRouteCollection with versioned group`() {
         let routes = Passage.Configuration.Restoration.Email.Routes()
         let collection = Passage.Restoration.EmailRouteCollection(
             routes: routes,
@@ -99,8 +99,8 @@ struct EmailRestorationRouteCollectionTests {
 
     // MARK: - Route Configuration Tests
 
-    @Test("Passage.Restoration.EmailRouteCollection with default routes")
-    func defaultRoutes() {
+    @Test
+    func `Passage.Restoration.EmailRouteCollection with default routes`() {
         let routes = Passage.Configuration.Restoration.Email.Routes()
         let collection = Passage.Restoration.EmailRouteCollection(
             routes: routes,
@@ -112,8 +112,8 @@ struct EmailRestorationRouteCollectionTests {
         #expect(collection.routes.resend.path.count > 0)
     }
 
-    @Test("Passage.Restoration.EmailRouteCollection request route path")
-    func requestRoutePath() {
+    @Test
+    func `Passage.Restoration.EmailRouteCollection request route path`() {
         let routes = Passage.Configuration.Restoration.Email.Routes()
         let collection = Passage.Restoration.EmailRouteCollection(
             routes: routes,
@@ -123,8 +123,8 @@ struct EmailRestorationRouteCollectionTests {
         #expect(!collection.routes.request.path.isEmpty)
     }
 
-    @Test("Passage.Restoration.EmailRouteCollection verify route path")
-    func verifyRoutePath() {
+    @Test
+    func `Passage.Restoration.EmailRouteCollection verify route path`() {
         let routes = Passage.Configuration.Restoration.Email.Routes()
         let collection = Passage.Restoration.EmailRouteCollection(
             routes: routes,
@@ -134,8 +134,8 @@ struct EmailRestorationRouteCollectionTests {
         #expect(!collection.routes.verify.path.isEmpty)
     }
 
-    @Test("Passage.Restoration.EmailRouteCollection resend route path")
-    func resendRoutePath() {
+    @Test
+    func `Passage.Restoration.EmailRouteCollection resend route path`() {
         let routes = Passage.Configuration.Restoration.Email.Routes()
         let collection = Passage.Restoration.EmailRouteCollection(
             routes: routes,
@@ -147,8 +147,8 @@ struct EmailRestorationRouteCollectionTests {
 
     // MARK: - Multiple Instance Tests
 
-    @Test("Multiple Passage.Restoration.EmailRouteCollection instances are independent")
-    func multipleInstancesIndependent() {
+    @Test
+    func `Multiple Passage.Restoration.EmailRouteCollection instances are independent`() {
         let requestRoute1 = Passage.Configuration.Restoration.Email.Routes.Request(path: "request1")
         let verifyRoute1 = Passage.Configuration.Restoration.Email.Routes.Verify(path: "verify1")
         let resendRoute1 = Passage.Configuration.Restoration.Email.Routes.Resend(path: "resend1")
@@ -174,8 +174,8 @@ struct EmailRestorationRouteCollectionTests {
         #expect(collection1.group != collection2.group)
     }
 
-    @Test("Passage.Restoration.EmailRouteCollection can be instantiated multiple times")
-    func multipleInstantiations() {
+    @Test
+    func `Passage.Restoration.EmailRouteCollection can be instantiated multiple times`() {
         let routes = Passage.Configuration.Restoration.Email.Routes()
 
         let collection1 = Passage.Restoration.EmailRouteCollection(routes: routes, group: [])
@@ -186,8 +186,8 @@ struct EmailRestorationRouteCollectionTests {
 
     // MARK: - Protocol Conformance Tests
 
-    @Test("Passage.Restoration.EmailRouteCollection conforms to RouteCollection")
-    func conformsToRouteCollection() {
+    @Test
+    func `Passage.Restoration.EmailRouteCollection conforms to RouteCollection`() {
         let routes = Passage.Configuration.Restoration.Email.Routes()
         let collection = Passage.Restoration.EmailRouteCollection(
             routes: routes,
@@ -195,13 +195,13 @@ struct EmailRestorationRouteCollectionTests {
         )
 
         let _: any RouteCollection = collection
-        #expect(collection is RouteCollection)
+        #expect(collection is any RouteCollection)
     }
 
     // MARK: - Group Path Component Tests
 
-    @Test("Passage.Restoration.EmailRouteCollection with different path component types")
-    func differentPathComponentTypes() {
+    @Test
+    func `Passage.Restoration.EmailRouteCollection with different path component types`() {
         let routes = Passage.Configuration.Restoration.Email.Routes()
 
         // String path components
@@ -219,8 +219,8 @@ struct EmailRestorationRouteCollectionTests {
         #expect(collection2.group.count == 2)
     }
 
-    @Test("Passage.Restoration.EmailRouteCollection preserves group order")
-    func preservesGroupOrder() {
+    @Test
+    func `Passage.Restoration.EmailRouteCollection preserves group order`() {
         let routes = Passage.Configuration.Restoration.Email.Routes()
         let group: [PathComponent] = ["first", "second", "third"]
         let collection = Passage.Restoration.EmailRouteCollection(
@@ -233,8 +233,8 @@ struct EmailRestorationRouteCollectionTests {
 
     // MARK: - Configuration Preservation Tests
 
-    @Test("Passage.Restoration.EmailRouteCollection preserves all route settings")
-    func preservesAllRouteSettings() {
+    @Test
+    func `Passage.Restoration.EmailRouteCollection preserves all route settings`() {
         let requestRoute = Passage.Configuration.Restoration.Email.Routes.Request(path: "req")
         let verifyRoute = Passage.Configuration.Restoration.Email.Routes.Verify(path: "ver")
         let resendRoute = Passage.Configuration.Restoration.Email.Routes.Resend(path: "res")
@@ -255,8 +255,8 @@ struct EmailRestorationRouteCollectionTests {
         #expect(collection.group == ["email"])
     }
 
-    @Test("Passage.Restoration.EmailRouteCollection with nested path groups")
-    func nestedPathGroups() {
+    @Test
+    func `Passage.Restoration.EmailRouteCollection with nested path groups`() {
         let routes = Passage.Configuration.Restoration.Email.Routes()
         let collection = Passage.Restoration.EmailRouteCollection(
             routes: routes,
@@ -268,8 +268,8 @@ struct EmailRestorationRouteCollectionTests {
 
     // MARK: - Route Path Tests
 
-    @Test("Passage.Restoration.EmailRouteCollection has three routes")
-    func hasThreeRoutes() {
+    @Test
+    func `Passage.Restoration.EmailRouteCollection has three routes`() {
         let routes = Passage.Configuration.Restoration.Email.Routes()
         let collection = Passage.Restoration.EmailRouteCollection(
             routes: routes,
@@ -282,8 +282,8 @@ struct EmailRestorationRouteCollectionTests {
         #expect(!collection.routes.resend.path.isEmpty)
     }
 
-    @Test("Passage.Restoration.EmailRouteCollection route paths are distinct")
-    func routePathsDistinct() {
+    @Test
+    func `Passage.Restoration.EmailRouteCollection route paths are distinct`() {
         let routes = Passage.Configuration.Restoration.Email.Routes()
         let collection = Passage.Restoration.EmailRouteCollection(
             routes: routes,
@@ -305,8 +305,8 @@ struct EmailRestorationRouteCollectionTests {
     /// Helper function that requires Sendable conformance.
     private func assertSendable<T: Sendable>(_ value: T) {}
 
-    @Test("Restoration.EmailRouteCollection conforms to Sendable")
-    func conformsToSendable() {
+    @Test
+    func `Restoration.EmailRouteCollection conforms to Sendable`() {
         let routes = Passage.Configuration.Restoration.Email.Routes()
         assertSendable(Passage.Restoration.EmailRouteCollection(routes: routes, group: []))
     }

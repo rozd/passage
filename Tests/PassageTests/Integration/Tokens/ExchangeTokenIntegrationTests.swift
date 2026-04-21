@@ -6,8 +6,8 @@ import Testing
 import Vapor
 import VaporTesting
 
-@Suite("Exchange Token Integration Tests", .tags(.integration, .exchangeCode))
-struct ExchangeTokenIntegrationTests {
+@Suite(.tags(.integration, .exchangeCode))
+struct `Exchange Token Integration Tests` {
 
     // MARK: - Configuration Helper
 
@@ -118,8 +118,8 @@ struct ExchangeTokenIntegrationTests {
 
     // MARK: - Successful Exchange Tests
 
-    @Test("Exchange code endpoint returns tokens for valid code")
-    func exchangeCodeReturnsTokens() async throws {
+    @Test
+    func `Exchange code endpoint returns tokens for valid code`() async throws {
         try await withApp(configure: configure) { app in
             // Create a user
             let user = try await createTestUser(
@@ -159,8 +159,8 @@ struct ExchangeTokenIntegrationTests {
         }
     }
 
-    @Test("Exchange code returns valid access token")
-    func exchangeCodeReturnsValidAccessToken() async throws {
+    @Test
+    func `Exchange code returns valid access token`() async throws {
         try await withApp(configure: configure) { app in
             let user = try await createTestUser(
                 app: app,
@@ -202,8 +202,8 @@ struct ExchangeTokenIntegrationTests {
 
     // MARK: - Error Cases
 
-    @Test("Exchange fails with invalid code")
-    func exchangeFailsWithInvalidCode() async throws {
+    @Test
+    func `Exchange fails with invalid code`() async throws {
         try await withApp(configure: configure) { app in
             try await app.testing().test(.POST, "auth/token/exchange", beforeRequest: { req in
                 try req.content.encode([
@@ -215,8 +215,8 @@ struct ExchangeTokenIntegrationTests {
         }
     }
 
-    @Test("Exchange fails with empty code")
-    func exchangeFailsWithEmptyCode() async throws {
+    @Test
+    func `Exchange fails with empty code`() async throws {
         try await withApp(configure: configure) { app in
             try await app.testing().test(.POST, "auth/token/exchange", beforeRequest: { req in
                 try req.content.encode([
@@ -229,8 +229,8 @@ struct ExchangeTokenIntegrationTests {
         }
     }
 
-    @Test("Exchange fails without code in request")
-    func exchangeFailsWithoutCode() async throws {
+    @Test
+    func `Exchange fails without code in request`() async throws {
         try await withApp(configure: configure) { app in
             try await app.testing().test(.POST, "auth/token/exchange", beforeRequest: { req in
                 try req.content.encode([String: String]())
@@ -240,8 +240,8 @@ struct ExchangeTokenIntegrationTests {
         }
     }
 
-    @Test("Exchange fails with expired code")
-    func exchangeFailsWithExpiredCode() async throws {
+    @Test
+    func `Exchange fails with expired code`() async throws {
         try await withApp(configure: configure) { app in
             let user = try await createTestUser(
                 app: app,
@@ -274,8 +274,8 @@ struct ExchangeTokenIntegrationTests {
 
     // MARK: - Single-Use Enforcement Tests
 
-    @Test("Exchange code cannot be used twice")
-    func exchangeCodeCannotBeUsedTwice() async throws {
+    @Test
+    func `Exchange code cannot be used twice`() async throws {
         try await withApp(configure: configure) { app in
             let user = try await createTestUser(
                 app: app,
@@ -317,8 +317,8 @@ struct ExchangeTokenIntegrationTests {
 
     // MARK: - User Data Consistency Tests
 
-    @Test("Exchange returns correct user data")
-    func exchangeReturnsCorrectUserData() async throws {
+    @Test
+    func `Exchange returns correct user data`() async throws {
         try await withApp(configure: configure) { app in
             let user = try await createTestUser(
                 app: app,
@@ -354,8 +354,8 @@ struct ExchangeTokenIntegrationTests {
 
     // MARK: - Custom Route Path Tests
 
-    @Test("Exchange works with custom route path")
-    func exchangeWorksWithCustomRoutePath() async throws {
+    @Test
+    func `Exchange works with custom route path`() async throws {
         @Sendable func customConfigure(_ app: Application) async throws {
             await app.jwt.keys.add(
                 hmac: HMACKey(from: "test-secret-key-for-jwt-signing"),
@@ -441,8 +441,8 @@ struct ExchangeTokenIntegrationTests {
 
     // MARK: - Refresh Token Usability Tests
 
-    @Test("Refresh token from exchange is usable")
-    func refreshTokenFromExchangeIsUsable() async throws {
+    @Test
+    func `Refresh token from exchange is usable`() async throws {
         try await withApp(configure: configure) { app in
             let user = try await createTestUser(
                 app: app,

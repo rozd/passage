@@ -1,13 +1,13 @@
 import Testing
 @testable import Passage
 
-@Suite("Identifier Tests")
-struct IdentifierTests {
+@Suite
+struct `Identifier Tests` {
 
     // MARK: - Initialization Tests
 
-    @Test("Email identifier initialization")
-    func emailIdentifierInitialization() {
+    @Test
+    func `Email identifier initialization`() {
         let identifier = Identifier(kind: .email, value: "test@example.com", provider: nil)
 
         #expect(identifier.kind == Identifier.Kind.email)
@@ -15,8 +15,8 @@ struct IdentifierTests {
         #expect(identifier.provider == nil)
     }
 
-    @Test("Phone identifier initialization")
-    func phoneIdentifierInitialization() {
+    @Test
+    func `Phone identifier initialization`() {
         let identifier = Identifier(kind: .phone, value: "+1234567890", provider: nil)
 
         #expect(identifier.kind == Identifier.Kind.phone)
@@ -24,8 +24,8 @@ struct IdentifierTests {
         #expect(identifier.provider == nil)
     }
 
-    @Test("Username identifier initialization")
-    func usernameIdentifierInitialization() {
+    @Test
+    func `Username identifier initialization`() {
         let identifier = Identifier(kind: .username, value: "johndoe", provider: nil)
 
         #expect(identifier.kind == Identifier.Kind.username)
@@ -33,8 +33,8 @@ struct IdentifierTests {
         #expect(identifier.provider == nil)
     }
 
-    @Test("Federated identifier initialization")
-    func federatedIdentifierInitialization() {
+    @Test
+    func `Federated identifier initialization`() {
         let identifier = Identifier(kind: .federated, value: "oauth-user-123", provider: .google)
 
         #expect(identifier.kind == Identifier.Kind.federated)
@@ -44,8 +44,8 @@ struct IdentifierTests {
 
     // MARK: - Convenience Initializer Tests
 
-    @Test("Email convenience initializer")
-    func emailConvenienceInitializer() {
+    @Test
+    func `Email convenience initializer`() {
         let identifier = Identifier.email("test@example.com")
 
         #expect(identifier.kind == Identifier.Kind.email)
@@ -53,8 +53,8 @@ struct IdentifierTests {
         #expect(identifier.provider == nil)
     }
 
-    @Test("Phone convenience initializer")
-    func phoneConvenienceInitializer() {
+    @Test
+    func `Phone convenience initializer`() {
         let identifier = Identifier.phone("+1234567890")
 
         #expect(identifier.kind == Identifier.Kind.phone)
@@ -62,8 +62,8 @@ struct IdentifierTests {
         #expect(identifier.provider == nil)
     }
 
-    @Test("Username convenience initializer")
-    func usernameConvenienceInitializer() {
+    @Test
+    func `Username convenience initializer`() {
         let identifier = Identifier.username("johndoe")
 
         #expect(identifier.kind == Identifier.Kind.username)
@@ -71,8 +71,8 @@ struct IdentifierTests {
         #expect(identifier.provider == nil)
     }
 
-    @Test("Federated convenience initializer")
-    func federatedConvenienceInitializer() {
+    @Test
+    func `Federated convenience initializer`() {
         let identifier = Identifier.federated(.github, userId: "12345")
 
         #expect(identifier.kind == Identifier.Kind.federated)
@@ -126,8 +126,8 @@ struct IdentifierTests {
         #expect(Identifier.Kind(rawValue: rawValue) == expected)
     }
 
-    @Test("Identifier kind from invalid raw value")
-    func kindFromInvalidRawValue() {
+    @Test
+    func `Identifier kind from invalid raw value`() {
         #expect(Identifier.Kind(rawValue: "invalid") == nil)
     }
 }

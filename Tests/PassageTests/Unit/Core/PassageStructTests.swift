@@ -2,43 +2,43 @@ import Testing
 import Vapor
 @testable import Passage
 
-@Suite("Passage Struct Tests")
-struct PassageStructTests {
+@Suite
+struct `Passage Struct Tests` {
 
     // MARK: - Passage Struct Tests
 
-    @Test("Passage struct is properly namespaced")
-    func passageNamespace() {
+    @Test
+    func `Passage struct is properly namespaced`() {
         let typeName = String(reflecting: Passage.self)
         #expect(typeName.contains("Passage"))
     }
 
-    @Test("Passage struct conforms to Sendable")
-    func passageSendable() {
+    @Test
+    func `Passage struct conforms to Sendable`() {
         #expect(Passage.self is any Sendable.Type)
     }
 
     // MARK: - Storage Nested Type Tests
 
-    @Test("Storage is nested within Passage")
-    func storageNesting() {
+    @Test
+    func `Storage is nested within Passage`() {
         let typeName = String(reflecting: Passage.Storage.self)
         #expect(typeName.contains("Passage.Storage"))
     }
 
-    @Test("Storage.Key is nested within Storage")
-    func storageKeyNesting() {
+    @Test
+    func `Storage.Key is nested within Storage`() {
         let typeName = String(reflecting: Passage.Storage.Key.self)
         #expect(typeName.contains("Passage.Storage.Key"))
     }
 
-    @Test("Storage.Key conforms to StorageKey protocol")
-    func storageKeyProtocol() {
+    @Test
+    func `Storage.Key conforms to StorageKey protocol`() {
         #expect(Passage.Storage.Key.self is any StorageKey.Type)
     }
 
-    @Test("Storage.Key.Value is Storage type")
-    func storageKeyValue() {
+    @Test
+    func `Storage.Key.Value is Storage type`() {
         let valueType = Passage.Storage.Key.Value.self
         #expect(valueType == Passage.Storage.self)
     }

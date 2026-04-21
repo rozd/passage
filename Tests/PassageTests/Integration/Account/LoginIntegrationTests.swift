@@ -5,8 +5,8 @@ import Testing
 import Vapor
 import VaporTesting
 
-@Suite("Login Integration Tests", .tags(.integration, .login))
-struct LoginIntegrationTests {
+@Suite(.tags(.integration, .login))
+struct `Login Integration Tests` {
 
     // MARK: - Configuration Helper
 
@@ -124,8 +124,8 @@ struct LoginIntegrationTests {
 
     // MARK: - Successful Login Tests
 
-    @Test("Login succeeds with verified email")
-    func loginWithVerifiedEmail() async throws {
+    @Test
+    func `Login succeeds with verified email`() async throws {
         try await withApp(configure: configure) { app in
             // Create user with verified email
             try await createTestUser(
@@ -154,8 +154,8 @@ struct LoginIntegrationTests {
         }
     }
 
-    @Test("Login succeeds with verified phone")
-    func loginWithVerifiedPhone() async throws {
+    @Test
+    func `Login succeeds with verified phone`() async throws {
         try await withApp(configure: configure) { app in
             // Create user with verified phone
             try await createTestUser(
@@ -183,8 +183,8 @@ struct LoginIntegrationTests {
         }
     }
 
-    @Test("Login succeeds with username (no verification required)")
-    func loginWithUsername() async throws {
+    @Test
+    func `Login succeeds with username (no verification required)`() async throws {
         try await withApp(configure: configure) { app in
             // Create user with username
             try await createTestUser(
@@ -212,8 +212,8 @@ struct LoginIntegrationTests {
 
     // MARK: - Validation Failure Tests
 
-    @Test("Login fails when no identifier is provided")
-    func loginFailsWithoutIdentifier() async throws {
+    @Test
+    func `Login fails when no identifier is provided`() async throws {
         try await withApp(configure: configure) { app in
             // Attempt login with no identifier
             try await app.testing().test(.POST, "auth/login", beforeRequest: { req in
@@ -228,8 +228,8 @@ struct LoginIntegrationTests {
 
     // MARK: - User Not Found Tests
 
-    @Test("Login fails when email does not exist")
-    func loginFailsWithNonexistentEmail() async throws {
+    @Test
+    func `Login fails when email does not exist`() async throws {
         try await withApp(configure: configure) { app in
             // No user created, attempt login
             try await app.testing().test(.POST, "auth/login", beforeRequest: { req in
@@ -243,8 +243,8 @@ struct LoginIntegrationTests {
         }
     }
 
-    @Test("Login fails when phone does not exist")
-    func loginFailsWithNonexistentPhone() async throws {
+    @Test
+    func `Login fails when phone does not exist`() async throws {
         try await withApp(configure: configure) { app in
             // No user created, attempt login
             try await app.testing().test(.POST, "auth/login", beforeRequest: { req in
@@ -258,8 +258,8 @@ struct LoginIntegrationTests {
         }
     }
 
-    @Test("Login fails when username does not exist")
-    func loginFailsWithNonexistentUsername() async throws {
+    @Test
+    func `Login fails when username does not exist`() async throws {
         try await withApp(configure: configure) { app in
             // No user created, attempt login
             try await app.testing().test(.POST, "auth/login", beforeRequest: { req in
@@ -275,8 +275,8 @@ struct LoginIntegrationTests {
 
     // MARK: - Password Mismatch Tests
 
-    @Test("Login fails with incorrect password for email")
-    func loginFailsWithIncorrectPasswordEmail() async throws {
+    @Test
+    func `Login fails with incorrect password for email`() async throws {
         try await withApp(configure: configure) { app in
             // Create user with verified email
             try await createTestUser(
@@ -298,8 +298,8 @@ struct LoginIntegrationTests {
         }
     }
 
-    @Test("Login fails with incorrect password for phone")
-    func loginFailsWithIncorrectPasswordPhone() async throws {
+    @Test
+    func `Login fails with incorrect password for phone`() async throws {
         try await withApp(configure: configure) { app in
             // Create user with verified phone
             try await createTestUser(
@@ -321,8 +321,8 @@ struct LoginIntegrationTests {
         }
     }
 
-    @Test("Login fails with incorrect password for username")
-    func loginFailsWithIncorrectPasswordUsername() async throws {
+    @Test
+    func `Login fails with incorrect password for username`() async throws {
         try await withApp(configure: configure) { app in
             // Create user with username
             try await createTestUser(
@@ -345,8 +345,8 @@ struct LoginIntegrationTests {
 
     // MARK: - Unverified Identifier Tests
 
-    @Test("Login fails with unverified email")
-    func loginFailsWithUnverifiedEmail() async throws {
+    @Test
+    func `Login fails with unverified email`() async throws {
         try await withApp(configure: configure) { app in
             // Create user with unverified email
             try await createTestUser(
@@ -368,8 +368,8 @@ struct LoginIntegrationTests {
         }
     }
 
-    @Test("Login fails with unverified phone")
-    func loginFailsWithUnverifiedPhone() async throws {
+    @Test
+    func `Login fails with unverified phone`() async throws {
         try await withApp(configure: configure) { app in
             // Create user with unverified phone
             try await createTestUser(
@@ -393,8 +393,8 @@ struct LoginIntegrationTests {
 
     // MARK: - Token Generation Tests
 
-    @Test("Login generates valid access token with correct claims")
-    func loginGeneratesValidAccessToken() async throws {
+    @Test
+    func `Login generates valid access token with correct claims`() async throws {
         try await withApp(configure: configure) { app in
             // Create verified user
             try await createTestUser(
@@ -426,8 +426,8 @@ struct LoginIntegrationTests {
         }
     }
 
-    @Test("Login generates refresh token stored in database")
-    func loginGeneratesRefreshToken() async throws {
+    @Test
+    func `Login generates refresh token stored in database`() async throws {
         try await withApp(configure: configure) { app in
             // Create verified user
             try await createTestUser(
@@ -460,8 +460,8 @@ struct LoginIntegrationTests {
         }
     }
 
-    @Test("Login revokes previous refresh tokens")
-    func loginRevokesOldTokens() async throws {
+    @Test
+    func `Login revokes previous refresh tokens`() async throws {
         try await withApp(configure: configure) { app in
             // Create verified user
             try await createTestUser(
@@ -514,8 +514,8 @@ struct LoginIntegrationTests {
 
     // MARK: - Additional Edge Cases
 
-    @Test("Multiple users can exist with different identifier types")
-    func multipleUsersWithDifferentIdentifiers() async throws {
+    @Test
+    func `Multiple users can exist with different identifier types`() async throws {
         try await withApp(configure: configure) { app in
             // Create users with different identifier types
             try await createTestUser(

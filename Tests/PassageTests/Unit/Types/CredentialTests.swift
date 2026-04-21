@@ -1,57 +1,57 @@
 import Testing
 @testable import Passage
 
-@Suite("Credential Tests")
-struct CredentialTests {
+@Suite
+struct `Credential Tests` {
 
     // MARK: - Credential Struct Tests
 
-    @Test("Credential password initialization")
-    func credentialPasswordInitialization() {
+    @Test
+    func `Credential password initialization`() {
         let credential = Credential(kind: .password, secret: "hashed-password-123")
 
         #expect(credential.kind == Credential.Kind.password)
         #expect(credential.secret == "hashed-password-123")
     }
 
-    @Test("Credential password convenience initializer")
-    func credentialPasswordConvenienceInitializer() {
+    @Test
+    func `Credential password convenience initializer`() {
         let credential = Credential.password("hashed-password-456")
 
         #expect(credential.kind == Credential.Kind.password)
         #expect(credential.secret == "hashed-password-456")
     }
 
-    @Test("Credential kind raw value")
-    func credentialKindRawValue() {
+    @Test
+    func `Credential kind raw value`() {
         #expect(Credential.Kind.password.rawValue == "password")
     }
 
-    @Test("Credential kind from raw value")
-    func credentialKindFromRawValue() {
+    @Test
+    func `Credential kind from raw value`() {
         #expect(Credential.Kind(rawValue: "password") == Credential.Kind.password)
         #expect(Credential.Kind(rawValue: "invalid") == nil)
     }
 
-    @Test("Credential passkey convenience initializer")
-    func credentialPasskeyConvenienceInitializer() {
+    @Test
+    func `Credential passkey convenience initializer`() {
         let credential = Credential.passkey("passkey-credential-data")
         #expect(credential.kind == Credential.Kind.passkey)
         #expect(credential.secret == "passkey-credential-data")
     }
 
-    @Test("Credential passkey kind raw value")
-    func credentialPasskeyKindRawValue() {
+    @Test
+    func `Credential passkey kind raw value`() {
         #expect(Credential.Kind.passkey.rawValue == "passkey")
     }
 
-    @Test("Credential kind passkey from raw value")
-    func credentialKindPasskeyFromRawValue() {
+    @Test
+    func `Credential kind passkey from raw value`() {
         #expect(Credential.Kind(rawValue: "passkey") == Credential.Kind.passkey)
     }
 
-    @Test("Credential conforms to Sendable")
-    func credentialConformsToSendable() {
+    @Test
+    func `Credential conforms to Sendable`() {
         func assertSendable<T: Sendable>(_ value: T) {}
         assertSendable(Credential.password("hash"))
         assertSendable(Credential.passkey("data"))

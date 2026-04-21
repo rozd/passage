@@ -3,33 +3,33 @@ import Vapor
 import JWT
 @testable import Passage
 
-@Suite("PassageBearerAuthenticator Tests")
-struct PassageBearerAuthenticatorTests {
+@Suite
+struct `PassageBearerAuthenticator Tests` {
 
     // MARK: - Structure Tests
 
-    @Test("PassageBearerAuthenticator can be initialized")
-    func canBeInitialized() {
+    @Test
+    func `PassageBearerAuthenticator can be initialized`() {
         let authenticator = PassageBearerAuthenticator()
         #expect(authenticator != nil)
     }
 
-    @Test("PassageBearerAuthenticator type name is correct")
-    func typeNameIsCorrect() {
+    @Test
+    func `PassageBearerAuthenticator type name is correct`() {
         let typeName = String(describing: PassageBearerAuthenticator.self)
         #expect(typeName == "PassageBearerAuthenticator")
     }
 
     // MARK: - Protocol Conformance Tests
 
-    @Test("PassageBearerAuthenticator conforms to JWTAuthenticator")
-    func conformsToJWTAuthenticator() {
+    @Test
+    func `PassageBearerAuthenticator conforms to JWTAuthenticator`() {
         let authenticator = PassageBearerAuthenticator()
         #expect(authenticator is any JWTAuthenticator)
     }
 
-    @Test("PassageBearerAuthenticator Payload typealias is AccessToken")
-    func payloadTypealiasIsAccessToken() {
+    @Test
+    func `PassageBearerAuthenticator Payload typealias is AccessToken`() {
         // Verify the Payload typealias by checking the type
         let payloadType = PassageBearerAuthenticator.Payload.self
         #expect(payloadType == AccessToken.self)
@@ -40,39 +40,39 @@ struct PassageBearerAuthenticatorTests {
     /// Helper function that requires Sendable conformance.
     private func assertSendable<T: Sendable>(_ value: T) {}
 
-    @Test("PassageBearerAuthenticator conforms to Sendable")
-    func conformsToSendable() {
+    @Test
+    func `PassageBearerAuthenticator conforms to Sendable`() {
         assertSendable(PassageBearerAuthenticator())
     }
 }
 
-@Suite("PassageSessionAuthenticator Tests")
-struct PassageSessionAuthenticatorTests {
+@Suite
+struct `PassageSessionAuthenticator Tests` {
 
     // MARK: - Structure Tests
 
-    @Test("PassageSessionAuthenticator can be initialized")
-    func canBeInitialized() {
+    @Test
+    func `PassageSessionAuthenticator can be initialized`() {
         let authenticator = PassageSessionAuthenticator()
         #expect(authenticator != nil)
     }
 
-    @Test("PassageSessionAuthenticator type name is correct")
-    func typeNameIsCorrect() {
+    @Test
+    func `PassageSessionAuthenticator type name is correct`() {
         let typeName = String(describing: PassageSessionAuthenticator.self)
         #expect(typeName == "PassageSessionAuthenticator")
     }
 
     // MARK: - Protocol Conformance Tests
 
-    @Test("PassageSessionAuthenticator conforms to AsyncAuthenticator")
-    func conformsToAsyncAuthenticator() {
+    @Test
+    func `PassageSessionAuthenticator conforms to AsyncAuthenticator`() {
         let authenticator = PassageSessionAuthenticator()
         #expect(authenticator is any AsyncAuthenticator)
     }
 
-    @Test("PassageSessionAuthenticator conforms to AsyncMiddleware")
-    func conformsToAsyncMiddleware() {
+    @Test
+    func `PassageSessionAuthenticator conforms to AsyncMiddleware`() {
         let authenticator = PassageSessionAuthenticator()
         #expect(authenticator is any AsyncMiddleware)
     }
@@ -82,8 +82,8 @@ struct PassageSessionAuthenticatorTests {
     /// Helper function that requires Sendable conformance.
     private func assertSendable<T: Sendable>(_ value: T) {}
 
-    @Test("PassageSessionAuthenticator conforms to Sendable")
-    func conformsToSendable() {
+    @Test
+    func `PassageSessionAuthenticator conforms to Sendable`() {
         assertSendable(PassageSessionAuthenticator())
     }
 }

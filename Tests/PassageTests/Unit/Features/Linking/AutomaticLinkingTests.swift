@@ -5,8 +5,8 @@ import Testing
 import Vapor
 import VaporTesting
 
-@Suite("Automatic Linking Tests", .tags(.integration, .federatedLogin))
-struct AutomaticLinkingTests {
+@Suite(.tags(.integration, .federatedLogin))
+struct `Automatic Linking Tests` {
 
     // MARK: - Configuration Helper
 
@@ -105,8 +105,8 @@ struct AutomaticLinkingTests {
 
     // MARK: - Skipped (No Match) Tests
 
-    @Test("Automatic linking returns skipped when no matching users exist")
-    func returnsSkippedWhenNoMatch() async throws {
+    @Test
+    func `Automatic linking returns skipped when no matching users exist`() async throws {
         try await withApp(configure: { app in
             try await configureWithAutomaticLinking(app)
         }) { app in
@@ -136,8 +136,8 @@ struct AutomaticLinkingTests {
         }
     }
 
-    @Test("Automatic linking returns skipped when matched user email is not verified")
-    func returnsSkippedWhenEmailNotVerified() async throws {
+    @Test
+    func `Automatic linking returns skipped when matched user email is not verified`() async throws {
         try await withApp(configure: { app in
             try await configureWithAutomaticLinking(app)
         }) { app in
@@ -175,8 +175,8 @@ struct AutomaticLinkingTests {
 
     // MARK: - Complete (Single Match) Tests
 
-    @Test("Automatic linking returns complete when single verified email matches")
-    func returnsCompleteWhenSingleEmailMatch() async throws {
+    @Test
+    func `Automatic linking returns complete when single verified email matches`() async throws {
         try await withApp(configure: { app in
             try await configureWithAutomaticLinking(app)
         }) { app in
@@ -212,8 +212,8 @@ struct AutomaticLinkingTests {
         }
     }
 
-    @Test("Automatic linking returns complete when single verified phone matches")
-    func returnsCompleteWhenSinglePhoneMatch() async throws {
+    @Test
+    func `Automatic linking returns complete when single verified phone matches`() async throws {
         try await withApp(configure: { app in
             try await configureWithAutomaticLinking(app, allowedIdentifiers: [.phone])
         }) { app in
@@ -251,8 +251,8 @@ struct AutomaticLinkingTests {
 
     // MARK: - Conflict (Multiple Matches) Tests
 
-    @Test("Automatic linking returns conflict when multiple users match")
-    func returnsConflictWhenMultipleUsersMatch() async throws {
+    @Test
+    func `Automatic linking returns conflict when multiple users match`() async throws {
         try await withApp(configure: { app in
             try await configureWithAutomaticLinking(app)
         }) { app in
@@ -295,8 +295,8 @@ struct AutomaticLinkingTests {
         }
     }
 
-    @Test("Automatic linking returns skipped on ambiguous match with ignoreAndCreateNew resolution")
-    func returnsSkippedWithIgnoreAndCreateNew() async throws {
+    @Test
+    func `Automatic linking returns skipped on ambiguous match with ignoreAndCreateNew resolution`() async throws {
         try await withApp(configure: { app in
             try await configureWithAutomaticLinking(app)
         }) { app in
@@ -329,8 +329,8 @@ struct AutomaticLinkingTests {
 
     // MARK: - Identifier Type Tests
 
-    @Test("Automatic linking only checks allowed identifier types")
-    func onlyChecksAllowedIdentifierTypes() async throws {
+    @Test
+    func `Automatic linking only checks allowed identifier types`() async throws {
         try await withApp(configure: { app in
             // Only allow email linking
             try await configureWithAutomaticLinking(app, allowedIdentifiers: [.email])
@@ -368,8 +368,8 @@ struct AutomaticLinkingTests {
         }
     }
 
-    @Test("Automatic linking checks both email and phone when both allowed")
-    func checksBothEmailAndPhoneWhenAllowed() async throws {
+    @Test
+    func `Automatic linking checks both email and phone when both allowed`() async throws {
         try await withApp(configure: { app in
             try await configureWithAutomaticLinking(app, allowedIdentifiers: [.email, .phone])
         }) { app in
@@ -407,8 +407,8 @@ struct AutomaticLinkingTests {
 
     // MARK: - Edge Cases
 
-    @Test("Automatic linking handles empty verified emails list")
-    func handlesEmptyVerifiedEmails() async throws {
+    @Test
+    func `Automatic linking handles empty verified emails list`() async throws {
         try await withApp(configure: { app in
             try await configureWithAutomaticLinking(app)
         }) { app in
@@ -436,8 +436,8 @@ struct AutomaticLinkingTests {
         }
     }
 
-    @Test("Automatic linking skips username and federated identifier kinds")
-    func skipsUsernameAndFederatedKinds() async throws {
+    @Test
+    func `Automatic linking skips username and federated identifier kinds`() async throws {
         try await withApp(configure: { app in
             try await configureWithAutomaticLinking(app)
         }) { app in
