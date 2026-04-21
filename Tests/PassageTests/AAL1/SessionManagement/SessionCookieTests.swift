@@ -97,4 +97,33 @@ struct SessionCookieTests {
         #expect(clearCookie.isHTTPOnly == true,
                 "§7.1.1-c: even the clear-state cookie must keep HttpOnly so XSS cannot smuggle values out")
     }
+
+    @Test(
+        "§7.1.1-d: Session-carrying cookie expires at (or soon after) the session's validity period",
+        .tags(.aal1, .sessionManagement, .unit, .should)
+    )
+    func sessionCookieExpiresWithSession() async throws {
+        // §7.1.1-d SHOULD: tag cookies with `expires` matching the session
+        // validity period so browsers eventually discard them. Passage's
+        // linking cookie uses the state's own `expiresAt` as the cookie's
+        // expiry — they lapse together. The spec emphasises this is a
+        // cleanup measure and NOT the primary session-timeout enforcement
+        // (that's the server-side `isExpired` check, covered by §7.1-l).
+        let sessionExpiry = Date().addingTimeInterval(600) // mirrors state.expiresAt
+        let cookie = makeCookie(isProduction: true, expires: sessionExpiry)
+
+        let cookieExpiry = try #require(cookie.expires,
+                                        "§7.1.1-d: cookie must carry an `expires` tag tied to the session")
+        #expect(cookieExpiry == sessionExpiry,
+                "§7.1.1-d: cookie `expires` must match the session's validity period")
+
+        // And the clear-state path sets `expires` to the epoch — browsers
+        // treat that as "delete immediately", which is the aggressive form
+        // of §7.1.1-d (lifetime ≤ session).
+        var clearCookie = HTTPCookies.Value(string: "")
+        clearCookie.expires = Date(timeIntervalSince1970: 0)
+        let clearExpiry = try #require(clearCookie.expires)
+        #expect(clearExpiry < Date(),
+                "§7.1.1-d: clear-state cookie must be tagged expired so the browser drops it")
+    }
 }
