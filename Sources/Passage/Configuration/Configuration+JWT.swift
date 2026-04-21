@@ -1,5 +1,5 @@
 import Foundation
-import JWTKit
+import JWT
 
 // MARK: - JWT & JWKS Configuration
 

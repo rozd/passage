@@ -4,8 +4,8 @@ import Queues
 @testable import Passage
 @testable import PassageOnlyForTest
 
-@Suite("Verification Jobs Tests", .tags(.unit))
-struct VerificationJobsTests {
+@Suite(.tags(.unit))
+struct `Verification Jobs Tests` {
     /// Creates a mock QueueContext for testing
     @Sendable private func createMockQueueContext(
         app: Application,
@@ -22,8 +22,8 @@ struct VerificationJobsTests {
 
     // MARK: - SendEmailCodeJob Tests
 
-    @Test("SendEmailCodeJob skips when email delivery is not configured")
-    func sendEmailJobSkipsWhenNoEmailDelivery() async throws {
+    @Test
+    func `SendEmailCodeJob skips when email delivery is not configured`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
 
@@ -81,8 +81,8 @@ struct VerificationJobsTests {
         #expect(capturingLogger.warnings.first?.contains("Email delivery not configured") == true)
     }
 
-    @Test("SendEmailCodeJob skips when user is not found")
-    func sendEmailJobSkipsWhenUserNotFound() async throws {
+    @Test
+    func `SendEmailCodeJob skips when user is not found`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
 
@@ -136,8 +136,8 @@ struct VerificationJobsTests {
         #expect(capturingLogger.warnings.first?.contains("non-existent-user-id") == true)
     }
 
-    @Test("SendEmailCodeJob error handler logs delivery errors")
-    func sendEmailJobErrorHandlerLogsErrors() async throws {
+    @Test
+    func `SendEmailCodeJob error handler logs delivery errors`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
 
@@ -164,8 +164,8 @@ struct VerificationJobsTests {
         #expect(capturingLogger.errors.first?.contains("test@example.com") == true)
     }
 
-    @Test("SendEmailCodeJob throws error from email delivery")
-    func sendEmailJobThrowsDeliveryError() async throws {
+    @Test
+    func `SendEmailCodeJob throws error from email delivery`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
 
@@ -225,8 +225,8 @@ struct VerificationJobsTests {
 
     // MARK: - SendPhoneCodeJob Tests
 
-    @Test("SendPhoneCodeJob skips when phone delivery is not configured")
-    func sendPhoneJobSkipsWhenNoPhoneDelivery() async throws {
+    @Test
+    func `SendPhoneCodeJob skips when phone delivery is not configured`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
 
@@ -283,8 +283,8 @@ struct VerificationJobsTests {
         #expect(capturingLogger.warnings.first?.contains("Phone delivery not configured") == true)
     }
 
-    @Test("SendPhoneCodeJob skips when user is not found")
-    func sendPhoneJobSkipsWhenUserNotFound() async throws {
+    @Test
+    func `SendPhoneCodeJob skips when user is not found`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
 
@@ -337,8 +337,8 @@ struct VerificationJobsTests {
         #expect(capturingLogger.warnings.first?.contains("non-existent-user-id") == true)
     }
 
-    @Test("SendPhoneCodeJob error handler logs delivery errors")
-    func sendPhoneJobErrorHandlerLogsErrors() async throws {
+    @Test
+    func `SendPhoneCodeJob error handler logs delivery errors`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
 
@@ -364,8 +364,8 @@ struct VerificationJobsTests {
         #expect(capturingLogger.errors.first?.contains("+1234567890") == true)
     }
 
-    @Test("SendPhoneCodeJob throws error from phone delivery")
-    func sendPhoneJobThrowsDeliveryError() async throws {
+    @Test
+    func `SendPhoneCodeJob throws error from phone delivery`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
 
@@ -424,30 +424,30 @@ struct VerificationJobsTests {
 
     // MARK: - Job Conformance Tests
 
-    @Test("SendEmailCodeJob conforms to AsyncJob")
-    func sendEmailJobConformsToAsyncJob() {
+    @Test
+    func `SendEmailCodeJob conforms to AsyncJob`() {
         let job = Passage.Verification.SendEmailCodeJob()
         let _: any AsyncJob = job
-        #expect(Passage.Verification.SendEmailCodeJob.self is AsyncJob.Type)
+        #expect(Passage.Verification.SendEmailCodeJob.self is any AsyncJob.Type)
     }
 
-    @Test("SendPhoneCodeJob conforms to AsyncJob")
-    func sendPhoneJobConformsToAsyncJob() {
+    @Test
+    func `SendPhoneCodeJob conforms to AsyncJob`() {
         let job = Passage.Verification.SendPhoneCodeJob()
         let _: any AsyncJob = job
-        #expect(Passage.Verification.SendPhoneCodeJob.self is AsyncJob.Type)
+        #expect(Passage.Verification.SendPhoneCodeJob.self is any AsyncJob.Type)
     }
 
-    @Test("SendEmailCodeJob has correct payload type")
-    func sendEmailJobPayloadType() {
+    @Test
+    func `SendEmailCodeJob has correct payload type`() {
         #expect(
             Passage.Verification.SendEmailCodeJob.Payload.self
                 == Passage.Verification.SendEmailCodePayload.self
         )
     }
 
-    @Test("SendPhoneCodeJob has correct payload type")
-    func sendPhoneJobPayloadType() {
+    @Test
+    func `SendPhoneCodeJob has correct payload type`() {
         #expect(
             Passage.Verification.SendPhoneCodeJob.Payload.self
                 == Passage.Verification.SendPhoneCodePayload.self
@@ -459,8 +459,8 @@ struct VerificationJobsTests {
     /// Helper function that requires Sendable conformance.
     private func assertSendable<T: Sendable>(_ value: T) {}
 
-    @Test("SendEmailCodePayload conforms to Sendable")
-    func sendEmailCodePayloadConformsToSendable() {
+    @Test
+    func `SendEmailCodePayload conforms to Sendable`() {
         assertSendable(Passage.Verification.SendEmailCodePayload(
             email: "test@example.com",
             userId: "user123",
@@ -469,13 +469,13 @@ struct VerificationJobsTests {
         ))
     }
 
-    @Test("SendEmailCodeJob conforms to Sendable")
-    func sendEmailCodeJobConformsToSendable() {
+    @Test
+    func `SendEmailCodeJob conforms to Sendable`() {
         assertSendable(Passage.Verification.SendEmailCodeJob())
     }
 
-    @Test("SendPhoneCodePayload conforms to Sendable")
-    func sendPhoneCodePayloadConformsToSendable() {
+    @Test
+    func `SendPhoneCodePayload conforms to Sendable`() {
         assertSendable(Passage.Verification.SendPhoneCodePayload(
             phone: "+1234567890",
             code: "123456",
@@ -483,8 +483,8 @@ struct VerificationJobsTests {
         ))
     }
 
-    @Test("SendPhoneCodeJob conforms to Sendable")
-    func sendPhoneCodeJobConformsToSendable() {
+    @Test
+    func `SendPhoneCodeJob conforms to Sendable`() {
         assertSendable(Passage.Verification.SendPhoneCodeJob())
     }
 }

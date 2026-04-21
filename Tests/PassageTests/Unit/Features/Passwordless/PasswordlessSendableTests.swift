@@ -2,24 +2,24 @@ import Testing
 import Vapor
 @testable import Passage
 
-@Suite("Passwordless Sendable Conformance Tests")
-struct PasswordlessSendableTests {
+@Suite
+struct `Passwordless Sendable Conformance Tests` {
 
     /// Helper function that requires Sendable conformance.
     private func assertSendable<T: Sendable>(_ value: T) {}
 
     // MARK: - Route Collection Tests
 
-    @Test("Passwordless.MagicLinkEmailRouteCollection conforms to Sendable")
-    func magicLinkEmailRouteCollectionConformsToSendable() {
+    @Test
+    func `Passwordless.MagicLinkEmailRouteCollection conforms to Sendable`() {
         let routes = Passage.Configuration.Passwordless.MagicLink.Routes.email
         assertSendable(Passage.Passwordless.MagicLinkEmailRouteCollection(routes: routes, group: []))
     }
 
     // MARK: - Job Payload Tests
 
-    @Test("Passwordless.EmailMagicLinkPayload conforms to Sendable")
-    func emailMagicLinkPayloadConformsToSendable() {
+    @Test
+    func `Passwordless.EmailMagicLinkPayload conforms to Sendable`() {
         assertSendable(Passage.Passwordless.EmailMagicLinkPayload(
             email: "test@example.com",
             userId: "user123",
@@ -27,8 +27,8 @@ struct PasswordlessSendableTests {
         ))
     }
 
-    @Test("Passwordless.SendEmailMagicLinkJob conforms to Sendable")
-    func sendEmailMagicLinkJobConformsToSendable() {
+    @Test
+    func `Passwordless.SendEmailMagicLinkJob conforms to Sendable`() {
         assertSendable(Passage.Passwordless.SendEmailMagicLinkJob())
     }
 }

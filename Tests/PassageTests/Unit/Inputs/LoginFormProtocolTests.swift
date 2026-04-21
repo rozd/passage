@@ -2,8 +2,8 @@ import Testing
 import Vapor
 @testable import Passage
 
-@Suite("LoginForm Protocol Tests")
-struct LoginFormProtocolTests {
+@Suite
+struct `LoginForm Protocol Tests` {
 
     // MARK: - Mock Implementations
 
@@ -57,8 +57,8 @@ struct LoginFormProtocolTests {
 
     // MARK: - asIdentifier() Tests
 
-    @Test("LoginForm asIdentifier returns email identifier")
-    func asIdentifierWithEmail() throws {
+    @Test
+    func `LoginForm asIdentifier returns email identifier`() throws {
         let form = MockLoginFormWithEmail(
             email: "test@example.com",
             phone: nil,
@@ -71,8 +71,8 @@ struct LoginFormProtocolTests {
         #expect(identifier.value == "test@example.com")
     }
 
-    @Test("LoginForm asIdentifier returns phone identifier")
-    func asIdentifierWithPhone() throws {
+    @Test
+    func `LoginForm asIdentifier returns phone identifier`() throws {
         let form = MockLoginFormWithPhone(
             email: nil,
             phone: "+1234567890",
@@ -85,8 +85,8 @@ struct LoginFormProtocolTests {
         #expect(identifier.value == "+1234567890")
     }
 
-    @Test("LoginForm asIdentifier returns username identifier")
-    func asIdentifierWithUsername() throws {
+    @Test
+    func `LoginForm asIdentifier returns username identifier`() throws {
         let form = MockLoginFormWithUsername(
             email: nil,
             phone: nil,
@@ -99,8 +99,8 @@ struct LoginFormProtocolTests {
         #expect(identifier.value == "johndoe")
     }
 
-    @Test("LoginForm asIdentifier prefers email over phone")
-    func asIdentifierPrefersEmail() throws {
+    @Test
+    func `LoginForm asIdentifier prefers email over phone`() throws {
         let form = MockLoginFormWithEmail(
             email: "test@example.com",
             phone: "+1234567890",
@@ -113,8 +113,8 @@ struct LoginFormProtocolTests {
         #expect(identifier.value == "test@example.com")
     }
 
-    @Test("LoginForm asIdentifier prefers email over username")
-    func asIdentifierPrefersEmailOverUsername() throws {
+    @Test
+    func `LoginForm asIdentifier prefers email over username`() throws {
         let form = MockLoginFormWithEmail(
             email: "test@example.com",
             phone: nil,
@@ -127,8 +127,8 @@ struct LoginFormProtocolTests {
         #expect(identifier.value == "test@example.com")
     }
 
-    @Test("LoginForm asIdentifier prefers phone over username")
-    func asIdentifierPrefersPhoneOverUsername() throws {
+    @Test
+    func `LoginForm asIdentifier prefers phone over username`() throws {
         let form = MockLoginFormWithPhone(
             email: nil,
             phone: "+1234567890",
@@ -141,8 +141,8 @@ struct LoginFormProtocolTests {
         #expect(identifier.value == "+1234567890")
     }
 
-    @Test("LoginForm asIdentifier throws when no identifier provided")
-    func asIdentifierThrowsWhenNoIdentifier() {
+    @Test
+    func `LoginForm asIdentifier throws when no identifier provided`() {
         let form = MockLoginFormWithEmail(
             email: nil,
             phone: nil,
@@ -157,8 +157,8 @@ struct LoginFormProtocolTests {
 
     // MARK: - Protocol Conformance Tests
 
-    @Test("LoginForm conforms to Form protocol")
-    func loginFormConformsToForm() {
+    @Test
+    func `LoginForm conforms to Form protocol`() {
         let form: any Form = MockLoginFormWithEmail(
             email: "test@example.com",
             phone: nil,
@@ -168,8 +168,8 @@ struct LoginFormProtocolTests {
         #expect(form is MockLoginFormWithEmail)
     }
 
-    @Test("LoginForm has required properties")
-    func loginFormRequiredProperties() {
+    @Test
+    func `LoginForm has required properties`() {
         let form = MockLoginFormWithEmail(
             email: "test@example.com",
             phone: nil,

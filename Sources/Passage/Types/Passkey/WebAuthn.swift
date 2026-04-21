@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 // MARK: - Credential Descriptors and Parameters
 

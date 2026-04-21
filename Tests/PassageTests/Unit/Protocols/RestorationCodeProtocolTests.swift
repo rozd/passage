@@ -2,8 +2,8 @@ import Testing
 import Foundation
 @testable import Passage
 
-@Suite("RestorationCode Protocol Tests")
-struct RestorationCodeProtocolTests {
+@Suite
+struct `RestorationCode Protocol Tests` {
 
     // MARK: - Mock Implementations
 
@@ -46,8 +46,8 @@ struct RestorationCodeProtocolTests {
 
     // MARK: - isExpired Tests
 
-    @Test("RestorationCode isExpired returns true when expired")
-    func isExpiredWhenExpired() {
+    @Test
+    func `RestorationCode isExpired returns true when expired`() {
         let code = MockEmailPasswordResetCode(
             user: MockUser(
                 id: UUID(),
@@ -68,8 +68,8 @@ struct RestorationCodeProtocolTests {
         #expect(code.isExpired == true)
     }
 
-    @Test("RestorationCode isExpired returns false when not expired")
-    func isExpiredWhenNotExpired() {
+    @Test
+    func `RestorationCode isExpired returns false when not expired`() {
         let code = MockEmailPasswordResetCode(
             user: MockUser(
                 id: UUID(),
@@ -92,8 +92,8 @@ struct RestorationCodeProtocolTests {
 
     // MARK: - isValid Tests
 
-    @Test("RestorationCode isValid returns true when not expired and under max attempts")
-    func isValidWhenValid() {
+    @Test
+    func `RestorationCode isValid returns true when not expired and under max attempts`() {
         let code = MockEmailPasswordResetCode(
             user: MockUser(
                 id: UUID(),
@@ -114,8 +114,8 @@ struct RestorationCodeProtocolTests {
         #expect(code.isValid(maxAttempts: 3) == true)
     }
 
-    @Test("RestorationCode isValid returns false when expired")
-    func isValidWhenExpired() {
+    @Test
+    func `RestorationCode isValid returns false when expired`() {
         let code = MockEmailPasswordResetCode(
             user: MockUser(
                 id: UUID(),
@@ -136,8 +136,8 @@ struct RestorationCodeProtocolTests {
         #expect(code.isValid(maxAttempts: 3) == false)
     }
 
-    @Test("RestorationCode isValid returns false when max attempts reached")
-    func isValidWhenMaxAttemptsReached() {
+    @Test
+    func `RestorationCode isValid returns false when max attempts reached`() {
         let code = MockEmailPasswordResetCode(
             user: MockUser(
                 id: UUID(),
@@ -158,8 +158,8 @@ struct RestorationCodeProtocolTests {
         #expect(code.isValid(maxAttempts: 3) == false)
     }
 
-    @Test("RestorationCode isValid at boundary of max attempts")
-    func isValidAtBoundary() {
+    @Test
+    func `RestorationCode isValid at boundary of max attempts`() {
         let code = MockEmailPasswordResetCode(
             user: MockUser(
                 id: UUID(),
@@ -183,8 +183,8 @@ struct RestorationCodeProtocolTests {
 
     // MARK: - EmailPasswordResetCode Tests
 
-    @Test("EmailPasswordResetCode stores email correctly")
-    func emailPasswordResetCodeEmail() {
+    @Test
+    func `EmailPasswordResetCode stores email correctly`() {
         let email = "test@example.com"
         let code = MockEmailPasswordResetCode(
             user: MockUser(
@@ -206,8 +206,8 @@ struct RestorationCodeProtocolTests {
         #expect(code.email == email)
     }
 
-    @Test("EmailPasswordResetCode conforms to RestorationCode")
-    func emailPasswordResetCodeConformance() {
+    @Test
+    func `EmailPasswordResetCode conforms to RestorationCode`() {
         let code: any RestorationCode = MockEmailPasswordResetCode(
             user: MockUser(
                 id: UUID(),
@@ -230,8 +230,8 @@ struct RestorationCodeProtocolTests {
 
     // MARK: - PhonePasswordResetCode Tests
 
-    @Test("PhonePasswordResetCode stores phone correctly")
-    func phonePasswordResetCodePhone() {
+    @Test
+    func `PhonePasswordResetCode stores phone correctly`() {
         let phone = "+1234567890"
         let code = MockPhonePasswordResetCode(
             user: MockUser(
@@ -253,8 +253,8 @@ struct RestorationCodeProtocolTests {
         #expect(code.phone == phone)
     }
 
-    @Test("PhonePasswordResetCode conforms to RestorationCode")
-    func phonePasswordResetCodeConformance() {
+    @Test
+    func `PhonePasswordResetCode conforms to RestorationCode`() {
         let code: any RestorationCode = MockPhonePasswordResetCode(
             user: MockUser(
                 id: UUID(),
@@ -277,8 +277,8 @@ struct RestorationCodeProtocolTests {
 
     // MARK: - Protocol Conformance Tests
 
-    @Test("RestorationCode protocol conforms to Sendable")
-    func restorationCodeProtocolIsSendable() {
+    @Test
+    func `RestorationCode protocol conforms to Sendable`() {
         let code: any Sendable = MockEmailPasswordResetCode(
             user: MockUser(
                 id: UUID(),
@@ -300,8 +300,8 @@ struct RestorationCodeProtocolTests {
 
     // MARK: - Properties Tests
 
-    @Test("RestorationCode stores codeHash correctly")
-    func codeHashStorage() {
+    @Test
+    func `RestorationCode stores codeHash correctly`() {
         let hash = "abc123hash"
         let code = MockEmailPasswordResetCode(
             user: MockUser(
@@ -323,8 +323,8 @@ struct RestorationCodeProtocolTests {
         #expect(code.codeHash == hash)
     }
 
-    @Test("RestorationCode tracks failed attempts")
-    func failedAttemptsTracking() {
+    @Test
+    func `RestorationCode tracks failed attempts`() {
         let code = MockEmailPasswordResetCode(
             user: MockUser(
                 id: UUID(),
@@ -345,8 +345,8 @@ struct RestorationCodeProtocolTests {
         #expect(code.failedAttempts == 2)
     }
 
-    @Test("RestorationCode stores user reference")
-    func userReference() {
+    @Test
+    func `RestorationCode stores user reference`() {
         let userId = UUID()
         let user = MockUser(
             id: userId,

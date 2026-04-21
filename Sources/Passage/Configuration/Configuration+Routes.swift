@@ -1,4 +1,4 @@
-import Vapor
+public import Vapor
 
 // MARK: - Main Routes Configuration
 

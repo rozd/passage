@@ -1,12 +1,12 @@
+import JWT
+@testable import Passage
+@testable import PassageOnlyForTest
 import Testing
 import Vapor
 import VaporTesting
-import JWTKit
-@testable import Passage
-@testable import PassageOnlyForTest
 
-@Suite("Manual Linking Route Collection Integration Tests", .tags(.integration, .federatedLogin))
-struct ManualLinkingRouteCollectionIntegrationTests {
+@Suite(.tags(.integration, .federatedLogin))
+struct `Manual Linking Route Collection Integration Tests` {
 
     // MARK: - Test Request/Response Types
 
@@ -223,8 +223,8 @@ struct ManualLinkingRouteCollectionIntegrationTests {
 
     // MARK: - Route Error Handling Tests (No Session)
 
-    @Test("POST to link/select without session returns bad request")
-    func postLinkSelectWithoutSessionReturnsBadRequest() async throws {
+    @Test
+    func `POST to link/select without session returns bad request`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: true)
         }) { app in
@@ -241,8 +241,8 @@ struct ManualLinkingRouteCollectionIntegrationTests {
         }
     }
 
-    @Test("POST to link/select with empty body returns unprocessable entity")
-    func postLinkSelectWithEmptyBodyReturnsError() async throws {
+    @Test
+    func `POST to link/select with empty body returns unprocessable entity`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: false)
         }) { app in
@@ -259,8 +259,8 @@ struct ManualLinkingRouteCollectionIntegrationTests {
         }
     }
 
-    @Test("POST to link/verify without session returns bad request")
-    func postLinkVerifyWithoutSessionReturnsBadRequest() async throws {
+    @Test
+    func `POST to link/verify without session returns bad request`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: false)
         }) { app in
@@ -279,8 +279,8 @@ struct ManualLinkingRouteCollectionIntegrationTests {
 
     // MARK: - Link Select Route Tests (With Session)
 
-    @Test("POST to link/select with valid user ID advances linking via route")
-    func postLinkSelectWithValidUserIdAdvancesLinking() async throws {
+    @Test
+    func `POST to link/select with valid user ID advances linking via route`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: true)
         }) { app in
@@ -338,8 +338,8 @@ struct ManualLinkingRouteCollectionIntegrationTests {
         }
     }
 
-    @Test("POST to link/select with invalid user ID returns bad request via route")
-    func postLinkSelectWithInvalidUserIdReturnsBadRequest() async throws {
+    @Test
+    func `POST to link/select with invalid user ID returns bad request via route`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: true)
         }) { app in
@@ -391,8 +391,8 @@ struct ManualLinkingRouteCollectionIntegrationTests {
 
     // MARK: - Link Verify Route Tests (With Session)
 
-    @Test("POST to initiate-linking without views returns conflict")
-    func postInitiateLinkingWithoutViewsReturnsConflict() async throws {
+    @Test
+    func `POST to initiate-linking without views returns conflict`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: false)
         }) { app in
@@ -425,8 +425,8 @@ struct ManualLinkingRouteCollectionIntegrationTests {
         }
     }
 
-    @Test("Full linking flow via routes: initiate -> select -> verify with password")
-    func fullLinkingFlowViaRoutes() async throws {
+    @Test
+    func `Full linking flow via routes: initiate -> select -> verify with password`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: true)
         }) { app in
@@ -518,8 +518,8 @@ struct ManualLinkingRouteCollectionIntegrationTests {
         }
     }
 
-    @Test("Link verify with wrong password returns unauthorized via route")
-    func linkVerifyWithWrongPasswordReturnsUnauthorized() async throws {
+    @Test
+    func `Link verify with wrong password returns unauthorized via route`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: true)
         }) { app in
@@ -585,8 +585,8 @@ struct ManualLinkingRouteCollectionIntegrationTests {
         }
     }
 
-    @Test("Link verify without password or code returns bad request via route")
-    func linkVerifyWithoutCredentialsReturnsBadRequest() async throws {
+    @Test
+    func `Link verify without password or code returns bad request via route`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: true)
         }) { app in
@@ -651,8 +651,8 @@ struct ManualLinkingRouteCollectionIntegrationTests {
         }
     }
 
-    @Test("Link verify without user selection returns bad request via route")
-    func linkVerifyWithoutUserSelectionReturnsBadRequest() async throws {
+    @Test
+    func `Link verify without user selection returns bad request via route`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: true)
         }) { app in
@@ -700,8 +700,8 @@ struct ManualLinkingRouteCollectionIntegrationTests {
 
     // MARK: - Redirect URL Tests
 
-    @Test("Initiating linking returns conflict when views are disabled via route")
-    func initiateLinkingReturnsConflictWhenViewsDisabled() async throws {
+    @Test
+    func `Initiating linking returns conflict when views are disabled via route`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: false)
         }) { app in
@@ -734,8 +734,8 @@ struct ManualLinkingRouteCollectionIntegrationTests {
 
     // MARK: - Multiple Candidates Tests
 
-    @Test("Initiate linking with multiple candidates returns all via route")
-    func initiateWithMultipleCandidatesReturnsAll() async throws {
+    @Test
+    func `Initiate linking with multiple candidates returns all via route`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: true)
         }) { app in
@@ -777,8 +777,8 @@ struct ManualLinkingRouteCollectionIntegrationTests {
         }
     }
 
-    @Test("Full flow with multiple candidates selects correct user via routes")
-    func fullFlowWithMultipleCandidatesSelectsCorrectUser() async throws {
+    @Test
+    func `Full flow with multiple candidates selects correct user via routes`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: true)
         }) { app in
@@ -862,8 +862,8 @@ struct ManualLinkingRouteCollectionIntegrationTests {
 
     // MARK: - No Candidates Tests
 
-    @Test("Initiate linking with no candidates returns skipped via route")
-    func initiateWithNoCandidatesReturnsSkipped() async throws {
+    @Test
+    func `Initiate linking with no candidates returns skipped via route`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: true)
         }) { app in
@@ -892,8 +892,8 @@ struct ManualLinkingRouteCollectionIntegrationTests {
 
     // MARK: - Phone-Based Linking Tests
 
-    @Test("Linking with phone identifier works via routes")
-    func linkingWithPhoneIdentifierWorksViaRoutes() async throws {
+    @Test
+    func `Linking with phone identifier works via routes`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, allowedIdentifiers: [.phone], withViews: true)
         }) { app in
@@ -980,8 +980,8 @@ struct ManualLinkingRouteCollectionIntegrationTests {
     // by setting Accept: text/html header to trigger view rendering.
     // The view handlers return redirects (not HTML directly) to guide the user flow.
 
-    @Test("HTML form submission to link/select succeeds and redirects to verify")
-    func htmlFormLinkSelectSuccessRedirectsToVerify() async throws {
+    @Test
+    func `HTML form submission to link/select succeeds and redirects to verify`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: true)
         }) { app in
@@ -1036,8 +1036,8 @@ struct ManualLinkingRouteCollectionIntegrationTests {
         }
     }
 
-    @Test("HTML form submission to link/select with invalid user redirects back with error")
-    func htmlFormLinkSelectErrorRedirectsBackWithError() async throws {
+    @Test
+    func `HTML form submission to link/select with invalid user redirects back with error`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: true)
         }) { app in
@@ -1091,8 +1091,8 @@ struct ManualLinkingRouteCollectionIntegrationTests {
         }
     }
 
-    @Test("HTML form submission to link/verify succeeds and redirects to dashboard")
-    func htmlFormLinkVerifySuccessRedirectsToDashboard() async throws {
+    @Test
+    func `HTML form submission to link/verify succeeds and redirects to dashboard`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: true)
         }) { app in
@@ -1162,8 +1162,8 @@ struct ManualLinkingRouteCollectionIntegrationTests {
         }
     }
 
-    @Test("HTML form submission to link/verify with wrong password redirects back with error")
-    func htmlFormLinkVerifyErrorRedirectsBackWithError() async throws {
+    @Test
+    func `HTML form submission to link/verify with wrong password redirects back with error`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: true)
         }) { app in
@@ -1233,8 +1233,8 @@ struct ManualLinkingRouteCollectionIntegrationTests {
         }
     }
 
-    @Test("Full HTML form flow: initiate -> select -> verify with redirects")
-    func fullHtmlFormFlowWithRedirects() async throws {
+    @Test
+    func `Full HTML form flow: initiate -> select -> verify with redirects`() async throws {
         try await withApp(configure: { app in
             try await configureWithManualLinking(app, withViews: true)
         }) { app in

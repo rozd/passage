@@ -1,12 +1,12 @@
+import JWT
+@testable import Passage
+@testable import PassageOnlyForTest
 import Testing
 import Vapor
 import VaporTesting
-import JWTKit
-@testable import Passage
-@testable import PassageOnlyForTest
 
-@Suite("Current User (GET /me) Integration Tests", .tags(.integration))
-struct CurrentUserIntegrationTests {
+@Suite(.tags(.integration))
+struct `Current User (GET /me) Integration Tests` {
 
     // MARK: - Configuration Helper
 
@@ -158,8 +158,8 @@ struct CurrentUserIntegrationTests {
 
     // MARK: - Endpoint Existence Tests
 
-    @Test("GET /me endpoint exists")
-    func meEndpointExists() async throws {
+    @Test
+    func `GET /me endpoint exists`() async throws {
         try await withApp(configure: configure) { app in
             // Create and login user
             try await createTestUser(
@@ -187,8 +187,8 @@ struct CurrentUserIntegrationTests {
 
     // MARK: - Authenticated User Tests
 
-    @Test("Authenticated user with email can get current user info")
-    func authenticatedUserWithEmailGetsUserInfo() async throws {
+    @Test
+    func `Authenticated user with email can get current user info`() async throws {
         try await withApp(configure: configure) { app in
             // Create and login user with email
             try await createTestUser(
@@ -217,8 +217,8 @@ struct CurrentUserIntegrationTests {
         }
     }
 
-    @Test("Authenticated user with phone can get current user info")
-    func authenticatedUserWithPhoneGetsUserInfo() async throws {
+    @Test
+    func `Authenticated user with phone can get current user info`() async throws {
         try await withApp(configure: configure) { app in
             // Create and login user with phone
             try await createTestUser(
@@ -247,8 +247,8 @@ struct CurrentUserIntegrationTests {
         }
     }
 
-    @Test("Authenticated user with username can get current user info")
-    func authenticatedUserWithUsernameGetsUserInfo() async throws {
+    @Test
+    func `Authenticated user with username can get current user info`() async throws {
         try await withApp(configure: configure) { app in
             // Create and login user with username
             try await createTestUser(
@@ -277,8 +277,8 @@ struct CurrentUserIntegrationTests {
 
     // MARK: - Unauthenticated User Tests
 
-    @Test("Unauthenticated request to /me returns authentication error")
-    func unauthenticatedRequestReturnsError() async throws {
+    @Test
+    func `Unauthenticated request to /me returns authentication error`() async throws {
         try await withApp(configure: configure) { app in
             // Request GET /me without any authorization header
             try await app.testing().test(.GET, "/me", afterResponse: { res async in
@@ -287,8 +287,8 @@ struct CurrentUserIntegrationTests {
         }
     }
 
-    @Test("Request with invalid token returns authentication error")
-    func invalidTokenReturnsError() async throws {
+    @Test
+    func `Request with invalid token returns authentication error`() async throws {
         try await withApp(configure: configure) { app in
             // Request GET /me with an invalid token
             try await app.testing().test(.GET, "/me", beforeRequest: { req in
@@ -299,8 +299,8 @@ struct CurrentUserIntegrationTests {
         }
     }
 
-    @Test("Request with malformed authorization header returns authentication error")
-    func malformedAuthorizationHeaderReturnsError() async throws {
+    @Test
+    func `Request with malformed authorization header returns authentication error`() async throws {
         try await withApp(configure: configure) { app in
             // Request GET /me with malformed authorization
             try await app.testing().test(.GET, "/me", beforeRequest: { req in
@@ -311,8 +311,8 @@ struct CurrentUserIntegrationTests {
         }
     }
 
-    @Test("Request with expired token returns authentication error")
-    func expiredTokenReturnsError() async throws {
+    @Test
+    func `Request with expired token returns authentication error`() async throws {
         try await withApp(configure: configure) { app in
             // Create user
             try await createTestUser(

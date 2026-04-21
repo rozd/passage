@@ -3,54 +3,54 @@ import Foundation
 import Vapor
 @testable import Passage
 
-@Suite("PasskeyRegisterRequest Tests", .tags(.unit, .passkey))
-struct PasskeyRegisterRequestTests {
+@Suite(.tags(.unit, .passkey))
+struct `PasskeyRegisterRequest Tests` {
 
     // MARK: - Initialization
 
-    @Test("Init with displayName stores value")
-    func initWithDisplayName() {
+    @Test
+    func `Init with displayName stores value`() {
         let req = PasskeyRegisterRequest(displayName: "Alice")
         #expect(req.displayName == "Alice")
     }
 
-    @Test("Default init has nil displayName")
-    func defaultInitHasNilDisplayName() {
+    @Test
+    func `Default init has nil displayName`() {
         let req = PasskeyRegisterRequest()
         #expect(req.displayName == nil)
     }
 
-    @Test("Init with explicit nil displayName stores nil")
-    func initWithNilDisplayName() {
+    @Test
+    func `Init with explicit nil displayName stores nil`() {
         let req = PasskeyRegisterRequest(displayName: nil)
         #expect(req.displayName == nil)
     }
 
     // MARK: - JSON Decoding
 
-    @Test("Decodes from JSON with displayName")
-    func decodesWithDisplayName() throws {
+    @Test
+    func `Decodes from JSON with displayName`() throws {
         let json = #"{"displayName":"Alice"}"#
         let req = try JSONDecoder().decode(PasskeyRegisterRequest.self, from: Data(json.utf8))
         #expect(req.displayName == "Alice")
     }
 
-    @Test("Decodes from empty JSON object as nil displayName")
-    func decodesEmptyJSON() throws {
+    @Test
+    func `Decodes from empty JSON object as nil displayName`() throws {
         let json = #"{}"#
         let req = try JSONDecoder().decode(PasskeyRegisterRequest.self, from: Data(json.utf8))
         #expect(req.displayName == nil)
     }
 
-    @Test("Decodes from JSON with explicit null displayName")
-    func decodesNullDisplayName() throws {
+    @Test
+    func `Decodes from JSON with explicit null displayName`() throws {
         let json = #"{"displayName":null}"#
         let req = try JSONDecoder().decode(PasskeyRegisterRequest.self, from: Data(json.utf8))
         #expect(req.displayName == nil)
     }
 
-    @Test("Decodes display name with special characters")
-    func decodesDisplayNameWithSpecialChars() throws {
+    @Test
+    func `Decodes display name with special characters`() throws {
         let json = #"{"displayName":"José Müller"}"#
         let req = try JSONDecoder().decode(PasskeyRegisterRequest.self, from: Data(json.utf8))
         #expect(req.displayName == "José Müller")
@@ -58,8 +58,8 @@ struct PasskeyRegisterRequestTests {
 
     // MARK: - Sendable
 
-    @Test("PasskeyRegisterRequest conforms to Sendable")
-    func conformsToSendable() {
+    @Test
+    func `PasskeyRegisterRequest conforms to Sendable`() {
         func assertSendable<T: Sendable>(_ value: T) {}
         assertSendable(PasskeyRegisterRequest(displayName: "Alice"))
         assertSendable(PasskeyRegisterRequest())

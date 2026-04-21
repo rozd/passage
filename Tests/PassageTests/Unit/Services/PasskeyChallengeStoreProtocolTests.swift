@@ -2,8 +2,8 @@ import Testing
 import Foundation
 @testable import Passage
 
-@Suite("PasskeyChallengeStore Protocol Tests", .tags(.unit))
-struct PasskeyChallengeStoreProtocolTests {
+@Suite(.tags(.unit))
+struct `PasskeyChallengeStore Protocol Tests` {
 
     // MARK: - Mock Implementations
 
@@ -110,22 +110,22 @@ struct PasskeyChallengeStoreProtocolTests {
 
     // MARK: - Protocol Conformance Tests
 
-    @Test("PasskeyChallengeStore protocol can be implemented")
-    func protocolCanBeImplemented() {
+    @Test
+    func `PasskeyChallengeStore protocol can be implemented`() {
         let store: any Passage.PasskeyChallengeStore = MockPasskeyChallengeStore()
         #expect(store is MockPasskeyChallengeStore)
     }
 
-    @Test("PasskeyChallengeStore is Sendable")
-    func protocolIsSendable() {
+    @Test
+    func `PasskeyChallengeStore is Sendable`() {
         let store: any Sendable = MockPasskeyChallengeStore()
         #expect(store is MockPasskeyChallengeStore)
     }
 
     // MARK: - Method Signature Tests
 
-    @Test("createPasskeyChallenge accepts PasskeyChallenge DTO and returns a stored record")
-    func createReturnsChallenge() async throws {
+    @Test
+    func `createPasskeyChallenge accepts PasskeyChallenge DTO and returns a stored record`() async throws {
         let store = MockPasskeyChallengeStore()
         let user = createMockUser()
         let bytes = Data([0xAA, 0xBB, 0xCC])
@@ -140,8 +140,8 @@ struct PasskeyChallengeStoreProtocolTests {
         #expect(challenge.expiresAt == expiresAt)
     }
 
-    @Test("createPasskeyChallenge accepts nil user for discoverable flow")
-    func createAllowsNilUser() async throws {
+    @Test
+    func `createPasskeyChallenge accepts nil user for discoverable flow`() async throws {
         let store = MockPasskeyChallengeStore()
         let dto = makeChallengeDTO(kind: .authentication, expiresAt: Date().addingTimeInterval(60))
 
@@ -151,8 +151,8 @@ struct PasskeyChallengeStoreProtocolTests {
         #expect(challenge.kind == .authentication)
     }
 
-    @Test("find returns nil for unknown bytes")
-    func findReturnsNilForUnknown() async throws {
+    @Test
+    func `find returns nil for unknown bytes`() async throws {
         let store = MockPasskeyChallengeStore()
 
         let result = try await store.find(passkeyChallengeMatching: Data([0xDE, 0xAD]))
@@ -162,8 +162,8 @@ struct PasskeyChallengeStoreProtocolTests {
 
     // MARK: - Discardable Result Test
 
-    @Test("createPasskeyChallenge is discardable")
-    func createIsDiscardable() async throws {
+    @Test
+    func `createPasskeyChallenge is discardable`() async throws {
         let store = MockPasskeyChallengeStore()
 
         try await store.createPasskeyChallenge(for: nil, from: makeChallengeDTO())
@@ -173,23 +173,23 @@ struct PasskeyChallengeStoreProtocolTests {
 
     // MARK: - Helper Extension Tests
 
-    @Test("fresh unconsumed challenge is valid")
-    func freshChallengeIsValid() {
+    @Test
+    func `fresh unconsumed challenge is valid`() {
         let challenge = makeStored()
         #expect(challenge.isExpired == false)
         #expect(challenge.isConsumed == false)
         #expect(challenge.isValid == true)
     }
 
-    @Test("expired challenge is not valid")
-    func expiredChallengeIsInvalid() {
+    @Test
+    func `expired challenge is not valid`() {
         let challenge = makeStored(expiresAt: Date().addingTimeInterval(-1))
         #expect(challenge.isExpired == true)
         #expect(challenge.isValid == false)
     }
 
-    @Test("consumed challenge is not valid")
-    func consumedChallengeIsInvalid() {
+    @Test
+    func `consumed challenge is not valid`() {
         let challenge = makeStored(consumedAt: Date())
         #expect(challenge.isConsumed == true)
         #expect(challenge.isValid == false)
@@ -197,8 +197,8 @@ struct PasskeyChallengeStoreProtocolTests {
 
     // MARK: - Store Protocol Integration
 
-    @Test("Store protocol exposes passkeyChallenges as optional property")
-    func storeExposesPasskeyChallenges() {
+    @Test
+    func `Store protocol exposes passkeyChallenges as optional property`() {
         struct TestStore: Passage.Store {
             var users: any Passage.UserStore { fatalError() }
             var tokens: any Passage.TokenStore { fatalError() }
@@ -213,8 +213,8 @@ struct PasskeyChallengeStoreProtocolTests {
         #expect(store.passkeyChallenges is MockPasskeyChallengeStore)
     }
 
-    @Test("Store passkeyChallenges defaults to nil when not provided")
-    func storePasskeyChallengesDefaultsToNil() {
+    @Test
+    func `Store passkeyChallenges defaults to nil when not provided`() {
         struct LegacyStore: Passage.Store {
             var users: any Passage.UserStore { fatalError() }
             var tokens: any Passage.TokenStore { fatalError() }

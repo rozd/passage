@@ -2,13 +2,13 @@ import Testing
 import Vapor
 @testable import Passage
 
-@Suite("Exchange Code Configuration Tests", .tags(.unit))
-struct ExchangeCodeConfigurationTests {
+@Suite(.tags(.unit))
+struct `Exchange Code Configuration Tests` {
 
     // MARK: - Default Configuration Tests
 
-    @Test("ExchangeCode default path is token/exchange")
-    func defaultExchangeCodePath() {
+    @Test
+    func `ExchangeCode default path is token/exchange`() {
         let exchangeCode = Passage.Configuration.Routes.ExchangeCode.default
 
         #expect(exchangeCode.path.count == 2)
@@ -16,8 +16,8 @@ struct ExchangeCodeConfigurationTests {
         #expect(exchangeCode.path[1] == PathComponent.constant("exchange"))
     }
 
-    @Test("ExchangeCode can be initialized with custom path")
-    func customExchangeCodePath() {
+    @Test
+    func `ExchangeCode can be initialized with custom path`() {
         let exchangeCode = Passage.Configuration.Routes.ExchangeCode(path: "oauth", "exchange")
 
         #expect(exchangeCode.path.count == 2)
@@ -25,16 +25,16 @@ struct ExchangeCodeConfigurationTests {
         #expect(exchangeCode.path[1] == PathComponent.constant("exchange"))
     }
 
-    @Test("ExchangeCode can be initialized with single path component")
-    func singlePathComponent() {
+    @Test
+    func `ExchangeCode can be initialized with single path component`() {
         let exchangeCode = Passage.Configuration.Routes.ExchangeCode(path: "exchange")
 
         #expect(exchangeCode.path.count == 1)
         #expect(exchangeCode.path[0] == PathComponent.constant("exchange"))
     }
 
-    @Test("ExchangeCode can be initialized with deep path")
-    func deepPath() {
+    @Test
+    func `ExchangeCode can be initialized with deep path`() {
         let exchangeCode = Passage.Configuration.Routes.ExchangeCode(path: "api", "v1", "auth", "exchange")
 
         #expect(exchangeCode.path.count == 4)
@@ -46,30 +46,30 @@ struct ExchangeCodeConfigurationTests {
 
     // MARK: - Routes Configuration Integration Tests
 
-    @Test("Routes includes exchangeCode property")
-    func routesIncludesExchangeCode() {
+    @Test
+    func `Routes includes exchangeCode property`() {
         let routes = Passage.Configuration.Routes()
 
         #expect(routes.exchangeCode.path.count == 2)
     }
 
-    @Test("Routes uses default exchangeCode when not specified")
-    func routesUsesDefaultExchangeCode() {
+    @Test
+    func `Routes uses default exchangeCode when not specified`() {
         let routes = Passage.Configuration.Routes()
 
         #expect(routes.exchangeCode.path == Passage.Configuration.Routes.ExchangeCode.default.path)
     }
 
-    @Test("Routes accepts custom exchangeCode")
-    func routesAcceptsCustomExchangeCode() {
+    @Test
+    func `Routes accepts custom exchangeCode`() {
         let customExchangeCode = Passage.Configuration.Routes.ExchangeCode(path: "custom", "path")
         let routes = Passage.Configuration.Routes(exchangeCode: customExchangeCode)
 
         #expect(routes.exchangeCode.path == customExchangeCode.path)
     }
 
-    @Test("Routes preserves exchangeCode with other custom routes")
-    func routesPreservesExchangeCodeWithOtherRoutes() {
+    @Test
+    func `Routes preserves exchangeCode with other custom routes`() {
         let customExchangeCode = Passage.Configuration.Routes.ExchangeCode(path: "code", "swap")
         let customLogin = Passage.Configuration.Routes.Login(path: "signin")
 
@@ -82,8 +82,8 @@ struct ExchangeCodeConfigurationTests {
         #expect(routes.login.path == customLogin.path)
     }
 
-    @Test("Routes with group and custom exchangeCode")
-    func routesWithGroupAndCustomExchangeCode() {
+    @Test
+    func `Routes with group and custom exchangeCode`() {
         let customExchangeCode = Passage.Configuration.Routes.ExchangeCode(path: "exchange")
 
         let routes = Passage.Configuration.Routes(
@@ -99,8 +99,8 @@ struct ExchangeCodeConfigurationTests {
 
     // MARK: - Sendable Conformance
 
-    @Test("ExchangeCode conforms to Sendable")
-    func exchangeCodeConformsToSendable() {
+    @Test
+    func `ExchangeCode conforms to Sendable`() {
         let exchangeCode: any Sendable = Passage.Configuration.Routes.ExchangeCode.default
         #expect(exchangeCode is Passage.Configuration.Routes.ExchangeCode)
     }

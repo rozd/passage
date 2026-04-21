@@ -2,8 +2,8 @@ import Testing
 import Foundation
 @testable import Passage
 
-@Suite("Store Protocols Tests")
-struct StoreProtocolsTests {
+@Suite
+struct `Store Protocols Tests` {
 
     // MARK: - Mock Implementations
 
@@ -130,14 +130,14 @@ struct StoreProtocolsTests {
         }
     }
 
-    @Test("UserStore protocol can be implemented")
-    func userStoreProtocolImplementation() {
+    @Test
+    func `UserStore protocol can be implemented`() {
         let store: any Passage.UserStore = MockUserStore()
         #expect(store.userType is MockUser.Type)
     }
 
-    @Test("UserStore protocol conforms to Sendable")
-    func userStoreProtocolIsSendable() {
+    @Test
+    func `UserStore protocol conforms to Sendable`() {
         let store: any Sendable = MockUserStore()
         #expect(store is MockUserStore)
     }
@@ -193,14 +193,14 @@ struct StoreProtocolsTests {
         }
     }
 
-    @Test("TokenStore protocol can be implemented")
-    func tokenStoreProtocolImplementation() {
+    @Test
+    func `TokenStore protocol can be implemented`() {
         let store: any Passage.TokenStore = MockTokenStore()
         #expect(store is MockTokenStore)
     }
 
-    @Test("TokenStore protocol conforms to Sendable")
-    func tokenStoreProtocolIsSendable() {
+    @Test
+    func `TokenStore protocol conforms to Sendable`() {
         let store: any Sendable = MockTokenStore()
         #expect(store is MockTokenStore)
     }
@@ -269,14 +269,14 @@ struct StoreProtocolsTests {
         }
     }
 
-    @Test("VerificationCodeStore protocol can be implemented")
-    func verificationCodeStoreProtocolImplementation() {
+    @Test
+    func `VerificationCodeStore protocol can be implemented`() {
         let store: any Passage.VerificationCodeStore = MockVerificationCodeStore()
         #expect(store is MockVerificationCodeStore)
     }
 
-    @Test("VerificationCodeStore protocol conforms to Sendable")
-    func verificationCodeStoreProtocolIsSendable() {
+    @Test
+    func `VerificationCodeStore protocol conforms to Sendable`() {
         let store: any Sendable = MockVerificationCodeStore()
         #expect(store is MockVerificationCodeStore)
     }
@@ -345,14 +345,14 @@ struct StoreProtocolsTests {
         }
     }
 
-    @Test("RestorationCodeStore protocol can be implemented")
-    func restorationCodeStoreProtocolImplementation() {
+    @Test
+    func `RestorationCodeStore protocol can be implemented`() {
         let store: any Passage.RestorationCodeStore = MockRestorationCodeStore()
         #expect(store is MockRestorationCodeStore)
     }
 
-    @Test("RestorationCodeStore protocol conforms to Sendable")
-    func restorationCodeStoreProtocolIsSendable() {
+    @Test
+    func `RestorationCodeStore protocol conforms to Sendable`() {
         let store: any Sendable = MockRestorationCodeStore()
         #expect(store is MockRestorationCodeStore)
     }
@@ -378,14 +378,14 @@ struct StoreProtocolsTests {
         func incrementFailedAttempts(for magicLink: any MagicLinkToken) async throws {}
     }
 
-    @Test("MagicLinkTokenStore protocol can be implemented")
-    func magicLinkTokenStoreProtocolImplementation() {
+    @Test
+    func `MagicLinkTokenStore protocol can be implemented`() {
         let store: any Passage.MagicLinkTokenStore = MockMagicLinkTokenStore()
         #expect(store is MockMagicLinkTokenStore)
     }
 
-    @Test("MagicLinkTokenStore protocol conforms to Sendable")
-    func magicLinkTokenStoreProtocolIsSendable() {
+    @Test
+    func `MagicLinkTokenStore protocol conforms to Sendable`() {
         let store: any Sendable = MockMagicLinkTokenStore()
         #expect(store is MockMagicLinkTokenStore)
     }
@@ -433,14 +433,14 @@ struct StoreProtocolsTests {
         }
     }
 
-    @Test("ExchangeTokenStore protocol can be implemented")
-    func exchangeTokenStoreProtocolImplementation() {
+    @Test
+    func `ExchangeTokenStore protocol can be implemented`() {
         let store: any Passage.ExchangeTokenStore = MockExchangeTokenStore()
         #expect(store is MockExchangeTokenStore)
     }
 
-    @Test("ExchangeTokenStore protocol conforms to Sendable")
-    func exchangeTokenStoreProtocolIsSendable() {
+    @Test
+    func `ExchangeTokenStore protocol conforms to Sendable`() {
         let store: any Sendable = MockExchangeTokenStore()
         #expect(store is MockExchangeTokenStore)
     }
@@ -456,20 +456,20 @@ struct StoreProtocolsTests {
         var exchangeTokens: any Passage.ExchangeTokenStore { MockExchangeTokenStore() }
     }
 
-    @Test("Store protocol can be implemented")
-    func storeProtocolImplementation() {
+    @Test
+    func `Store protocol can be implemented`() {
         let store: any Passage.Store = MockStore()
         #expect(store is MockStore)
     }
 
-    @Test("Store protocol conforms to Sendable")
-    func storeProtocolIsSendable() {
+    @Test
+    func `Store protocol conforms to Sendable`() {
         let store: any Sendable = MockStore()
         #expect(store is MockStore)
     }
 
-    @Test("Store protocol provides access to all sub-stores")
-    func storeProtocolSubStoresAccess() {
+    @Test
+    func `Store protocol provides access to all sub-stores`() {
         let store: any Passage.Store = MockStore()
 
         #expect(store.users is MockUserStore)

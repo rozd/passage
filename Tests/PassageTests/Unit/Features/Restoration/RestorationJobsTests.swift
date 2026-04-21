@@ -4,8 +4,8 @@ import Queues
 @testable import Passage
 @testable import PassageOnlyForTest
 
-@Suite("Restoration Jobs Tests", .tags(.unit))
-struct RestorationJobsTests {
+@Suite(.tags(.unit))
+struct `Restoration Jobs Tests` {
 
     /// Creates a mock QueueContext for testing
     @Sendable private func createMockQueueContext(
@@ -23,8 +23,8 @@ struct RestorationJobsTests {
 
     // MARK: - SendEmailPasswordResetCodeJob Tests
 
-    @Test("SendEmailPasswordResetCodeJob skips when email delivery is not configured")
-    func sendEmailResetJobSkipsWhenNoEmailDelivery() async throws {
+    @Test
+    func `SendEmailPasswordResetCodeJob skips when email delivery is not configured`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
 
@@ -83,8 +83,8 @@ struct RestorationJobsTests {
         #expect(capturingLogger.warnings.first?.contains("password reset job") == true)
     }
 
-    @Test("SendEmailPasswordResetCodeJob skips when user is not found")
-    func sendEmailResetJobSkipsWhenUserNotFound() async throws {
+    @Test
+    func `SendEmailPasswordResetCodeJob skips when user is not found`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
 
@@ -139,8 +139,8 @@ struct RestorationJobsTests {
         #expect(capturingLogger.warnings.first?.contains("non-existent-user-id") == true)
     }
 
-    @Test("SendEmailPasswordResetCodeJob error handler logs delivery errors")
-    func sendEmailResetJobErrorHandlerLogsErrors() async throws {
+    @Test
+    func `SendEmailPasswordResetCodeJob error handler logs delivery errors`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
 
@@ -167,8 +167,8 @@ struct RestorationJobsTests {
         #expect(capturingLogger.errors.first?.contains("test@example.com") == true)
     }
 
-    @Test("SendEmailPasswordResetCodeJob throws error from email delivery")
-    func sendEmailResetJobThrowsDeliveryError() async throws {
+    @Test
+    func `SendEmailPasswordResetCodeJob throws error from email delivery`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
 
@@ -228,8 +228,8 @@ struct RestorationJobsTests {
 
     // MARK: - SendPhonePasswordResetCodeJob Tests
 
-    @Test("SendPhonePasswordResetCodeJob skips when phone delivery is not configured")
-    func sendPhoneResetJobSkipsWhenNoPhoneDelivery() async throws {
+    @Test
+    func `SendPhonePasswordResetCodeJob skips when phone delivery is not configured`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
 
@@ -287,8 +287,8 @@ struct RestorationJobsTests {
         #expect(capturingLogger.warnings.first?.contains("password reset job") == true)
     }
 
-    @Test("SendPhonePasswordResetCodeJob skips when user is not found")
-    func sendPhoneResetJobSkipsWhenUserNotFound() async throws {
+    @Test
+    func `SendPhonePasswordResetCodeJob skips when user is not found`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
 
@@ -342,8 +342,8 @@ struct RestorationJobsTests {
         #expect(capturingLogger.warnings.first?.contains("non-existent-user-id") == true)
     }
 
-    @Test("SendPhonePasswordResetCodeJob error handler logs delivery errors")
-    func sendPhoneResetJobErrorHandlerLogsErrors() async throws {
+    @Test
+    func `SendPhonePasswordResetCodeJob error handler logs delivery errors`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
 
@@ -369,8 +369,8 @@ struct RestorationJobsTests {
         #expect(capturingLogger.errors.first?.contains("+1234567890") == true)
     }
 
-    @Test("SendPhonePasswordResetCodeJob throws error from phone delivery")
-    func sendPhoneResetJobThrowsDeliveryError() async throws {
+    @Test
+    func `SendPhonePasswordResetCodeJob throws error from phone delivery`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
 
@@ -429,30 +429,30 @@ struct RestorationJobsTests {
 
     // MARK: - Job Conformance Tests
 
-    @Test("SendEmailPasswordResetCodeJob conforms to AsyncJob")
-    func sendEmailResetJobConformsToAsyncJob() {
+    @Test
+    func `SendEmailPasswordResetCodeJob conforms to AsyncJob`() {
         let job = Passage.Restoration.SendEmailPasswordResetCodeJob()
         let _: any AsyncJob = job
-        #expect(Passage.Restoration.SendEmailPasswordResetCodeJob.self is AsyncJob.Type)
+        #expect(Passage.Restoration.SendEmailPasswordResetCodeJob.self is any AsyncJob.Type)
     }
 
-    @Test("SendPhonePasswordResetCodeJob conforms to AsyncJob")
-    func sendPhoneResetJobConformsToAsyncJob() {
+    @Test
+    func `SendPhonePasswordResetCodeJob conforms to AsyncJob`() {
         let job = Passage.Restoration.SendPhonePasswordResetCodeJob()
         let _: any AsyncJob = job
-        #expect(Passage.Restoration.SendPhonePasswordResetCodeJob.self is AsyncJob.Type)
+        #expect(Passage.Restoration.SendPhonePasswordResetCodeJob.self is any AsyncJob.Type)
     }
 
-    @Test("SendEmailPasswordResetCodeJob has correct payload type")
-    func sendEmailResetJobPayloadType() {
+    @Test
+    func `SendEmailPasswordResetCodeJob has correct payload type`() {
         #expect(
             Passage.Restoration.SendEmailPasswordResetCodeJob.Payload.self
                 == Passage.Restoration.EmailPasswordResetCodePayload.self
         )
     }
 
-    @Test("SendPhonePasswordResetCodeJob has correct payload type")
-    func sendPhoneResetJobPayloadType() {
+    @Test
+    func `SendPhonePasswordResetCodeJob has correct payload type`() {
         #expect(
             Passage.Restoration.SendPhonePasswordResetCodeJob.Payload.self
                 == Passage.Restoration.PhonePasswordResetCodePayload.self
@@ -464,8 +464,8 @@ struct RestorationJobsTests {
     /// Helper function that requires Sendable conformance.
     private func assertSendable<T: Sendable>(_ value: T) {}
 
-    @Test("EmailPasswordResetCodePayload conforms to Sendable")
-    func emailPasswordResetCodePayloadConformsToSendable() {
+    @Test
+    func `EmailPasswordResetCodePayload conforms to Sendable`() {
         assertSendable(Passage.Restoration.EmailPasswordResetCodePayload(
             email: "test@example.com",
             userId: "user123",
@@ -474,13 +474,13 @@ struct RestorationJobsTests {
         ))
     }
 
-    @Test("SendEmailPasswordResetCodeJob conforms to Sendable")
-    func sendEmailPasswordResetCodeJobConformsToSendable() {
+    @Test
+    func `SendEmailPasswordResetCodeJob conforms to Sendable`() {
         assertSendable(Passage.Restoration.SendEmailPasswordResetCodeJob())
     }
 
-    @Test("PhonePasswordResetCodePayload conforms to Sendable")
-    func phonePasswordResetCodePayloadConformsToSendable() {
+    @Test
+    func `PhonePasswordResetCodePayload conforms to Sendable`() {
         assertSendable(Passage.Restoration.PhonePasswordResetCodePayload(
             phone: "+1234567890",
             code: "123456",
@@ -488,8 +488,8 @@ struct RestorationJobsTests {
         ))
     }
 
-    @Test("SendPhonePasswordResetCodeJob conforms to Sendable")
-    func sendPhonePasswordResetCodeJobConformsToSendable() {
+    @Test
+    func `SendPhonePasswordResetCodeJob conforms to Sendable`() {
         assertSendable(Passage.Restoration.SendPhonePasswordResetCodeJob())
     }
 }

@@ -1,13 +1,13 @@
 import Testing
 @testable import Passage
 
-@Suite("Views Theme Tests")
-struct ViewsThemeTests {
+@Suite
+struct `Views Theme Tests` {
 
     // MARK: - Theme Brightness Tests
 
-    @Test("Brightness enum cases")
-    func brightnessEnumCases() {
+    @Test
+    func `Brightness enum cases`() {
         let brightnesses: [Passage.Views.Theme.Brightness] = [
             .light,
             .dark
@@ -18,8 +18,8 @@ struct ViewsThemeTests {
 
     // MARK: - Theme Initialization Tests
 
-    @Test("Theme initialization with colors")
-    func themeInitialization() {
+    @Test
+    func `Theme initialization with colors`() {
         let colors = Passage.Views.Theme.Colors.defaultLight
         let theme = Passage.Views.Theme(colors: colors)
 
@@ -27,8 +27,8 @@ struct ViewsThemeTests {
         #expect(theme.overrides.isEmpty)
     }
 
-    @Test("Theme initialization with overrides")
-    func themeInitializationWithOverrides() {
+    @Test
+    func `Theme initialization with overrides`() {
         let lightColors = Passage.Views.Theme.Colors.defaultLight
         let darkColors = Passage.Views.Theme.Colors.defaultDark
 
@@ -45,8 +45,8 @@ struct ViewsThemeTests {
 
     // MARK: - Theme Resolution Tests
 
-    @Test("Theme resolves to base colors for light when no override")
-    func themeResolvesToBaseColorsForLight() {
+    @Test
+    func `Theme resolves to base colors for light when no override`() {
         let colors = Passage.Views.Theme.Colors.defaultLight
         let theme = Passage.Views.Theme(colors: colors)
 
@@ -55,8 +55,8 @@ struct ViewsThemeTests {
         #expect(resolved.primary == colors.primary)
     }
 
-    @Test("Theme resolves to override colors when available")
-    func themeResolvesToOverrideColors() {
+    @Test
+    func `Theme resolves to override colors when available`() {
         let lightColors = Passage.Views.Theme.Colors.defaultLight
         let darkColors = Passage.Views.Theme.Colors.defaultDark
 
@@ -73,8 +73,8 @@ struct ViewsThemeTests {
         #expect(resolvedDark.primary != lightColors.primary)
     }
 
-    @Test("Theme resolves to base colors when override not available")
-    func themeResolvesToBaseWhenNoOverride() {
+    @Test
+    func `Theme resolves to base colors when override not available`() {
         let colors = Passage.Views.Theme.Colors.defaultLight
         let theme = Passage.Views.Theme(colors: colors)
 
@@ -84,8 +84,8 @@ struct ViewsThemeTests {
         #expect(resolvedDark.primary == colors.primary)
     }
 
-    @Test("Theme resolve method creates Resolved struct")
-    func themeResolveCreatesResolvedStruct() {
+    @Test
+    func `Theme resolve method creates Resolved struct`() {
         let colors = Passage.Views.Theme.Colors.defaultLight
         let theme = Passage.Views.Theme(colors: colors)
 
@@ -96,14 +96,14 @@ struct ViewsThemeTests {
 
     // MARK: - Default Theme Colors Tests
 
-    @Test("Default light theme has expected primary color")
-    func defaultLightThemePrimaryColor() {
+    @Test
+    func `Default light theme has expected primary color`() {
         let colors = Passage.Views.Theme.Colors.defaultLight
         #expect(colors.primary == "#6200EE")
     }
 
-    @Test("Default dark theme has expected primary color")
-    func defaultDarkThemePrimaryColor() {
+    @Test
+    func `Default dark theme has expected primary color`() {
         let colors = Passage.Views.Theme.Colors.defaultDark
         #expect(colors.primary == "#BB86FC")
     }
@@ -158,8 +158,8 @@ struct ViewsThemeTests {
 
     // MARK: - Theme Color Pairs Tests
 
-    @Test("Ocean theme has both light and dark variants")
-    func oceanThemeVariants() {
+    @Test
+    func `Ocean theme has both light and dark variants`() {
         let light = Passage.Views.Theme.Colors.oceanLight
         let dark = Passage.Views.Theme.Colors.oceanDark
 
@@ -167,8 +167,8 @@ struct ViewsThemeTests {
         #expect(light.background != dark.background)
     }
 
-    @Test("Forest theme has both light and dark variants")
-    func forestThemeVariants() {
+    @Test
+    func `Forest theme has both light and dark variants`() {
         let light = Passage.Views.Theme.Colors.forestLight
         let dark = Passage.Views.Theme.Colors.forestDark
 
@@ -176,8 +176,8 @@ struct ViewsThemeTests {
         #expect(light.background != dark.background)
     }
 
-    @Test("Sunset theme has both light and dark variants")
-    func sunsetThemeVariants() {
+    @Test
+    func `Sunset theme has both light and dark variants`() {
         let light = Passage.Views.Theme.Colors.sunsetLight
         let dark = Passage.Views.Theme.Colors.sunsetDark
 
@@ -187,20 +187,20 @@ struct ViewsThemeTests {
 
     // MARK: - Sendable Conformance Tests
 
-    @Test("Theme conforms to Sendable")
-    func themeIsSendable() {
+    @Test
+    func `Theme conforms to Sendable`() {
         let theme: any Sendable = Passage.Views.Theme(colors: .defaultLight)
         #expect(theme is Passage.Views.Theme)
     }
 
-    @Test("Theme.Colors conforms to Sendable")
-    func colorsIsSendable() {
+    @Test
+    func `Theme.Colors conforms to Sendable`() {
         let colors: any Sendable = Passage.Views.Theme.Colors.defaultLight
         #expect(colors is Passage.Views.Theme.Colors)
     }
 
-    @Test("Theme.Brightness conforms to Sendable")
-    func brightnessIsSendable() {
+    @Test
+    func `Theme.Brightness conforms to Sendable`() {
         let brightness: any Sendable = Passage.Views.Theme.Brightness.light
         #expect(brightness is Passage.Views.Theme.Brightness)
     }

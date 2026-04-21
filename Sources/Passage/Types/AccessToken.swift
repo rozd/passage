@@ -1,5 +1,5 @@
 import Foundation
-import JWTKit
+public import JWT
 
 public struct AccessToken: Sendable {
 

@@ -1,12 +1,12 @@
-import Testing
-import Vapor
-import JWTKit
 import Foundation
+import JWT
 @testable import Passage
 @testable import PassageOnlyForTest
+import Testing
+import Vapor
 
-@Suite("Account Methods Unit Tests", .tags(.unit))
-struct AccountMethodsTests {
+@Suite(.tags(.unit))
+struct `Account Methods Unit Tests` {
 
     // MARK: - Helper Methods
 
@@ -101,8 +101,8 @@ struct AccountMethodsTests {
 
     // MARK: - logout() Tests
 
-    @Test("logout revokes all refresh tokens for user")
-    func logoutRevokesRefreshTokens() async throws {
+    @Test
+    func `logout revokes all refresh tokens for user`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configure(app)
@@ -125,8 +125,8 @@ struct AccountMethodsTests {
         }
     }
 
-    @Test("logout succeeds even when user has no tokens")
-    func logoutSucceedsWithNoTokens() async throws {
+    @Test
+    func `logout succeeds even when user has no tokens`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configure(app)
@@ -143,8 +143,8 @@ struct AccountMethodsTests {
         try await account.logout()
     }
 
-    @Test("logout succeeds when no user is authenticated")
-    func logoutSucceedsWhenNotAuthenticated() async throws {
+    @Test
+    func `logout succeeds when no user is authenticated`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configure(app)
@@ -156,8 +156,8 @@ struct AccountMethodsTests {
         try await account.logout()
     }
 
-    @Test("logout revokes multiple refresh tokens")
-    func logoutRevokesMultipleTokens() async throws {
+    @Test
+    func `logout revokes multiple refresh tokens`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configure(app)
@@ -189,8 +189,8 @@ struct AccountMethodsTests {
 
     // MARK: - currentUser() Tests
 
-    @Test("currentUser returns user data when user is authenticated")
-    func currentUserReturnsDataForAuthenticatedUser() async throws {
+    @Test
+    func `currentUser returns user data when user is authenticated`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configure(app)
@@ -211,8 +211,8 @@ struct AccountMethodsTests {
         #expect(userData.email == "user@example.com")
     }
 
-    @Test("currentUser throws error when no user authenticated")
-    func currentUserThrowsWhenNotAuthenticated() async throws {
+    @Test
+    func `currentUser throws error when no user authenticated`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configure(app)
@@ -221,13 +221,13 @@ struct AccountMethodsTests {
         let account = Passage.Account(request: request)
 
         // No user authenticated - should throw
-        #expect(throws: Error.self) {
+        #expect(throws: (any Error).self) {
             _ = try account.currentUser()
         }
     }
 
-    @Test("currentUser returns correct data for user with phone")
-    func currentUserReturnsDataWithPhone() async throws {
+    @Test
+    func `currentUser returns correct data for user with phone`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configure(app)
@@ -252,8 +252,8 @@ struct AccountMethodsTests {
 
     // MARK: - login() passwordIsNotSet Tests
 
-    @Test("login throws passwordIsNotSet when user has no password hash")
-    func loginThrowsPasswordIsNotSet() async throws {
+    @Test
+    func `login throws passwordIsNotSet when user has no password hash`() async throws {
         // Create a mock user without password to verify the logic
         let mockUser = createMockUserWithoutPassword(email: "user@example.com")
 
@@ -268,22 +268,22 @@ struct AccountMethodsTests {
         #expect(mockUser.passwordHash == nil)
     }
 
-    @Test("login passwordIsNotSet has correct HTTP status")
-    func loginPasswordIsNotSetHasCorrectStatus() async throws {
+    @Test
+    func `login passwordIsNotSet has correct HTTP status`() async throws {
         let error = AuthenticationError.passwordIsNotSet
         #expect(error.status == .internalServerError)
     }
 
-    @Test("login passwordIsNotSet has correct reason message")
-    func loginPasswordIsNotSetHasCorrectReason() async throws {
+    @Test
+    func `login passwordIsNotSet has correct reason message`() async throws {
         let error = AuthenticationError.passwordIsNotSet
         #expect(error.reason == "Password is not set for this account.")
     }
 
     // MARK: - user(withId:) Tests
 
-    @Test("user(withId:) returns user when ID exists")
-    func userWithIdReturnsUser() async throws {
+    @Test
+    func `user(withId:) returns user when ID exists`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configure(app)
@@ -298,8 +298,8 @@ struct AccountMethodsTests {
         #expect((try found.requiredIdAsString) == userId)
     }
 
-    @Test("user(withId:) throws userNotFound when ID does not exist")
-    func userWithIdThrowsWhenNotFound() async throws {
+    @Test
+    func `user(withId:) throws userNotFound when ID does not exist`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configure(app)
@@ -314,8 +314,8 @@ struct AccountMethodsTests {
 
     // MARK: - user(for:) Tests
 
-    @Test("user(for:) returns user matching access token subject")
-    func userForAccessTokenReturnsMatchingUser() async throws {
+    @Test
+    func `user(for:) returns user matching access token subject`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configure(app)
@@ -338,8 +338,8 @@ struct AccountMethodsTests {
         #expect((try found.requiredIdAsString) == userId)
     }
 
-    @Test("user(for:) throws userNotFound for unknown subject")
-    func userForUnknownSubjectThrows() async throws {
+    @Test
+    func `user(for:) throws userNotFound for unknown subject`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configure(app)

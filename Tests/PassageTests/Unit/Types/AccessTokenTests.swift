@@ -1,15 +1,15 @@
-import Testing
 import Foundation
-import JWTKit
+import JWT
 @testable import Passage
+import Testing
 
-@Suite("Access Token Tests")
-struct AccessTokenTests {
+@Suite
+struct `Access Token Tests` {
 
     // MARK: - Initialization Tests
 
-    @Test("Access token initialization with all claims")
-    func initializationWithAllClaims() {
+    @Test
+    func `Access token initialization with all claims`() {
         let issuedAt = Date()
         let expiresAt = Date(timeIntervalSinceNow: 3600)
 
@@ -30,8 +30,8 @@ struct AccessTokenTests {
         #expect(token.scope == "read write")
     }
 
-    @Test("Access token initialization without optional claims")
-    func initializationWithoutOptionalClaims() {
+    @Test
+    func `Access token initialization without optional claims`() {
         let expiresAt = Date(timeIntervalSinceNow: 3600)
 
         let token = AccessToken(
@@ -48,8 +48,8 @@ struct AccessTokenTests {
         #expect(token.scope == nil)
     }
 
-    @Test("Access token default issuedAt")
-    func defaultIssuedAt() {
+    @Test
+    func `Access token default issuedAt`() {
         let beforeCreation = Date()
         let expiresAt = Date(timeIntervalSinceNow: 3600)
 
@@ -86,8 +86,8 @@ struct AccessTokenTests {
         #expect(token.subject.value == userId)
     }
 
-    @Test("Access token expiration claim")
-    func expirationClaim() {
+    @Test
+    func `Access token expiration claim`() {
         let expirationDate = Date(timeIntervalSinceNow: 7200)
 
         let token = AccessToken(
@@ -101,8 +101,8 @@ struct AccessTokenTests {
         #expect(token.expiration.value.timeIntervalSince1970 == expirationDate.timeIntervalSince1970)
     }
 
-    @Test("Access token issuedAt claim")
-    func issuedAtClaim() {
+    @Test
+    func `Access token issuedAt claim`() {
         let issuedAtDate = Date(timeIntervalSinceNow: -100)
 
         let token = AccessToken(
@@ -170,8 +170,8 @@ struct AccessTokenTests {
 
     // MARK: - Multiple Tokens Tests
 
-    @Test("Different access tokens have different data")
-    func differentTokensHaveDifferentData() {
+    @Test
+    func `Different access tokens have different data`() {
         let token1 = AccessToken(
             userId: "user1",
             expiresAt: Date(timeIntervalSinceNow: 3600),

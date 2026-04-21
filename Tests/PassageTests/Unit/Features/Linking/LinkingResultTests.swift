@@ -2,8 +2,8 @@ import Testing
 import Foundation
 @testable import Passage
 
-@Suite("Linking Result Tests", .tags(.unit, .federatedLogin))
-struct LinkingResultTests {
+@Suite(.tags(.unit, .federatedLogin))
+struct `Linking Result Tests` {
 
     // MARK: - Mock User
 
@@ -26,8 +26,8 @@ struct LinkingResultTests {
 
     // MARK: - Case Tests
 
-    @Test("Linking.Result.complete stores user")
-    func completeStoresUser() {
+    @Test
+    func `Linking.Result.complete stores user`() {
         let user = MockUser(
             id: UUID(),
             email: "test@example.com",
@@ -48,8 +48,8 @@ struct LinkingResultTests {
         }
     }
 
-    @Test("Linking.Result.conflict stores candidate IDs")
-    func conflictStoresCandidates() {
+    @Test
+    func `Linking.Result.conflict stores candidate IDs`() {
         let candidates = ["user-1", "user-2", "user-3"]
         let result = Passage.Linking.Result.conflict(candidates: candidates)
 
@@ -61,8 +61,8 @@ struct LinkingResultTests {
         }
     }
 
-    @Test("Linking.Result.conflict with empty candidates")
-    func conflictWithEmptyCandidates() {
+    @Test
+    func `Linking.Result.conflict with empty candidates`() {
         let result = Passage.Linking.Result.conflict(candidates: [])
 
         if case .conflict(let candidates) = result {
@@ -72,8 +72,8 @@ struct LinkingResultTests {
         }
     }
 
-    @Test("Linking.Result.initiated has no associated values")
-    func initiatedCase() {
+    @Test
+    func `Linking.Result.initiated has no associated values`() {
         let result = Passage.Linking.Result.initiated
 
         if case .initiated = result {
@@ -84,8 +84,8 @@ struct LinkingResultTests {
         }
     }
 
-    @Test("Linking.Result.skipped has no associated values")
-    func skippedCase() {
+    @Test
+    func `Linking.Result.skipped has no associated values`() {
         let result = Passage.Linking.Result.skipped
 
         if case .skipped = result {
@@ -98,8 +98,8 @@ struct LinkingResultTests {
 
     // MARK: - Case Distinction Tests
 
-    @Test("All Linking.Result cases are distinct")
-    func casesAreDistinct() {
+    @Test
+    func `All Linking.Result cases are distinct`() {
         let user = MockUser(
             id: UUID(),
             email: nil,
@@ -144,8 +144,8 @@ struct LinkingResultTests {
 
     // MARK: - Sendable Conformance
 
-    @Test("Linking.Result conforms to Sendable")
-    func conformsToSendable() {
+    @Test
+    func `Linking.Result conforms to Sendable`() {
         let user = MockUser(
             id: UUID(),
             email: nil,
@@ -169,8 +169,8 @@ struct LinkingResultTests {
 
     // MARK: - Use Case Tests
 
-    @Test("Linking.Result.complete represents successful automatic linking")
-    func completeRepresentsAutomaticLinking() {
+    @Test
+    func `Linking.Result.complete represents successful automatic linking`() {
         // When automatic linking finds exactly one matching user
         let linkedUser = MockUser(
             id: UUID(),
@@ -193,8 +193,8 @@ struct LinkingResultTests {
         }
     }
 
-    @Test("Linking.Result.conflict represents multiple matching users")
-    func conflictRepresentsMultipleMatches() {
+    @Test
+    func `Linking.Result.conflict represents multiple matching users`() {
         // When multiple users match the federated identity's verified emails
         let candidateIds = ["uuid-1", "uuid-2"]
         let result = Passage.Linking.Result.conflict(candidates: candidateIds)
@@ -208,8 +208,8 @@ struct LinkingResultTests {
         }
     }
 
-    @Test("Linking.Result.initiated represents manual linking flow started")
-    func initiatedRepresentsManualFlowStarted() {
+    @Test
+    func `Linking.Result.initiated represents manual linking flow started`() {
         // When manual linking is configured and candidates exist
         let result = Passage.Linking.Result.initiated
 
@@ -221,8 +221,8 @@ struct LinkingResultTests {
         }
     }
 
-    @Test("Linking.Result.skipped represents no matching users")
-    func skippedRepresentsNoMatches() {
+    @Test
+    func `Linking.Result.skipped represents no matching users`() {
         // When no existing users match the federated identity
         let result = Passage.Linking.Result.skipped
 

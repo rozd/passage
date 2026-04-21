@@ -9,13 +9,13 @@ import Vapor
 /// only verify the protocol is expressible with library-agnostic primitives
 /// (`Data`, `any AsyncResponseEncodable & Sendable`, core-owned DTOs) so
 /// third-party conformances don't need to import any WebAuthn library.
-@Suite("PasskeyService Protocol Tests", .tags(.unit))
-struct PasskeyServiceProtocolTests {
+@Suite(.tags(.unit))
+struct `PasskeyService Protocol Tests` {
 
     // MARK: - PasskeyBeginResult
 
-    @Test("PasskeyBeginResult carries challenge + opaque body")
-    func beginResultFields() {
+    @Test
+    func `PasskeyBeginResult carries challenge + opaque body`() {
         let body = StubEncodableBody(value: "ok")
         let challenge = PasskeyChallenge(
             bytes: Data([0xA1]), kind: .registration, expiresAt: Date()
@@ -27,8 +27,8 @@ struct PasskeyServiceProtocolTests {
         #expect(result.body is StubEncodableBody)
     }
 
-    @Test("PasskeyBeginResult is Sendable")
-    func beginResultIsSendable() {
+    @Test
+    func `PasskeyBeginResult is Sendable`() {
         let _: any Sendable = PasskeyBeginResult(
             challenge: PasskeyChallenge(bytes: Data(), kind: .registration, expiresAt: Date()),
             body: StubEncodableBody(value: "x")
@@ -38,8 +38,8 @@ struct PasskeyServiceProtocolTests {
 
     // MARK: - PasskeyFinishRegistrationResult
 
-    @Test("PasskeyFinishRegistrationResult carries credential + matched challenge")
-    func finishResultFields() {
+    @Test
+    func `PasskeyFinishRegistrationResult carries credential + matched challenge`() {
         let credential = PasskeyCredential(
             credentialID: "id",
             publicKey: Data(),
@@ -59,8 +59,8 @@ struct PasskeyServiceProtocolTests {
         #expect(result.matchedChallenge.kind == .registration)
     }
 
-    @Test("PasskeyFinishRegistrationResult is Sendable")
-    func finishResultIsSendable() {
+    @Test
+    func `PasskeyFinishRegistrationResult is Sendable`() {
         let credential = PasskeyCredential(
             credentialID: "",
             publicKey: Data(),
@@ -81,22 +81,22 @@ struct PasskeyServiceProtocolTests {
 
     // MARK: - Protocol conformance
 
-    @Test("PasskeyService protocol is implementable with library-agnostic primitives")
-    func protocolIsImplementable() {
+    @Test
+    func `PasskeyService protocol is implementable with library-agnostic primitives`() {
         let service: any Passage.PasskeyService = StubPasskeyService()
         #expect(service is StubPasskeyService)
     }
 
-    @Test("PasskeyService is Sendable-required")
-    func protocolIsSendable() {
+    @Test
+    func `PasskeyService is Sendable-required`() {
         // If `PasskeyService` dropped its `: Sendable` requirement, this would
         // fail to compile. The runtime test simply records intent.
         let _: any Sendable = StubPasskeyService()
         #expect(Bool(true))
     }
 
-    @Test("beginRegistration forwards PasskeyUser / Policy / challengeTTL verbatim")
-    func beginForwardsArguments() async throws {
+    @Test
+    func `beginRegistration forwards PasskeyUser / Policy / challengeTTL verbatim`() async throws {
         let stub = StubPasskeyService()
         let user = PublicKeyCredentialUserEntity(
             name: "alice", id: Data([0x01]), displayName: "Alice"
@@ -112,8 +112,8 @@ struct PasskeyServiceProtocolTests {
         #expect(stub.lastBeginTTL == 120)
     }
 
-    @Test("finishRegistration consults lookupChallenge + confirmUnused closures")
-    func finishInvokesClosures() async throws {
+    @Test
+    func `finishRegistration consults lookupChallenge + confirmUnused closures`() async throws {
         let stub = StubPasskeyService()
         let storedChallenge = StubStoredChallenge(kind: .registration)
 
@@ -132,8 +132,8 @@ struct PasskeyServiceProtocolTests {
 
     // MARK: - PasskeyCredentialDescriptor
 
-    @Test("PasskeyCredentialDescriptor carries credentialID + transports verbatim")
-    func descriptorFields() {
+    @Test
+    func `PasskeyCredentialDescriptor carries credentialID + transports verbatim`() {
         let descriptor = PasskeyCredentialDescriptor(
             credentialID: "desc-id",
             transports: [.usb, .hybrid]
@@ -142,16 +142,16 @@ struct PasskeyServiceProtocolTests {
         #expect(descriptor.transports == [.usb, .hybrid])
     }
 
-    @Test("PasskeyCredentialDescriptor is Sendable")
-    func descriptorIsSendable() {
+    @Test
+    func `PasskeyCredentialDescriptor is Sendable`() {
         let _: any Sendable = PasskeyCredentialDescriptor(credentialID: "x", transports: [])
         #expect(Bool(true))
     }
 
     // MARK: - PasskeyFinishAuthenticationResult
 
-    @Test("PasskeyFinishAuthenticationResult preserves all fields")
-    func finishAuthenticationResultFields() {
+    @Test
+    func `PasskeyFinishAuthenticationResult preserves all fields`() {
         let credential = StubStoredCredential(credentialID: "c-1")
         let challenge = StubStoredChallenge(kind: .authentication)
         let result = PasskeyFinishAuthenticationResult(
@@ -168,8 +168,8 @@ struct PasskeyServiceProtocolTests {
         #expect(result.userHandle == Data([0x0A, 0x0B]))
     }
 
-    @Test("PasskeyFinishAuthenticationResult is Sendable")
-    func finishAuthenticationResultIsSendable() {
+    @Test
+    func `PasskeyFinishAuthenticationResult is Sendable`() {
         let _: any Sendable = PasskeyFinishAuthenticationResult(
             matchedCredential: StubStoredCredential(credentialID: ""),
             matchedChallenge: StubStoredChallenge(kind: .authentication),
@@ -182,8 +182,8 @@ struct PasskeyServiceProtocolTests {
 
     // MARK: - Authentication ceremony methods
 
-    @Test("beginAuthentication forwards allowCredentials + policy + TTL verbatim")
-    func beginAuthenticationForwardsArguments() async throws {
+    @Test
+    func `beginAuthentication forwards allowCredentials + policy + TTL verbatim`() async throws {
         let stub = StubPasskeyService()
         let allow: [PasskeyCredentialDescriptor] = [
             .init(credentialID: "c1", transports: [.internal]),
@@ -202,8 +202,8 @@ struct PasskeyServiceProtocolTests {
         #expect(stub.lastBeginAuthTTL == 77)
     }
 
-    @Test("beginAuthentication accepts nil allowCredentials (discoverable flow)")
-    func beginAuthenticationSupportsDiscoverable() async throws {
+    @Test
+    func `beginAuthentication accepts nil allowCredentials (discoverable flow)`() async throws {
         let stub = StubPasskeyService()
         let result = try await stub.beginAuthentication(
             allowCredentials: nil,
@@ -214,8 +214,8 @@ struct PasskeyServiceProtocolTests {
         #expect(stub.lastBeginAuthAllow == nil)
     }
 
-    @Test("finishAuthentication consults lookupChallenge + lookupCredential closures")
-    func finishAuthenticationInvokesClosures() async throws {
+    @Test
+    func `finishAuthentication consults lookupChallenge + lookupCredential closures`() async throws {
         let stub = StubPasskeyService()
         let storedChallenge = StubStoredChallenge(kind: .authentication)
         let storedCredential = StubStoredCredential(credentialID: "stub-cred")
@@ -233,8 +233,8 @@ struct PasskeyServiceProtocolTests {
         #expect(stub.finishAuthLookupCredentialInvoked)
     }
 
-    @Test("finishAuthentication surfaces invalidPasskeyChallenge when lookup returns nil")
-    func finishAuthenticationThrowsOnMissingChallenge() async throws {
+    @Test
+    func `finishAuthentication surfaces invalidPasskeyChallenge when lookup returns nil`() async throws {
         let stub = StubPasskeyService()
         await #expect(throws: AuthenticationError.invalidPasskeyChallenge) {
             _ = try await stub.finishAuthentication(
@@ -246,8 +246,8 @@ struct PasskeyServiceProtocolTests {
         }
     }
 
-    @Test("finishAuthentication surfaces unknownPasskey when credential lookup returns nil")
-    func finishAuthenticationThrowsOnUnknownCredential() async throws {
+    @Test
+    func `finishAuthentication surfaces unknownPasskey when credential lookup returns nil`() async throws {
         let stub = StubPasskeyService()
         await #expect(throws: AuthenticationError.unknownPasskey) {
             _ = try await stub.finishAuthentication(

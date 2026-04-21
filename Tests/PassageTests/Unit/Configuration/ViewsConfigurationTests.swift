@@ -2,8 +2,8 @@ import Testing
 import Foundation
 @testable import Passage
 
-@Suite("Views Configuration Tests")
-struct ViewsConfigurationTests {
+@Suite
+struct `Views Configuration Tests` {
 
     // MARK: - Test Helpers
 
@@ -13,16 +13,16 @@ struct ViewsConfigurationTests {
 
     // MARK: - Redirect Configuration Tests
 
-    @Test("Redirect default configuration")
-    func redirectDefault() {
+    @Test
+    func `Redirect default configuration`() {
         let redirect = Passage.Configuration.Views.Redirect()
 
         #expect(redirect.onSuccess == nil)
         #expect(redirect.onFailure == nil)
     }
 
-    @Test("Redirect with success and failure paths")
-    func redirectWithPaths() {
+    @Test
+    func `Redirect with success and failure paths`() {
         let redirect = Passage.Configuration.Views.Redirect(
             onSuccess: "/dashboard",
             onFailure: "/error"
@@ -32,8 +32,8 @@ struct ViewsConfigurationTests {
         #expect(redirect.onFailure == "/error")
     }
 
-    @Test("Redirect with only success path")
-    func redirectOnlySuccess() {
+    @Test
+    func `Redirect with only success path`() {
         let redirect = Passage.Configuration.Views.Redirect(onSuccess: "/home")
 
         #expect(redirect.onSuccess == "/home")
@@ -42,8 +42,8 @@ struct ViewsConfigurationTests {
 
     // MARK: - LoginView Tests
 
-    @Test("LoginView initialization")
-    func loginViewInitialization() {
+    @Test
+    func `LoginView initialization`() {
         let view = Passage.Configuration.Views.LoginView(
             style: .neobrutalism,
             theme: createTestTheme(),
@@ -71,8 +71,8 @@ struct ViewsConfigurationTests {
         #expect(view.template == expected)
     }
 
-    @Test("LoginView with custom redirect")
-    func loginViewWithRedirect() {
+    @Test
+    func `LoginView with custom redirect`() {
         let view = Passage.Configuration.Views.LoginView(
             style: .neobrutalism,
             theme: createTestTheme(),
@@ -86,8 +86,8 @@ struct ViewsConfigurationTests {
 
     // MARK: - RegisterView Tests
 
-    @Test("RegisterView initialization")
-    func registerViewInitialization() {
+    @Test
+    func `RegisterView initialization`() {
         let view = Passage.Configuration.Views.RegisterView(
             style: .minimalism,
             theme: createTestTheme(),
@@ -99,8 +99,8 @@ struct ViewsConfigurationTests {
         #expect(view.identifier == .email)
     }
 
-    @Test("RegisterView template name")
-    func registerViewTemplate() {
+    @Test
+    func `RegisterView template name`() {
         let view = Passage.Configuration.Views.RegisterView(
             style: .material,
             theme: createTestTheme(),
@@ -112,8 +112,8 @@ struct ViewsConfigurationTests {
 
     // MARK: - PasswordResetRequestView Tests
 
-    @Test("PasswordResetRequestView initialization")
-    func passwordResetRequestViewInitialization() {
+    @Test
+    func `PasswordResetRequestView initialization`() {
         let view = Passage.Configuration.Views.PasswordResetRequestView(
             style: .neomorphism,
             theme: createTestTheme()
@@ -123,8 +123,8 @@ struct ViewsConfigurationTests {
         #expect(view.style == .neomorphism)
     }
 
-    @Test("PasswordResetRequestView template name")
-    func passwordResetRequestViewTemplate() {
+    @Test
+    func `PasswordResetRequestView template name`() {
         let view = Passage.Configuration.Views.PasswordResetRequestView(
             style: .minimalism,
             theme: createTestTheme()
@@ -135,8 +135,8 @@ struct ViewsConfigurationTests {
 
     // MARK: - PasswordResetConfirmView Tests
 
-    @Test("PasswordResetConfirmView initialization")
-    func passwordResetConfirmViewInitialization() {
+    @Test
+    func `PasswordResetConfirmView initialization`() {
         let view = Passage.Configuration.Views.PasswordResetConfirmView(
             style: .material,
             theme: createTestTheme()
@@ -146,8 +146,8 @@ struct ViewsConfigurationTests {
         #expect(view.style == .material)
     }
 
-    @Test("PasswordResetConfirmView template name")
-    func passwordResetConfirmViewTemplate() {
+    @Test
+    func `PasswordResetConfirmView template name`() {
         let view = Passage.Configuration.Views.PasswordResetConfirmView(
             style: .neobrutalism,
             theme: createTestTheme()
@@ -158,8 +158,8 @@ struct ViewsConfigurationTests {
 
     // MARK: - Views Configuration Tests
 
-    @Test("Views default configuration")
-    func viewsDefault() {
+    @Test
+    func `Views default configuration`() {
         let views = Passage.Configuration.Views()
 
         #expect(views.register == nil)
@@ -169,8 +169,8 @@ struct ViewsConfigurationTests {
         #expect(views.enabled == false)
     }
 
-    @Test("Views with login view enabled")
-    func viewsWithLogin() {
+    @Test
+    func `Views with login view enabled`() {
         let views = Passage.Configuration.Views(
             login: .init(style: .minimalism, theme: createTestTheme(), identifier: .email)
         )
@@ -179,8 +179,8 @@ struct ViewsConfigurationTests {
         #expect(views.enabled == true)
     }
 
-    @Test("Views with register view enabled")
-    func viewsWithRegister() {
+    @Test
+    func `Views with register view enabled`() {
         let views = Passage.Configuration.Views(
             register: .init(style: .material, theme: createTestTheme(), identifier: .email)
         )
@@ -189,8 +189,8 @@ struct ViewsConfigurationTests {
         #expect(views.enabled == true)
     }
 
-    @Test("Views with password reset views enabled")
-    func viewsWithPasswordReset() {
+    @Test
+    func `Views with password reset views enabled`() {
         let views = Passage.Configuration.Views(
             passwordResetRequest: .init(style: .neobrutalism, theme: createTestTheme()),
             passwordResetConfirm: .init(style: .neobrutalism, theme: createTestTheme())
@@ -201,8 +201,8 @@ struct ViewsConfigurationTests {
         #expect(views.enabled == true)
     }
 
-    @Test("Views with all views enabled")
-    func viewsWithAllEnabled() {
+    @Test
+    func `Views with all views enabled`() {
         let theme = createTestTheme()
         let views = Passage.Configuration.Views(
             register: .init(style: .minimalism, theme: theme, identifier: .email),
@@ -218,8 +218,8 @@ struct ViewsConfigurationTests {
         #expect(views.enabled == true)
     }
 
-    @Test("Views enabled property")
-    func viewsEnabledProperty() {
+    @Test
+    func `Views enabled property`() {
         let disabledViews = Passage.Configuration.Views()
         #expect(disabledViews.enabled == false)
 
@@ -229,8 +229,8 @@ struct ViewsConfigurationTests {
         #expect(enabledViews.enabled == true)
     }
 
-    @Test("Views Sendable conformance")
-    func viewsSendableConformance() {
+    @Test
+    func `Views Sendable conformance`() {
         let views: Passage.Configuration.Views = .init()
 
         let _: any Sendable = views
@@ -245,8 +245,8 @@ struct ViewsConfigurationTests {
 
     // MARK: - PasskeyAuthenticateView Tests
 
-    @Test("PasskeyAuthenticateView initialization")
-    func passkeyAuthenticateViewInitialization() {
+    @Test
+    func `PasskeyAuthenticateView initialization`() {
         let view = Passage.Configuration.Views.PasskeyAuthenticateView(
             style: .minimalism,
             theme: createTestTheme()
@@ -270,8 +270,8 @@ struct ViewsConfigurationTests {
         #expect(view.template == expected)
     }
 
-    @Test("PasskeyAuthenticateView with custom redirect")
-    func passkeyAuthenticateViewWithRedirect() {
+    @Test
+    func `PasskeyAuthenticateView with custom redirect`() {
         let view = Passage.Configuration.Views.PasskeyAuthenticateView(
             style: .minimalism,
             theme: createTestTheme(),
@@ -280,8 +280,8 @@ struct ViewsConfigurationTests {
         #expect(view.redirect.onSuccess == "/dashboard")
     }
 
-    @Test("Views with passkeyAuthenticate enabled")
-    func viewsWithPasskeyAuthenticate() {
+    @Test
+    func `Views with passkeyAuthenticate enabled`() {
         let views = Passage.Configuration.Views(
             passkeyAuthenticate: .init(style: .minimalism, theme: createTestTheme())
         )
@@ -289,14 +289,14 @@ struct ViewsConfigurationTests {
         #expect(views.enabled == true)
     }
 
-    @Test("Views without passkeyAuthenticate is disabled (when nothing else is set)")
-    func viewsWithoutPasskeyAuthenticateDefaultNil() {
+    @Test
+    func `Views without passkeyAuthenticate is disabled (when nothing else is set)`() {
         let views = Passage.Configuration.Views()
         #expect(views.passkeyAuthenticate == nil)
     }
 
-    @Test("PasskeyAuthenticateView Sendable conformance")
-    func passkeyAuthenticateViewSendable() {
+    @Test
+    func `PasskeyAuthenticateView Sendable conformance`() {
         let _: any Sendable = Passage.Configuration.Views.PasskeyAuthenticateView(
             style: .minimalism,
             theme: createTestTheme()

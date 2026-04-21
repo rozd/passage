@@ -17,17 +17,9 @@ final class CapturingLogger: LogHandler, @unchecked Sendable {
         set { metadata[key] = newValue }
     }
 
-    func log(
-        level: Logger.Level,
-        message: Logger.Message,
-        metadata: Logger.Metadata?,
-        source: String,
-        file: String,
-        function: String,
-        line: UInt
-    ) {
-        let messageString = message.description
-        switch level {
+    func log(event: LogEvent) {
+        let messageString = event.message.description
+        switch event.level {
         case .warning:
             warnings.append(messageString)
         case .error, .critical:
@@ -48,9 +40,9 @@ struct MockDeliveryError: Error, Equatable {
 
 /// Email delivery that always throws an error
 struct FailingEmailDelivery: Passage.EmailDelivery, Sendable {
-    let error: Error
+    let error: any Error
 
-    init(error: Error = MockDeliveryError(message: "Email delivery failed")) {
+    init(error: any Error = MockDeliveryError(message: "Email delivery failed")) {
         self.error = error
     }
 
@@ -87,9 +79,9 @@ struct FailingEmailDelivery: Passage.EmailDelivery, Sendable {
 
 /// Phone delivery that always throws an error
 struct FailingPhoneDelivery: Passage.PhoneDelivery, Sendable {
-    let error: Error
+    let error: any Error
 
-    init(error: Error = MockDeliveryError(message: "Phone delivery failed")) {
+    init(error: any Error = MockDeliveryError(message: "Phone delivery failed")) {
         self.error = error
     }
 

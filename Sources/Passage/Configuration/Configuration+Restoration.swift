@@ -1,5 +1,5 @@
-import Foundation
-import Vapor
+public import Foundation
+public import Vapor
 
 // MARK: - Restoration Configuration (Password Reset)
 

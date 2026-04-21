@@ -1,10 +1,11 @@
-import Testing
-import Foundation
-import Vapor
-import VaporTesting
-import JWTKit
+import JWT
+import NIOFoundationCompat
 @testable import Passage
 @testable import PassageOnlyForTest
+import Queues
+import Testing
+import Vapor
+import VaporTesting
 
 /// End-to-end coverage of `POST /auth/passkey/authenticate/finish`.
 ///
@@ -15,8 +16,8 @@ import JWTKit
 /// finds the seeded challenge, the stored credential's sign-count is updated,
 /// the challenge is consumed (one-shot), and the response carries an exchange
 /// code.
-@Suite("Passkey Finish Authentication Integration Tests", .tags(.integration, .passkey))
-struct FinishAuthenticationIntegrationTests {
+@Suite(.tags(.integration, .passkey))
+struct `Passkey Finish Authentication Integration Tests` {
 
     // MARK: - Fixtures
 
@@ -134,8 +135,8 @@ struct FinishAuthenticationIntegrationTests {
 
     // MARK: - Happy path
 
-    @Test("POST finish returns 200 with exchange `code` JSON")
-    func finishReturns200WithCode() async throws {
+    @Test
+    func `POST finish returns 200 with exchange 'code' JSON`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder)
@@ -155,8 +156,8 @@ struct FinishAuthenticationIntegrationTests {
         }
     }
 
-    @Test("POST finish updates the credential's signCount and backup flag")
-    func finishUpdatesSignCount() async throws {
+    @Test
+    func `POST finish updates the credential's signCount and backup flag`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             let service = MockPasskeyService(newSignCount: 7, credentialBackedUp: true)
@@ -179,8 +180,8 @@ struct FinishAuthenticationIntegrationTests {
         }
     }
 
-    @Test("POST finish consumes the matched challenge (one-shot)")
-    func finishConsumesChallenge() async throws {
+    @Test
+    func `POST finish consumes the matched challenge (one-shot)`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder)
@@ -202,8 +203,8 @@ struct FinishAuthenticationIntegrationTests {
         }
     }
 
-    @Test("POST finish forwards the raw body to the service verbatim")
-    func finishForwardsRawBody() async throws {
+    @Test
+    func `POST finish forwards the raw body to the service verbatim`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder)
@@ -225,8 +226,8 @@ struct FinishAuthenticationIntegrationTests {
 
     // MARK: - Challenge resolution failures (HTTP 401)
 
-    @Test("POST finish returns 401 when no challenge is stored for the bytes")
-    func noMatchingChallengeReturns401() async throws {
+    @Test
+    func `POST finish returns 401 when no challenge is stored for the bytes`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder, seedChallenge: false)
@@ -241,8 +242,8 @@ struct FinishAuthenticationIntegrationTests {
         }
     }
 
-    @Test("POST finish returns 401 when the stored challenge is already consumed")
-    func consumedChallengeReturns401() async throws {
+    @Test
+    func `POST finish returns 401 when the stored challenge is already consumed`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder, seedConsumedChallenge: true)
@@ -257,8 +258,8 @@ struct FinishAuthenticationIntegrationTests {
         }
     }
 
-    @Test("POST finish returns 401 when a registration challenge is replayed for authentication")
-    func wrongChallengeKindReturns401() async throws {
+    @Test
+    func `POST finish returns 401 when a registration challenge is replayed for authentication`() async throws {
         // Core's lookupChallenge closure requires kind == .authentication; a
         // registration-kind challenge with the same bytes must not unlock auth.
         let holder = Holder()
@@ -275,8 +276,8 @@ struct FinishAuthenticationIntegrationTests {
         }
     }
 
-    @Test("POST finish returns 401 when the credential ID is not in the store")
-    func unknownCredentialReturns401() async throws {
+    @Test
+    func `POST finish returns 401 when the credential ID is not in the store`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder, seedCredential: false)
@@ -293,8 +294,8 @@ struct FinishAuthenticationIntegrationTests {
 
     // MARK: - Service / configuration errors
 
-    @Test("POST finish returns 404 when passkey service is nil (routes not registered)")
-    func serviceNilReturns404() async throws {
+    @Test
+    func `POST finish returns 404 when passkey service is nil (routes not registered)`() async throws {
         try await withApp(configure: { app in
             await app.jwt.keys.add(
                 hmac: HMACKey(from: "test-secret-key-for-jwt-signing"),
@@ -342,8 +343,8 @@ struct FinishAuthenticationIntegrationTests {
         }
     }
 
-    @Test("POST finish returns 404 when passkey config is absent")
-    func passkeyConfigAbsentReturns404() async throws {
+    @Test
+    func `POST finish returns 404 when passkey config is absent`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder, includePasskeyConfig: false)
@@ -358,8 +359,8 @@ struct FinishAuthenticationIntegrationTests {
         }
     }
 
-    @Test("POST finish propagates service-level errors verbatim")
-    func finishPropagatesServiceError() async throws {
+    @Test
+    func `POST finish propagates service-level errors verbatim`() async throws {
         struct BoomError: AbortError {
             var status: HTTPResponseStatus { .internalServerError }
             var reason: String { "boom" }

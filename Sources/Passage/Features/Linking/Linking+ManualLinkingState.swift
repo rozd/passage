@@ -1,6 +1,6 @@
 import Foundation
+import JWT
 import Vapor
-import JWTKit
 
 // MARK: - Linking State
 

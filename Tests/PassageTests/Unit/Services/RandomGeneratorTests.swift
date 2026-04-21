@@ -2,13 +2,13 @@ import Testing
 import Foundation
 @testable import Passage
 
-@Suite("RandomGenerator Tests")
-struct RandomGeneratorTests {
+@Suite
+struct `RandomGenerator Tests` {
 
     // MARK: - DefaultRandomGenerator Tests
 
-    @Test("DefaultRandomGenerator generateRandomString creates non-empty string")
-    func generateRandomStringNonEmpty() {
+    @Test
+    func `DefaultRandomGenerator generateRandomString creates non-empty string`() {
         let generator = DefaultRandomGenerator()
         let randomString = generator.generateRandomString(count: 16)
 
@@ -26,8 +26,8 @@ struct RandomGeneratorTests {
         #expect(randomString.count > 0)
     }
 
-    @Test("DefaultRandomGenerator generateRandomString produces different values")
-    func generateRandomStringUnique() {
+    @Test
+    func `DefaultRandomGenerator generateRandomString produces different values`() {
         let generator = DefaultRandomGenerator()
         let string1 = generator.generateRandomString(count: 16)
         let string2 = generator.generateRandomString(count: 16)
@@ -35,16 +35,16 @@ struct RandomGeneratorTests {
         #expect(string1 != string2)
     }
 
-    @Test("DefaultRandomGenerator generateOpaqueToken creates non-empty token")
-    func generateOpaqueTokenNonEmpty() {
+    @Test
+    func `DefaultRandomGenerator generateOpaqueToken creates non-empty token`() {
         let generator = DefaultRandomGenerator()
         let token = generator.generateOpaqueToken()
 
         #expect(!token.isEmpty)
     }
 
-    @Test("DefaultRandomGenerator generateOpaqueToken produces different values")
-    func generateOpaqueTokenUnique() {
+    @Test
+    func `DefaultRandomGenerator generateOpaqueToken produces different values`() {
         let generator = DefaultRandomGenerator()
         let token1 = generator.generateOpaqueToken()
         let token2 = generator.generateOpaqueToken()
@@ -52,8 +52,8 @@ struct RandomGeneratorTests {
         #expect(token1 != token2)
     }
 
-    @Test("DefaultRandomGenerator hashOpaqueToken creates consistent hash")
-    func hashOpaqueTokenConsistent() {
+    @Test
+    func `DefaultRandomGenerator hashOpaqueToken creates consistent hash`() {
         let generator = DefaultRandomGenerator()
         let token = "test_token"
         let hash1 = generator.hashOpaqueToken(token: token)
@@ -62,8 +62,8 @@ struct RandomGeneratorTests {
         #expect(hash1 == hash2)
     }
 
-    @Test("DefaultRandomGenerator hashOpaqueToken creates different hashes for different tokens")
-    func hashOpaqueTokenDifferentInputs() {
+    @Test
+    func `DefaultRandomGenerator hashOpaqueToken creates different hashes for different tokens`() {
         let generator = DefaultRandomGenerator()
         let hash1 = generator.hashOpaqueToken(token: "token1")
         let hash2 = generator.hashOpaqueToken(token: "token2")
@@ -71,8 +71,8 @@ struct RandomGeneratorTests {
         #expect(hash1 != hash2)
     }
 
-    @Test("DefaultRandomGenerator hashOpaqueToken produces 64-character hex string")
-    func hashOpaqueTokenLength() {
+    @Test
+    func `DefaultRandomGenerator hashOpaqueToken produces 64-character hex string`() {
         let generator = DefaultRandomGenerator()
         let hash = generator.hashOpaqueToken(token: "test")
 
@@ -80,8 +80,8 @@ struct RandomGeneratorTests {
         #expect(hash.count == 64)
     }
 
-    @Test("DefaultRandomGenerator hashOpaqueToken produces hex characters only")
-    func hashOpaqueTokenHexOnly() {
+    @Test
+    func `DefaultRandomGenerator hashOpaqueToken produces hex characters only`() {
         let generator = DefaultRandomGenerator()
         let hash = generator.hashOpaqueToken(token: "test")
 
@@ -90,8 +90,8 @@ struct RandomGeneratorTests {
         #expect(hashCharacterSet.isSubset(of: hexCharacterSet))
     }
 
-    @Test("DefaultRandomGenerator generateVerificationCode creates code of correct length")
-    func generateVerificationCodeLength() {
+    @Test
+    func `DefaultRandomGenerator generateVerificationCode creates code of correct length`() {
         let generator = DefaultRandomGenerator()
         let code = generator.generateVerificationCode(length: 6)
 
@@ -108,8 +108,8 @@ struct RandomGeneratorTests {
         #expect(code.count == length)
     }
 
-    @Test("DefaultRandomGenerator generateVerificationCode produces different values")
-    func generateVerificationCodeUnique() {
+    @Test
+    func `DefaultRandomGenerator generateVerificationCode produces different values`() {
         let generator = DefaultRandomGenerator()
         let code1 = generator.generateVerificationCode(length: 6)
         let code2 = generator.generateVerificationCode(length: 6)
@@ -118,8 +118,8 @@ struct RandomGeneratorTests {
         #expect(code1 != code2)
     }
 
-    @Test("DefaultRandomGenerator generateVerificationCode excludes confusing characters")
-    func generateVerificationCodeNoConfusingChars() {
+    @Test
+    func `DefaultRandomGenerator generateVerificationCode excludes confusing characters`() {
         let generator = DefaultRandomGenerator()
         let code = generator.generateVerificationCode(length: 100) // Large sample
 
@@ -130,8 +130,8 @@ struct RandomGeneratorTests {
         #expect(!code.contains("I"))
     }
 
-    @Test("DefaultRandomGenerator generateVerificationCode uses alphanumeric characters")
-    func generateVerificationCodeAlphanumeric() {
+    @Test
+    func `DefaultRandomGenerator generateVerificationCode uses alphanumeric characters`() {
         let generator = DefaultRandomGenerator()
         let code = generator.generateVerificationCode(length: 100)
 
@@ -143,14 +143,14 @@ struct RandomGeneratorTests {
 
     // MARK: - Protocol Conformance Tests
 
-    @Test("DefaultRandomGenerator conforms to RandomGenerator protocol")
-    func defaultRandomGeneratorConformsToProtocol() {
+    @Test
+    func `DefaultRandomGenerator conforms to RandomGenerator protocol`() {
         let generator: any Passage.RandomGenerator = DefaultRandomGenerator()
         #expect(generator is DefaultRandomGenerator)
     }
 
-    @Test("RandomGenerator protocol conforms to Sendable")
-    func randomGeneratorProtocolIsSendable() {
+    @Test
+    func `RandomGenerator protocol conforms to Sendable`() {
         let generator: any Sendable = DefaultRandomGenerator()
         #expect(generator is DefaultRandomGenerator)
     }
@@ -164,8 +164,8 @@ struct RandomGeneratorTests {
         func generateVerificationCode(length: Int) -> String { String(repeating: "X", count: length) }
     }
 
-    @Test("Custom RandomGenerator implementation can be used")
-    func customRandomGeneratorImplementation() {
+    @Test
+    func `Custom RandomGenerator implementation can be used`() {
         let generator: any Passage.RandomGenerator = CustomRandomGenerator()
 
         #expect(generator.generateRandomString(count: 10) == "custom_random")
@@ -176,16 +176,16 @@ struct RandomGeneratorTests {
 
     // MARK: - Edge Cases Tests
 
-    @Test("DefaultRandomGenerator generateVerificationCode with length 0")
-    func generateVerificationCodeZeroLength() {
+    @Test
+    func `DefaultRandomGenerator generateVerificationCode with length 0`() {
         let generator = DefaultRandomGenerator()
         let code = generator.generateVerificationCode(length: 0)
 
         #expect(code.isEmpty)
     }
 
-    @Test("DefaultRandomGenerator generateRandomString with count 0")
-    func generateRandomStringZeroCount() {
+    @Test
+    func `DefaultRandomGenerator generateRandomString with count 0`() {
         let generator = DefaultRandomGenerator()
         let randomString = generator.generateRandomString(count: 0)
 
@@ -193,8 +193,8 @@ struct RandomGeneratorTests {
         #expect(randomString.isEmpty)
     }
 
-    @Test("DefaultRandomGenerator hashOpaqueToken with empty string")
-    func hashOpaqueTokenEmptyString() {
+    @Test
+    func `DefaultRandomGenerator hashOpaqueToken with empty string`() {
         let generator = DefaultRandomGenerator()
         let hash = generator.hashOpaqueToken(token: "")
 
@@ -204,8 +204,8 @@ struct RandomGeneratorTests {
 
     // MARK: - Integration Tests
 
-    @Test("DefaultRandomGenerator token and hash workflow")
-    func tokenAndHashWorkflow() {
+    @Test
+    func `DefaultRandomGenerator token and hash workflow`() {
         let generator = DefaultRandomGenerator()
 
         // Generate token
@@ -221,8 +221,8 @@ struct RandomGeneratorTests {
         #expect(hash == hash2)
     }
 
-    @Test("DefaultRandomGenerator verification code workflow")
-    func verificationCodeWorkflow() {
+    @Test
+    func `DefaultRandomGenerator verification code workflow`() {
         let generator = DefaultRandomGenerator()
 
         // Generate code

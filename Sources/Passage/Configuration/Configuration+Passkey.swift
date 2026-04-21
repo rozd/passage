@@ -1,4 +1,5 @@
-import Vapor
+public import Foundation
+public import Vapor
 
 public extension Passage.Configuration {
 

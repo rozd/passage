@@ -3,13 +3,13 @@ import Vapor
 import NIOCore
 @testable import Passage
 
-@Suite("Form Detection Tests")
-struct FormDetectionTests {
+@Suite
+struct `Form Detection Tests` {
 
     // MARK: - isFormSubmission Tests
 
-    @Test("isFormSubmission returns true for application/x-www-form-urlencoded")
-    func formSubmissionWithURLEncoded() async throws {
+    @Test
+    func `isFormSubmission returns true for application/x-www-form-urlencoded`() async throws {
         try await withApp { app in
             let req = Request(
                 application: app,
@@ -22,8 +22,8 @@ struct FormDetectionTests {
         }
     }
 
-    @Test("isFormSubmission returns true for multipart/form-data")
-    func formSubmissionWithMultipart() async throws {
+    @Test
+    func `isFormSubmission returns true for multipart/form-data`() async throws {
         try await withApp { app in
             let req = Request(
                 application: app,
@@ -36,8 +36,8 @@ struct FormDetectionTests {
         }
     }
 
-    @Test("isFormSubmission returns false for application/json")
-    func formSubmissionWithJSON() async throws {
+    @Test
+    func `isFormSubmission returns false for application/json`() async throws {
         try await withApp { app in
             let req = Request(
                 application: app,
@@ -50,8 +50,8 @@ struct FormDetectionTests {
         }
     }
 
-    @Test("isFormSubmission returns false when no content type")
-    func formSubmissionWithNoContentType() async throws {
+    @Test
+    func `isFormSubmission returns false when no content type`() async throws {
         try await withApp { app in
             let req = Request(
                 application: app,
@@ -65,8 +65,8 @@ struct FormDetectionTests {
 
     // MARK: - isWaitingForHTML Tests
 
-    @Test("isWaitingForHTML returns true for text/html accept header")
-    func waitingForHTMLWithTextHTML() async throws {
+    @Test
+    func `isWaitingForHTML returns true for text/html accept header`() async throws {
         try await withApp { app in
             let req = Request(
                 application: app,
@@ -79,8 +79,8 @@ struct FormDetectionTests {
         }
     }
 
-    @Test("isWaitingForHTML returns true for text/html with charset")
-    func waitingForHTMLWithCharset() async throws {
+    @Test
+    func `isWaitingForHTML returns true for text/html with charset`() async throws {
         try await withApp { app in
             let req = Request(
                 application: app,
@@ -93,8 +93,8 @@ struct FormDetectionTests {
         }
     }
 
-    @Test("isWaitingForHTML returns true for text/html in complex accept header")
-    func waitingForHTMLInComplexAccept() async throws {
+    @Test
+    func `isWaitingForHTML returns true for text/html in complex accept header`() async throws {
         try await withApp { app in
             let req = Request(
                 application: app,
@@ -107,8 +107,8 @@ struct FormDetectionTests {
         }
     }
 
-    @Test("isWaitingForHTML returns false for application/json accept header")
-    func waitingForHTMLWithJSON() async throws {
+    @Test
+    func `isWaitingForHTML returns false for application/json accept header`() async throws {
         try await withApp { app in
             let req = Request(
                 application: app,
@@ -121,8 +121,8 @@ struct FormDetectionTests {
         }
     }
 
-    @Test("isWaitingForHTML returns false when no accept header")
-    func waitingForHTMLWithNoAccept() async throws {
+    @Test
+    func `isWaitingForHTML returns false when no accept header`() async throws {
         try await withApp { app in
             let req = Request(
                 application: app,

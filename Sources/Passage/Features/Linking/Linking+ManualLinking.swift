@@ -18,7 +18,7 @@ extension Passage.Linking.ManualLinking {
         linking.request
     }
 
-    var store: Passage.Store {
+    var store: any Passage.Store {
         linking.store
     }
 

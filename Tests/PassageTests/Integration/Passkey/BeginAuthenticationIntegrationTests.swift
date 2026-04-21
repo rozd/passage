@@ -1,18 +1,19 @@
-import Testing
-import Foundation
-import Vapor
-import VaporTesting
-import JWTKit
+import JWT
+import NIOFoundationCompat
 @testable import Passage
 @testable import PassageOnlyForTest
+import Queues
+import Testing
+import Vapor
+import VaporTesting
 
 /// End-to-end coverage of `POST /auth/passkey/authenticate/begin` —
 /// the first leg of the authentication ceremony. Discoverable-only flow:
 /// the endpoint accepts no body (empty `{}` from the browser is fine),
 /// always forwards `allowCredentials: nil` to the service, and persists
 /// a kind=.authentication challenge with `user == nil`.
-@Suite("Passkey Begin Authentication Integration Tests", .tags(.integration, .passkey))
-struct BeginAuthenticationIntegrationTests {
+@Suite(.tags(.integration, .passkey))
+struct `Passkey Begin Authentication Integration Tests` {
 
     // MARK: - Fixtures
 
@@ -77,8 +78,8 @@ struct BeginAuthenticationIntegrationTests {
 
     // MARK: - Happy path
 
-    @Test("POST begin returns 200 JSON with a base64url challenge")
-    func beginReturns200JSON() async throws {
+    @Test
+    func `POST begin returns 200 JSON with a base64url challenge`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder)
@@ -100,8 +101,8 @@ struct BeginAuthenticationIntegrationTests {
         }
     }
 
-    @Test("Service receives allowCredentials=nil (discoverable flow)")
-    func serviceReceivesNilAllowCredentials() async throws {
+    @Test
+    func `Service receives allowCredentials=nil (discoverable flow)`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder)
@@ -119,8 +120,8 @@ struct BeginAuthenticationIntegrationTests {
         }
     }
 
-    @Test("Challenge is persisted with kind=.authentication and user=nil")
-    func challengeIsPersistedAsAuthentication() async throws {
+    @Test
+    func `Challenge is persisted with kind=.authentication and user=nil`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder)
@@ -142,8 +143,8 @@ struct BeginAuthenticationIntegrationTests {
         }
     }
 
-    @Test("POST begin accepts an empty body (no content-type)")
-    func beginAcceptsEmptyBody() async throws {
+    @Test
+    func `POST begin accepts an empty body (no content-type)`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder)
@@ -158,8 +159,8 @@ struct BeginAuthenticationIntegrationTests {
 
     // MARK: - Policy gating
 
-    @Test("POST begin returns 400 when allowDiscoverableLogin is false")
-    func discoverableDisabledReturns400() async throws {
+    @Test
+    func `POST begin returns 400 when allowDiscoverableLogin is false`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder, allowDiscoverableLogin: false)
@@ -176,8 +177,8 @@ struct BeginAuthenticationIntegrationTests {
 
     // MARK: - Configuration / service gating
 
-    @Test("POST begin returns 404 when passkey config is absent")
-    func passkeyConfigAbsentReturns404() async throws {
+    @Test
+    func `POST begin returns 404 when passkey config is absent`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             try await self.configure(app, holder: holder, includePasskeyConfig: false)
@@ -192,8 +193,8 @@ struct BeginAuthenticationIntegrationTests {
         }
     }
 
-    @Test("POST begin returns 404 when passkey service is nil (routes not registered)")
-    func serviceNilReturns404() async throws {
+    @Test
+    func `POST begin returns 404 when passkey service is nil (routes not registered)`() async throws {
         try await withApp(configure: { app in
             await app.jwt.keys.add(
                 hmac: HMACKey(from: "test-secret-key-for-jwt-signing"),
@@ -241,8 +242,8 @@ struct BeginAuthenticationIntegrationTests {
         }
     }
 
-    @Test("POST begin propagates service-level errors verbatim")
-    func beginPropagatesServiceError() async throws {
+    @Test
+    func `POST begin propagates service-level errors verbatim`() async throws {
         struct BoomError: AbortError {
             var status: HTTPResponseStatus { .internalServerError }
             var reason: String { "boom" }

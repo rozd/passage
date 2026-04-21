@@ -2,8 +2,8 @@ import Testing
 import Foundation
 @testable import Passage
 
-@Suite("RefreshToken Protocol Tests")
-struct RefreshTokenProtocolTests {
+@Suite
+struct `RefreshToken Protocol Tests` {
 
     // MARK: - Mock Implementations
 
@@ -40,8 +40,8 @@ struct RefreshTokenProtocolTests {
 
     // MARK: - isExpired Tests
 
-    @Test("RefreshToken isExpired returns true when expired")
-    func isExpiredWhenExpired() {
+    @Test
+    func `RefreshToken isExpired returns true when expired`() {
         let token = MockRefreshToken(
             id: UUID(),
             user: MockUser(
@@ -63,8 +63,8 @@ struct RefreshTokenProtocolTests {
         #expect(token.isExpired == true)
     }
 
-    @Test("RefreshToken isExpired returns false when not expired")
-    func isExpiredWhenNotExpired() {
+    @Test
+    func `RefreshToken isExpired returns false when not expired`() {
         let token = MockRefreshToken(
             id: UUID(),
             user: MockUser(
@@ -88,8 +88,8 @@ struct RefreshTokenProtocolTests {
 
     // MARK: - isRevoked Tests
 
-    @Test("RefreshToken isRevoked returns true when revoked")
-    func isRevokedWhenRevoked() {
+    @Test
+    func `RefreshToken isRevoked returns true when revoked`() {
         let token = MockRefreshToken(
             id: UUID(),
             user: MockUser(
@@ -111,8 +111,8 @@ struct RefreshTokenProtocolTests {
         #expect(token.isRevoked == true)
     }
 
-    @Test("RefreshToken isRevoked returns false when not revoked")
-    func isRevokedWhenNotRevoked() {
+    @Test
+    func `RefreshToken isRevoked returns false when not revoked`() {
         let token = MockRefreshToken(
             id: UUID(),
             user: MockUser(
@@ -136,8 +136,8 @@ struct RefreshTokenProtocolTests {
 
     // MARK: - isValid Tests
 
-    @Test("RefreshToken isValid returns true when not expired and not revoked")
-    func isValidWhenValid() {
+    @Test
+    func `RefreshToken isValid returns true when not expired and not revoked`() {
         let token = MockRefreshToken(
             id: UUID(),
             user: MockUser(
@@ -159,8 +159,8 @@ struct RefreshTokenProtocolTests {
         #expect(token.isValid == true)
     }
 
-    @Test("RefreshToken isValid returns false when expired")
-    func isValidWhenExpired() {
+    @Test
+    func `RefreshToken isValid returns false when expired`() {
         let token = MockRefreshToken(
             id: UUID(),
             user: MockUser(
@@ -182,8 +182,8 @@ struct RefreshTokenProtocolTests {
         #expect(token.isValid == false)
     }
 
-    @Test("RefreshToken isValid returns false when revoked")
-    func isValidWhenRevoked() {
+    @Test
+    func `RefreshToken isValid returns false when revoked`() {
         let token = MockRefreshToken(
             id: UUID(),
             user: MockUser(
@@ -205,8 +205,8 @@ struct RefreshTokenProtocolTests {
         #expect(token.isValid == false)
     }
 
-    @Test("RefreshToken isValid returns false when both expired and revoked")
-    func isValidWhenExpiredAndRevoked() {
+    @Test
+    func `RefreshToken isValid returns false when both expired and revoked`() {
         let token = MockRefreshToken(
             id: UUID(),
             user: MockUser(
@@ -230,8 +230,8 @@ struct RefreshTokenProtocolTests {
 
     // MARK: - Protocol Conformance Tests
 
-    @Test("MockRefreshToken conforms to RefreshToken protocol")
-    func mockRefreshTokenConformsToProtocol() {
+    @Test
+    func `MockRefreshToken conforms to RefreshToken protocol`() {
         let token: any RefreshToken = MockRefreshToken(
             id: UUID(),
             user: MockUser(
@@ -252,8 +252,8 @@ struct RefreshTokenProtocolTests {
         #expect(token is MockRefreshToken)
     }
 
-    @Test("RefreshToken protocol conforms to Sendable")
-    func refreshTokenProtocolIsSendable() {
+    @Test
+    func `RefreshToken protocol conforms to Sendable`() {
         let token: any Sendable = MockRefreshToken(
             id: UUID(),
             user: MockUser(
@@ -276,8 +276,8 @@ struct RefreshTokenProtocolTests {
 
     // MARK: - Token Rotation Tests
 
-    @Test("RefreshToken with replacedBy set")
-    func tokenWithReplacedBy() {
+    @Test
+    func `RefreshToken with replacedBy set`() {
         let newTokenId = UUID()
         let token = MockRefreshToken(
             id: UUID(),
@@ -300,8 +300,8 @@ struct RefreshTokenProtocolTests {
         #expect(token.replacedBy == newTokenId)
     }
 
-    @Test("RefreshToken without replacedBy")
-    func tokenWithoutReplacedBy() {
+    @Test
+    func `RefreshToken without replacedBy`() {
         let token = MockRefreshToken(
             id: UUID(),
             user: MockUser(
@@ -325,8 +325,8 @@ struct RefreshTokenProtocolTests {
 
     // MARK: - Properties Tests
 
-    @Test("RefreshToken stores tokenHash correctly")
-    func tokenHashStorage() {
+    @Test
+    func `RefreshToken stores tokenHash correctly`() {
         let hash = "abc123hash456"
         let token = MockRefreshToken(
             id: UUID(),
@@ -349,8 +349,8 @@ struct RefreshTokenProtocolTests {
         #expect(token.tokenHash == hash)
     }
 
-    @Test("RefreshToken stores user reference")
-    func userReference() {
+    @Test
+    func `RefreshToken stores user reference`() {
         let userId = UUID()
         let user = MockUser(
             id: userId,

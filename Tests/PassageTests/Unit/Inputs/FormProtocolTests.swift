@@ -2,8 +2,8 @@ import Testing
 import Vapor
 @testable import Passage
 
-@Suite("Form Protocol Tests")
-struct FormProtocolTests {
+@Suite
+struct `Form Protocol Tests` {
 
     // MARK: - Mock Implementation
 
@@ -40,39 +40,39 @@ struct FormProtocolTests {
 
     // MARK: - Protocol Conformance Tests
 
-    @Test("Form protocol can be implemented")
-    func formProtocolImplementation() {
+    @Test
+    func `Form protocol can be implemented`() {
         let form = MockForm(name: "test")
         let _: any Form = form
         #expect(form.name == "test")
     }
 
-    @Test("Form protocol conforms to Content")
-    func formProtocolConformsToContent() {
+    @Test
+    func `Form protocol conforms to Content`() {
         let form = MockForm(name: "test")
         let _: any Content = form
-        #expect(form is Content)
+        #expect(form is any Content)
     }
 
-    @Test("Form protocol conforms to Validatable")
-    func formProtocolConformsToValidatable() {
+    @Test
+    func `Form protocol conforms to Validatable`() {
         let form = MockForm(name: "test")
         let _: any Validatable = form
-        #expect(form is Validatable)
+        #expect(form is any Validatable)
     }
 
     // MARK: - Default validate() Implementation Tests
 
-    @Test("Form default validate() does nothing")
-    func formDefaultValidateDoesNothing() throws {
+    @Test
+    func `Form default validate() does nothing`() throws {
         let form = MockFormNoExtraValidation(data: "test data")
         try form.validate() // Should not throw
     }
 
     // MARK: - Custom validate() Implementation Tests
 
-    @Test("Form custom validate() can throw errors")
-    func formCustomValidateCanThrow() {
+    @Test
+    func `Form custom validate() can throw errors`() {
         let form = MockFormWithValidation(value: 5)
 
         #expect(throws: (any Error).self) {
@@ -80,16 +80,16 @@ struct FormProtocolTests {
         }
     }
 
-    @Test("Form custom validate() succeeds when valid")
-    func formCustomValidateSucceeds() throws {
+    @Test
+    func `Form custom validate() succeeds when valid`() throws {
         let form = MockFormWithValidation(value: 50)
         try form.validate() // Should not throw
     }
 
     // MARK: - Multiple Form Implementations Tests
 
-    @Test("Multiple Form implementations can coexist")
-    func multipleFormImplementations() {
+    @Test
+    func `Multiple Form implementations can coexist`() {
         let form1: any Form = MockForm(name: "test1")
         let form2: any Form = MockFormWithValidation(value: 25)
         let form3: any Form = MockFormNoExtraValidation(data: "test3")
@@ -101,14 +101,14 @@ struct FormProtocolTests {
 
     // MARK: - Form Properties Tests
 
-    @Test("Form can have properties")
-    func formCanHaveProperties() {
+    @Test
+    func `Form can have properties`() {
         let form = MockForm(name: "test name")
         #expect(form.name == "test name")
     }
 
-    @Test("Form can have computed properties")
-    func formCanHaveComputedProperties() {
+    @Test
+    func `Form can have computed properties`() {
         struct FormWithComputed: Form {
             static func validations(_ validations: inout Validations) {}
 

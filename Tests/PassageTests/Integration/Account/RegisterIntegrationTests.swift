@@ -1,13 +1,14 @@
+import JWT
+@testable import Passage
+@testable import PassageOnlyForTest
+import Queues
 import Testing
 import Vapor
 import VaporTesting
-import JWTKit
 import XCTQueues
-@testable import Passage
-@testable import PassageOnlyForTest
 
-@Suite("Register Integration Tests", .tags(.integration, .register))
-struct RegisterIntegrationTests {
+@Suite(.tags(.integration, .register))
+struct `Register Integration Tests` {
 
     // MARK: - Sendable Capture Helper
 
@@ -103,8 +104,8 @@ struct RegisterIntegrationTests {
 
     // MARK: - Successful Registration Tests
 
-    @Test("Registration succeeds with email identifier")
-    func registerWithEmail() async throws {
+    @Test
+    func `Registration succeeds with email identifier`() async throws {
         let captured = CapturedMessages()
 
         try await withApp(configure: { app in try await configureWithCapture(app, captured: captured) }) { app in
@@ -140,8 +141,8 @@ struct RegisterIntegrationTests {
         }
     }
 
-    @Test("Registration succeeds with phone identifier")
-    func registerWithPhone() async throws {
+    @Test
+    func `Registration succeeds with phone identifier`() async throws {
         let captured = CapturedMessages()
 
         try await withApp(configure: { app in try await configureWithCapture(app, captured: captured) }) { app in
@@ -177,8 +178,8 @@ struct RegisterIntegrationTests {
         }
     }
 
-    @Test("Registration succeeds with username identifier")
-    func registerWithUsername() async throws {
+    @Test
+    func `Registration succeeds with username identifier`() async throws {
         try await withApp(configure: configure) { app in
             // Register new user with username
             try await app.testing().test(.POST, "auth/register", beforeRequest: { req in
@@ -207,8 +208,8 @@ struct RegisterIntegrationTests {
 
     // MARK: - Duplicate Identifier Tests
 
-    @Test("Registration fails when email already exists")
-    func registerFailsWithDuplicateEmail() async throws {
+    @Test
+    func `Registration fails when email already exists`() async throws {
         try await withApp(configure: configure) { app in
             // Create first user
             try await app.testing().test(.POST, "auth/register", beforeRequest: { req in
@@ -234,8 +235,8 @@ struct RegisterIntegrationTests {
         }
     }
 
-    @Test("Registration fails when phone already exists")
-    func registerFailsWithDuplicatePhone() async throws {
+    @Test
+    func `Registration fails when phone already exists`() async throws {
         try await withApp(configure: configure) { app in
             // Create first user
             try await app.testing().test(.POST, "auth/register", beforeRequest: { req in
@@ -261,8 +262,8 @@ struct RegisterIntegrationTests {
         }
     }
 
-    @Test("Registration fails when username already exists")
-    func registerFailsWithDuplicateUsername() async throws {
+    @Test
+    func `Registration fails when username already exists`() async throws {
         try await withApp(configure: configure) { app in
             // Create first user
             try await app.testing().test(.POST, "auth/register", beforeRequest: { req in
@@ -290,8 +291,8 @@ struct RegisterIntegrationTests {
 
     // MARK: - Form Validation Tests
 
-    @Test("Registration fails when passwords don't match")
-    func registerFailsWithMismatchedPasswords() async throws {
+    @Test
+    func `Registration fails when passwords don't match`() async throws {
         try await withApp(configure: configure) { app in
             try await app.testing().test(.POST, "auth/register", beforeRequest: { req in
                 try req.content.encode([
@@ -305,8 +306,8 @@ struct RegisterIntegrationTests {
         }
     }
 
-    @Test("Registration fails when no identifier provided")
-    func registerFailsWithoutIdentifier() async throws {
+    @Test
+    func `Registration fails when no identifier provided`() async throws {
         try await withApp(configure: configure) { app in
             try await app.testing().test(.POST, "auth/register", beforeRequest: { req in
                 try req.content.encode([
@@ -321,8 +322,8 @@ struct RegisterIntegrationTests {
 
     // MARK: - Verification Flow Tests
 
-    @Test("User cannot login with unverified email")
-    func cannotLoginWithUnverifiedEmail() async throws {
+    @Test
+    func `User cannot login with unverified email`() async throws {
         try await withApp(configure: configure) { app in
             // Register user with email
             try await app.testing().test(.POST, "auth/register", beforeRequest: { req in
@@ -347,8 +348,8 @@ struct RegisterIntegrationTests {
         }
     }
 
-    @Test("User cannot login with unverified phone")
-    func cannotLoginWithUnverifiedPhone() async throws {
+    @Test
+    func `User cannot login with unverified phone`() async throws {
         try await withApp(configure: configure) { app in
             // Register user with phone
             try await app.testing().test(.POST, "auth/register", beforeRequest: { req in
@@ -373,8 +374,8 @@ struct RegisterIntegrationTests {
         }
     }
 
-    @Test("Username registration allows immediate login")
-    func usernameRegistrationAllowsImmediateLogin() async throws {
+    @Test
+    func `Username registration allows immediate login`() async throws {
         try await withApp(configure: configure) { app in
             // Register user with username
             try await app.testing().test(.POST, "auth/register", beforeRequest: { req in
@@ -405,8 +406,8 @@ struct RegisterIntegrationTests {
 
     // MARK: - Email Verification Tests
 
-    @Test("Email verification succeeds via GET request with code")
-    func emailVerificationSucceeds() async throws {
+    @Test
+    func `Email verification succeeds via GET request with code`() async throws {
         let captured = CapturedMessages()
 
         try await withApp(configure: { app in try await configureWithCapture(app, captured: captured) }) { app in
@@ -452,8 +453,8 @@ struct RegisterIntegrationTests {
         }
     }
 
-    @Test("Email verification fails with invalid code")
-    func emailVerificationFailsWithInvalidCode() async throws {
+    @Test
+    func `Email verification fails with invalid code`() async throws {
         try await withApp(configure: configure) { app in
             // Register user
             try await app.testing().test(.POST, "auth/register", beforeRequest: { req in
@@ -477,8 +478,8 @@ struct RegisterIntegrationTests {
         }
     }
 
-    @Test("Verified email user can login successfully")
-    func verifiedEmailUserCanLogin() async throws {
+    @Test
+    func `Verified email user can login successfully`() async throws {
         let captured = CapturedMessages()
 
         try await withApp(configure: { app in try await configureWithCapture(app, captured: captured) }) { app in
@@ -523,8 +524,8 @@ struct RegisterIntegrationTests {
 
     // MARK: - Phone Verification Tests
 
-    @Test("Phone verification succeeds via POST request with code")
-    func phoneVerificationSucceeds() async throws {
+    @Test
+    func `Phone verification succeeds via POST request with code`() async throws {
         let captured = CapturedMessages()
 
         try await withApp(configure: { app in try await configureWithCapture(app, captured: captured) }) { app in
@@ -568,8 +569,8 @@ struct RegisterIntegrationTests {
         }
     }
 
-    @Test("Phone verification fails with invalid code")
-    func phoneVerificationFailsWithInvalidCode() async throws {
+    @Test
+    func `Phone verification fails with invalid code`() async throws {
         try await withApp(configure: configure) { app in
             // Register user
             try await app.testing().test(.POST, "auth/register", beforeRequest: { req in
@@ -595,8 +596,8 @@ struct RegisterIntegrationTests {
         }
     }
 
-    @Test("Verified phone user can login successfully")
-    func verifiedPhoneUserCanLogin() async throws {
+    @Test
+    func `Verified phone user can login successfully`() async throws {
         let captured = CapturedMessages()
 
         try await withApp(configure: { app in try await configureWithCapture(app, captured: captured) }) { app in
@@ -643,8 +644,8 @@ struct RegisterIntegrationTests {
 
     // MARK: - Verification Code Resend Tests
 
-    @Test("Email verification code can be resent")
-    func emailVerificationCodeCanBeResent() async throws {
+    @Test
+    func `Email verification code can be resent`() async throws {
         let captured = CapturedMessages()
 
         try await withApp(configure: { app in try await configureWithCapture(app, captured: captured) }) { app in
@@ -682,8 +683,8 @@ struct RegisterIntegrationTests {
         }
     }
 
-    @Test("Phone verification code can be resent")
-    func phoneVerificationCodeCanBeResent() async throws {
+    @Test
+    func `Phone verification code can be resent`() async throws {
         let captured = CapturedMessages()
 
         try await withApp(configure: { app in try await configureWithCapture(app, captured: captured) }) { app in

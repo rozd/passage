@@ -2,13 +2,13 @@ import Testing
 import Vapor
 @testable import Passage
 
-@Suite("Views Contexts Tests")
-struct ViewsContextsTests {
+@Suite
+struct `Views Contexts Tests` {
 
     // MARK: - Context Generic Type Tests
 
-    @Test("Context initializes with theme and params")
-    func contextInitialization() {
+    @Test
+    func `Context initializes with theme and params`() {
         struct TestParams: Sendable, Encodable {
             let value: String
         }
@@ -25,8 +25,8 @@ struct ViewsContextsTests {
 
     // MARK: - LoginViewParams Tests
 
-    @Test("LoginViewParams initialization")
-    func loginViewContextInit() {
+    @Test
+    func `LoginViewParams initialization`() {
         let context = Passage.Views.LoginViewParams(
             byEmail: true,
             byPhone: false,
@@ -49,8 +49,8 @@ struct ViewsContextsTests {
         #expect(context.resetPasswordLink == "/reset")
     }
 
-    @Test("LoginViewParams copyWith updates only specified fields")
-    func loginViewContextCopyWith() {
+    @Test
+    func `LoginViewParams copyWith updates only specified fields`() {
         let original = Passage.Views.LoginViewParams(
             byEmail: true,
             byPhone: false,
@@ -84,8 +84,8 @@ struct ViewsContextsTests {
         #expect(updated.resetPasswordLink == nil)
     }
 
-    @Test("LoginViewParams copyWith preserves original when no params")
-    func loginViewContextCopyWithNoParams() {
+    @Test
+    func `LoginViewParams copyWith preserves original when no params`() {
         let original = Passage.Views.LoginViewParams(
             byEmail: true,
             byPhone: false,
@@ -111,8 +111,8 @@ struct ViewsContextsTests {
 
     // MARK: - RegisterViewParams Tests
 
-    @Test("RegisterViewParams initialization")
-    func registerViewContextInit() {
+    @Test
+    func `RegisterViewParams initialization`() {
         let context = Passage.Views.RegisterViewParams(
             byEmail: true,
             byPhone: false,
@@ -131,8 +131,8 @@ struct ViewsContextsTests {
         #expect(context.loginLink == "/login")
     }
 
-    @Test("RegisterViewParams copyWith updates only specified fields")
-    func registerViewContextCopyWith() {
+    @Test
+    func `RegisterViewParams copyWith updates only specified fields`() {
         let original = Passage.Views.RegisterViewParams(
             byEmail: true,
             byPhone: false,
@@ -160,8 +160,8 @@ struct ViewsContextsTests {
 
     // MARK: - ResetPasswordRequestViewParams Tests
 
-    @Test("ResetPasswordRequestViewParams initialization")
-    func resetPasswordRequestContextInit() {
+    @Test
+    func `ResetPasswordRequestViewParams initialization`() {
         let context = Passage.Views.ResetPasswordRequestViewParams(
             byEmail: true,
             byPhone: false,
@@ -175,8 +175,8 @@ struct ViewsContextsTests {
         #expect(context.success == nil)
     }
 
-    @Test("ResetPasswordRequestViewParams copyWith updates fields")
-    func resetPasswordRequestContextCopyWith() {
+    @Test
+    func `ResetPasswordRequestViewParams copyWith updates fields`() {
         let original = Passage.Views.ResetPasswordRequestViewParams(
             byEmail: true,
             byPhone: false,
@@ -194,8 +194,8 @@ struct ViewsContextsTests {
         #expect(updated.byEmail == true)
     }
 
-    @Test("ResetPasswordRequestViewParams with both email and phone")
-    func resetPasswordRequestContextBothIdentifiers() {
+    @Test
+    func `ResetPasswordRequestViewParams with both email and phone`() {
         let context = Passage.Views.ResetPasswordRequestViewParams(
             byEmail: true,
             byPhone: true,
@@ -209,8 +209,8 @@ struct ViewsContextsTests {
 
     // MARK: - ResetPasswordConfirmViewParams Tests
 
-    @Test("ResetPasswordConfirmViewParams initialization")
-    func resetPasswordConfirmContextInit() {
+    @Test
+    func `ResetPasswordConfirmViewParams initialization`() {
         let context = Passage.Views.ResetPasswordConfirmViewParams(
             byEmail: true,
             byPhone: false,
@@ -225,8 +225,8 @@ struct ViewsContextsTests {
         #expect(context.email == "test@example.com")
     }
 
-    @Test("ResetPasswordConfirmViewParams copyWith preserves code")
-    func resetPasswordConfirmContextCopyWithPreservesCode() {
+    @Test
+    func `ResetPasswordConfirmViewParams copyWith preserves code`() {
         let original = Passage.Views.ResetPasswordConfirmViewParams(
             byEmail: true,
             byPhone: false,
@@ -247,8 +247,8 @@ struct ViewsContextsTests {
         #expect(updated.error == "Invalid code")
     }
 
-    @Test("ResetPasswordConfirmViewParams copyWith updates specified fields")
-    func resetPasswordConfirmContextCopyWith() {
+    @Test
+    func `ResetPasswordConfirmViewParams copyWith updates specified fields`() {
         let original = Passage.Views.ResetPasswordConfirmViewParams(
             byEmail: true,
             byPhone: false,
@@ -272,8 +272,8 @@ struct ViewsContextsTests {
 
     // MARK: - Content Conformance Tests
 
-    @Test("LoginViewParams conforms to Content")
-    func loginViewContextConformsToContent() {
+    @Test
+    func `LoginViewParams conforms to Content`() {
         let context = Passage.Views.LoginViewParams(
             byEmail: true, byPhone: false, byUsername: false,
             withApple: false, withGoogle: false, withGitHub: false,
@@ -283,8 +283,8 @@ struct ViewsContextsTests {
         let _: any Content = context
     }
 
-    @Test("RegisterViewParams conforms to Content")
-    func registerViewContextConformsToContent() {
+    @Test
+    func `RegisterViewParams conforms to Content`() {
         let context = Passage.Views.RegisterViewParams(
             byEmail: true, byPhone: false, byUsername: false,
             withApple: false, withGoogle: false, withGitHub: false,
@@ -293,8 +293,8 @@ struct ViewsContextsTests {
         let _: any Content = context
     }
 
-    @Test("ResetPasswordRequestViewParams conforms to Content")
-    func resetPasswordRequestContextConformsToContent() {
+    @Test
+    func `ResetPasswordRequestViewParams conforms to Content`() {
         let context = Passage.Views.ResetPasswordRequestViewParams(
             byEmail: true, byPhone: false,
             error: nil, success: nil
@@ -302,8 +302,8 @@ struct ViewsContextsTests {
         let _: any Content = context
     }
 
-    @Test("ResetPasswordConfirmViewParams conforms to Content")
-    func resetPasswordConfirmContextConformsToContent() {
+    @Test
+    func `ResetPasswordConfirmViewParams conforms to Content`() {
         let context = Passage.Views.ResetPasswordConfirmViewParams(
             byEmail: true, byPhone: false,
             code: "123", email: nil,
@@ -314,8 +314,8 @@ struct ViewsContextsTests {
 
     // MARK: - Context Immutability Tests
 
-    @Test("LoginViewParams copyWith creates new instance")
-    func loginViewContextCopyWithCreatesNewInstance() {
+    @Test
+    func `LoginViewParams copyWith creates new instance`() {
         let original = Passage.Views.LoginViewParams(
             byEmail: true, byPhone: false, byUsername: false,
             withApple: false, withGoogle: false, withGitHub: false,
@@ -330,8 +330,8 @@ struct ViewsContextsTests {
         #expect(copy.error == "New error")
     }
 
-    @Test("RegisterViewParams copyWith creates new instance")
-    func registerViewContextCopyWithCreatesNewInstance() {
+    @Test
+    func `RegisterViewParams copyWith creates new instance`() {
         let original = Passage.Views.RegisterViewParams(
             byEmail: true, byPhone: false, byUsername: false,
             withApple: false, withGoogle: false, withGitHub: false,
@@ -349,8 +349,8 @@ struct ViewsContextsTests {
     /// Helper function that requires Sendable conformance.
     private func assertSendable<T: Sendable>(_ value: T) {}
 
-    @Test("LoginViewParams conforms to Sendable")
-    func loginViewContextConformsToSendable() {
+    @Test
+    func `LoginViewParams conforms to Sendable`() {
         assertSendable(Passage.Views.LoginViewParams(
             byEmail: true, byPhone: false, byUsername: false,
             withApple: false, withGoogle: false, withGitHub: false,
@@ -359,8 +359,8 @@ struct ViewsContextsTests {
         ))
     }
 
-    @Test("RegisterViewParams conforms to Sendable")
-    func registerViewContextConformsToSendable() {
+    @Test
+    func `RegisterViewParams conforms to Sendable`() {
         assertSendable(Passage.Views.RegisterViewParams(
             byEmail: true, byPhone: false, byUsername: false,
             withApple: false, withGoogle: false, withGitHub: false,
@@ -368,37 +368,37 @@ struct ViewsContextsTests {
         ))
     }
 
-    @Test("ResetPasswordRequestViewParams conforms to Sendable")
-    func resetPasswordRequestViewContextConformsToSendable() {
+    @Test
+    func `ResetPasswordRequestViewParams conforms to Sendable`() {
         assertSendable(Passage.Views.ResetPasswordRequestViewParams(
             byEmail: true, byPhone: false, error: nil, success: nil
         ))
     }
 
-    @Test("ResetPasswordConfirmViewParams conforms to Sendable")
-    func resetPasswordConfirmViewContextConformsToSendable() {
+    @Test
+    func `ResetPasswordConfirmViewParams conforms to Sendable`() {
         assertSendable(Passage.Views.ResetPasswordConfirmViewParams(
             byEmail: true, byPhone: false, code: "123456",
             email: "test@example.com", error: nil, success: nil
         ))
     }
 
-    @Test("MagicLinkRequestViewParams conforms to Sendable")
-    func magicLinkRequestViewContextConformsToSendable() {
+    @Test
+    func `MagicLinkRequestViewParams conforms to Sendable`() {
         assertSendable(Passage.Views.MagicLinkRequestViewParams(
             byEmail: true, error: nil, success: nil, identifier: nil
         ))
     }
 
-    @Test("MagicLinkVerifyViewParams conforms to Sendable")
-    func magicLinkVerifyViewContextConformsToSendable() {
+    @Test
+    func `MagicLinkVerifyViewParams conforms to Sendable`() {
         assertSendable(Passage.Views.MagicLinkVerifyViewParams(
             error: nil, success: nil, redirectUrl: nil, loginLink: nil
         ))
     }
 
-    @Test("OAuthLinkSelectViewContext conforms to Sendable")
-    func oAuthLinkSelectViewContextConformsToSendable() {
+    @Test
+    func `OAuthLinkSelectViewContext conforms to Sendable`() {
         let candidate = Passage.Views.LinkAccountSelectViewParams.Candidate(
             userId: "user123", maskedEmail: "t***@example.com", maskedPhone: nil
         )
@@ -408,8 +408,8 @@ struct ViewsContextsTests {
         ))
     }
 
-    @Test("OAuthLinkVerifyViewContext conforms to Sendable")
-    func oAuthLinkVerifyViewContextConformsToSendable() {
+    @Test
+    func `OAuthLinkVerifyViewContext conforms to Sendable`() {
         assertSendable(Passage.Views.LinkAccountVerifyViewParams(
             maskedEmail: "t***@example.com", hasPassword: true,
             canUseEmailCode: true, error: nil

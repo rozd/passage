@@ -1,4 +1,5 @@
 import Foundation
+import Queues
 import Vapor
 
 // MARK: - Restoration Namespace

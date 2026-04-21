@@ -1,4 +1,5 @@
 import Foundation
+import JWT
 import Vapor
 
 extension Passage {

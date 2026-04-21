@@ -1,10 +1,11 @@
-import Testing
-import Foundation
-import Vapor
-import VaporTesting
-import JWTKit
+import JWT
+import NIOFoundationCompat
 @testable import Passage
 @testable import PassageOnlyForTest
+import Queues
+import Testing
+import Vapor
+import VaporTesting
 
 /// End-to-end coverage of `POST /auth/passkey/signup/begin` plus the
 /// `GET` view that serves its HTML entry point. These tests pin down:
@@ -19,8 +20,8 @@ import JWTKit
 ///    `PublicKeyCredentialUserEntity` handed to the service.
 /// 5. That the view context carries `signupBeginURL` / `signupFinishURL`
 ///    so the inline JS knows where to POST.
-@Suite("Passkey Begin Signup Integration Tests", .tags(.integration, .passkey))
-struct BeginSignupIntegrationTests {
+@Suite(.tags(.integration, .passkey))
+struct `Passkey Begin Signup Integration Tests` {
 
     // MARK: - Configuration Helpers
 
@@ -89,8 +90,8 @@ struct BeginSignupIntegrationTests {
 
     // MARK: - JSON wire shape
 
-    @Test("POST begin returns options as JSON with base64url challenge when Accept: application/json")
-    func beginReturnsOptionsAsJSON() async throws {
+    @Test
+    func `POST begin returns options as JSON with base64url challenge when Accept: application/json`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             holder.service = MockPasskeyService()
@@ -136,8 +137,8 @@ struct BeginSignupIntegrationTests {
         }
     }
 
-    @Test("Service receives a user entity derived from the form identifier")
-    func serviceReceivesForwardedIdentifier() async throws {
+    @Test
+    func `Service receives a user entity derived from the form identifier`() async throws {
         let holder = Holder()
         try await withApp(configure: { app in
             holder.service = MockPasskeyService()
@@ -164,8 +165,8 @@ struct BeginSignupIntegrationTests {
         }
     }
 
-    @Test("Service receives the configured policy (timeout, algorithms, attestation)")
-    func serviceReceivesConfiguredPolicy() async throws {
+    @Test
+    func `Service receives the configured policy (timeout, algorithms, attestation)`() async throws {
         let policy = Passage.Configuration.Passkey.Policy(
             timeout: .seconds(120),
             attestation: .direct,
@@ -272,8 +273,8 @@ struct BeginSignupIntegrationTests {
 
     // MARK: - Validation / form errors
 
-    @Test("POST begin returns 400 when no identifier is provided")
-    func missingIdentifierReturns400() async throws {
+    @Test
+    func `POST begin returns 400 when no identifier is provided`() async throws {
         try await withApp(configure: { app in
             try await self.configure(app)
         }) { app in
@@ -290,8 +291,8 @@ struct BeginSignupIntegrationTests {
         }
     }
 
-    @Test("POST begin returns 400 when required displayName is missing")
-    func missingDisplayNameReturns400() async throws {
+    @Test
+    func `POST begin returns 400 when required displayName is missing`() async throws {
         try await withApp(configure: { app in
             try await self.configure(app)
         }) { app in
@@ -310,8 +311,8 @@ struct BeginSignupIntegrationTests {
 
     // MARK: - Service absent / service errors
 
-    @Test("POST begin returns 404 when no PasskeyService is registered (routes not registered)")
-    func serviceNotRegisteredReturns404() async throws {
+    @Test
+    func `POST begin returns 404 when no PasskeyService is registered (routes not registered)`() async throws {
         try await withApp(configure: { app in
             try await self.configure(app, passkeyService: nil)
         }) { app in
@@ -328,8 +329,8 @@ struct BeginSignupIntegrationTests {
         }
     }
 
-    @Test("POST begin propagates service errors as 500 JSON")
-    func serviceErrorBubblesUp() async throws {
+    @Test
+    func `POST begin propagates service errors as 500 JSON`() async throws {
         struct BoomError: AbortError {
             var status: HTTPResponseStatus { .internalServerError }
             var reason: String { "boom" }
@@ -354,8 +355,8 @@ struct BeginSignupIntegrationTests {
 
     // MARK: - Route registration gating
 
-    @Test("Begin route is not registered when configuration.passkey is nil")
-    func beginRouteAbsentWithoutPasskeyConfig() async throws {
+    @Test
+    func `Begin route is not registered when configuration.passkey is nil`() async throws {
         try await withApp(configure: { app in
             try await self.configure(app, includePasskeyConfig: false)
         }) { app in
@@ -372,8 +373,8 @@ struct BeginSignupIntegrationTests {
         }
     }
 
-    @Test("Begin route honors custom registerBegin path from configuration")
-    func beginRouteRespectsCustomPath() async throws {
+    @Test
+    func `Begin route honors custom registerBegin path from configuration`() async throws {
         let customRoutes = Passage.Configuration.Passkey.Routes(
             signupBegin: .init(path: "start")
         )
@@ -409,8 +410,8 @@ struct BeginSignupIntegrationTests {
 
     // MARK: - Dual-mode HTML fallback
 
-    @Test("HTML form submission with passkeySignup view configured redirects to the passkey view")
-    func htmlFallbackRedirectsToPasskeyView() async throws {
+    @Test
+    func `HTML form submission with passkeySignup view configured redirects to the passkey view`() async throws {
         let theme = Passage.Views.Theme(colors: .defaultLight)
         let viewsConfig = Passage.Configuration.Views(
             passkeySignup: .init(style: .minimalism, theme: theme, identifier: .email)
@@ -440,8 +441,8 @@ struct BeginSignupIntegrationTests {
         }
     }
 
-    @Test("HTML form submission with failing service redirects to passkey view with error")
-    func htmlFallbackRedirectsOnErrorToPasskeyView() async throws {
+    @Test
+    func `HTML form submission with failing service redirects to passkey view with error`() async throws {
         struct BoomError: AbortError {
             var status: HTTPResponseStatus { .badRequest }
             var reason: String { "identifier rejected" }
@@ -474,8 +475,8 @@ struct BeginSignupIntegrationTests {
         }
     }
 
-    @Test("HTML Accept without a configured passkey view still returns JSON")
-    func htmlAcceptWithoutViewReturnsJSON() async throws {
+    @Test
+    func `HTML Accept without a configured passkey view still returns JSON`() async throws {
         try await withApp(configure: { app in
             // No views.passkeySignup — guard falls through to JSON.
             try await self.configure(app)
@@ -499,8 +500,8 @@ struct BeginSignupIntegrationTests {
 
     // MARK: - View (GET) — begin endpoint as HTML entry point
 
-    @Test("GET begin view returns 404 when passkeySignup view is not configured")
-    func viewNotConfiguredReturns404() async throws {
+    @Test
+    func `GET begin view returns 404 when passkeySignup view is not configured`() async throws {
         try await withApp(configure: { app in
             try await self.configure(app)
         }) { app in
@@ -510,8 +511,8 @@ struct BeginSignupIntegrationTests {
         }
     }
 
-    @Test("GET begin view renders passkey-register template with identifier flags")
-    func viewRendersWithIdentifierFlags() async throws {
+    @Test
+    func `GET begin view renders passkey-register template with identifier flags`() async throws {
         let viewsConfig = Passage.Configuration.Views(
             passkeySignup: .init(
                 style: .minimalism,
@@ -539,8 +540,8 @@ struct BeginSignupIntegrationTests {
         }
     }
 
-    @Test("GET begin view passes signupBeginURL and signupFinishURL to the template")
-    func viewForwardsURLs() async throws {
+    @Test
+    func `GET begin view passes signupBeginURL and signupFinishURL to the template`() async throws {
         let viewsConfig = Passage.Configuration.Views(
             passkeySignup: .init(
                 style: .minimalism,
@@ -568,8 +569,8 @@ struct BeginSignupIntegrationTests {
         }
     }
 
-    @Test("View-side URLs track custom passkey route overrides")
-    func viewURLsFollowCustomRoutes() async throws {
+    @Test
+    func `View-side URLs track custom passkey route overrides`() async throws {
         let passkeyRoutes = Passage.Configuration.Passkey.Routes(
             group: ["pk"],
             signupBegin: .init(path: "start"),
