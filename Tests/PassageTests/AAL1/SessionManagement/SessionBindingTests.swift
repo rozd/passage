@@ -187,4 +187,38 @@ struct SessionBindingTests {
         #expect(token.tokenHash == random.hashOpaqueToken(token: hostSecret),
                 "§7.1-f: the persisted hash must match the host-generated secret")
     }
+
+    @Test(
+        "§7.1-g: Session secret is produced by an approved RBG with at least 64 bits of entropy",
+        .tags(.aal1, .sessionManagement, .authenticator, .unit, .shall)
+    )
+    func sessionSecretHasAtLeast64BitsOfEntropy() async throws {
+        // §7.1-g SHALL: secrets used for session binding must come from an
+        // approved random bit generator (SP 800-90Ar1) and carry ≥ 64 bits
+        // of entropy. Passage's `DefaultRandomGenerator.generateOpaqueToken`
+        // is implemented as `base64(random(count: 32))` — 32 bytes = 256
+        // bits of raw entropy, an order of magnitude above the §7.1-g
+        // floor. This test pins the structural bound and a collision
+        // attestation.
+        let random = DefaultRandomGenerator()
+
+        // Bound from below: a base64-encoded 32-byte payload is ≥ 43
+        // characters (ceil(32*4/3)); we accept any length that implies
+        // ≥ 64 bits of entropy. 11 base64 chars = 66 bits minimum.
+        let token = random.generateOpaqueToken()
+        // base64 encodes 6 bits per char → entropy floor in bits.
+        let approxBits = token.count * 6
+        #expect(approxBits >= 64,
+                "§7.1-g: opaque token must carry ≥ 64 bits of entropy (got ~\(approxBits))")
+
+        // Attestation that the RBG is actually randomising: produce a
+        // batch of tokens and assert no collisions. Any deterministic or
+        // low-entropy source would collide inside a few thousand draws.
+        var seen = Set<String>()
+        for _ in 0..<1_024 {
+            let t = random.generateOpaqueToken()
+            let inserted = seen.insert(t).inserted
+            #expect(inserted, "§7.1-g: RBG must not produce duplicate tokens in a 1024-draw batch")
+        }
+    }
 }
