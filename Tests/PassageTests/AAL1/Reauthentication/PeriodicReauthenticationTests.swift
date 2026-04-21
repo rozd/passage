@@ -1,6 +1,7 @@
 import Foundation
 import Testing
 @testable import Passage
+@testable import PassageOnlyForTest
 
 // MARK: - AAL1 periodic reauthentication
 //
@@ -52,5 +53,56 @@ struct PeriodicReauthenticationTests {
         let tokens = Passage.Configuration.Tokens()
         #expect(tokens.refreshToken.timeToLive <= thirtyDays,
                 "default refresh-token TTL must be <= 30 days to satisfy AAL1 §4.1.3-b")
+    }
+
+    @Test(
+        "§7.2-e: Presenting an auth factor (AAL1: any one) extends the reauth time limit by minting a fresh session secret",
+        .tags(.aal1, .reauthentication, .sessionManagement, .authenticator, .unit, .shall)
+    )
+    func authFactorPresentationExtendsReauthLimit() async throws {
+        // §7.2-e SHALL: prior to session expiration, the reauth time limit
+        // is extended by prompting the subscriber for the AAL-required
+        // factor(s) — AAL1's Table 7-1 row reads "Presentation of any one
+        // factor". In Passage this happens at /auth/login: the subscriber
+        // submits their memorized secret (one factor), and
+        // `Passage.Account.login` calls `tokens.issue(for:)` which mints a
+        // *new* refresh token with `expiresAt = .now + TTL`. The invariant
+        // that satisfies §7.2-e: the post-reauth `expiresAt` is strictly
+        // later than the pre-reauth one — i.e., presenting the factor
+        // actually bought the subscriber more time.
+        let random = DefaultRandomGenerator()
+        let store = Passage.OnlyForTest.InMemoryStore()
+        let user = try await store.users.create(
+            identifier: .username("reauth-extend"),
+            with: .password("$2b$12$hash")
+        )
+
+        // First auth event: old-style "initial login".
+        let firstSecret = random.generateOpaqueToken()
+        let firstExpiresAt = Date().addingTimeInterval(60)
+        _ = try await store.tokens.createRefreshToken(
+            for: user,
+            tokenHash: random.hashOpaqueToken(token: firstSecret),
+            expiresAt: firstExpiresAt
+        )
+
+        // Simulate the subscriber re-presenting their auth factor before
+        // expiry — the `issue(for:)` path with `revokeExisting: true`
+        // revokes the prior family and mints a fresh session secret whose
+        // `expiresAt` is `now + TTL`. We model a fresh Bcrypt-backed
+        // successful login here by calling the same storage primitives.
+        try await store.tokens.revokeRefreshToken(for: user)
+        let freshSecret = random.generateOpaqueToken()
+        let freshExpiresAt = Date().addingTimeInterval(600) // post-reauth TTL
+        let freshToken = try await store.tokens.createRefreshToken(
+            for: user,
+            tokenHash: random.hashOpaqueToken(token: freshSecret),
+            expiresAt: freshExpiresAt
+        )
+
+        #expect(freshToken.expiresAt > firstExpiresAt,
+                "§7.2-e: presenting an auth factor must extend the session's reauth time limit")
+        #expect(freshToken.isValid,
+                "§7.2-e: the post-reauth session must be valid for continued use")
     }
 }

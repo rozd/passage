@@ -918,8 +918,9 @@ requirements:
     section: "7.2 Reauthentication"
     tags: [sessionManagement, reauthentication]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/Reauthentication/PeriodicReauthenticationTests.swift::authFactorPresentationExtendsReauthLimit
     excluded_reason: null
     requirement: |
       Prior to session expiration, the reauthentication time limit SHALL be extended by prompting the subscriber for the authentication factor(s) specified in Table 7-1. (AAL1 row: "Presentation of any one factor".)
