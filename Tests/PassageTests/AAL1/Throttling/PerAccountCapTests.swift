@@ -12,14 +12,11 @@ import Testing
 // §5.2.2-b is the *ceiling* — any future loosening of `perIdentifier` must
 // not exceed 100.
 
-@Suite("AAL1 per-account cap", .tags(.aal1, .throttling))
-struct PerAccountCapTests {
+@Suite(.tags(.aal1, .throttling))
+struct `AAL1 per-account cap` {
 
-    @Test(
-        "§5.2.2-b: Per-account throttle ceiling is at most 100 consecutive failed attempts",
-        .tags(.aal1, .throttling, .authenticator, .unit, .shall)
-    )
-    func perAccountCapIsAtMost100() async throws {
+    @Test(.tags(.aal1, .throttling, .authenticator, .unit, .shall))
+    func `§5.2.2-b: Per-account throttle ceiling is at most 100 consecutive failed attempts`() async throws {
         // §5.2.2-b caps failed attempts at 100; Passage's shipped default is
         // 10 — well inside the budget. The test pins the *ceiling*: if the
         // default is ever raised above 100, §5.2.2-b is violated.
@@ -30,11 +27,8 @@ struct PerAccountCapTests {
                 "per-account throttle must actually be engaged (maxFailures > 0)")
     }
 
-    @Test(
-        "§5.2.2-c: Successful authentication disregards prior failed attempts on the same bucket",
-        .tags(.aal1, .throttling, .authenticator, .unit, .should)
-    )
-    func successfulAuthResetsBucket() async throws {
+    @Test(.tags(.aal1, .throttling, .authenticator, .unit, .should))
+    func `§5.2.2-c: Successful authentication disregards prior failed attempts on the same bucket`() async throws {
         // Exercise the concrete reset path on the shipped in-memory throttle.
         // After a run of failures puts the bucket into a throttled state,
         // calling `reset(bucket:)` — which `LoginThrottleMiddleware` invokes

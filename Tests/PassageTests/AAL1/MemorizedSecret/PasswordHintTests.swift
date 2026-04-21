@@ -17,8 +17,8 @@ import Queues
 // the user protocol. The test probes the public route table for any
 // hint-adjacent endpoint reachable without authentication.
 
-@Suite("AAL1 no password hint surface", .tags(.aal1, .memorizedSecret))
-struct PasswordHintTests {
+@Suite(.tags(.aal1, .memorizedSecret))
+struct `AAL1 no password hint surface` {
 
     @Sendable private func configure(_ app: Application) async throws {
         await app.jwt.keys.add(
@@ -46,11 +46,8 @@ struct PasswordHintTests {
         )
     }
 
-    @Test(
-        "§5.1.1.2-j: No unauthenticated password-hint endpoint exists",
-        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .shallNot)
-    )
-    func noUnauthenticatedHintEndpoint() async throws {
+    @Test(.tags(.aal1, .memorizedSecret, .authenticator, .integration, .shallNot))
+    func `§5.1.1.2-j: No unauthenticated password-hint endpoint exists`() async throws {
         try await withApp(configure: configure) { app in
             // Two common hint URL shapes. Neither must be registered —
             // the lookup must 404, not 200/401/403 (200 would return a

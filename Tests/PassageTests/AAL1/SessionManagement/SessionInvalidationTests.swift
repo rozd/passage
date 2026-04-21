@@ -13,14 +13,11 @@ import Testing
 // refresh-token record is either gone or no longer valid — a subsequent
 // rotation attempt with the now-stale secret is rejected.
 
-@Suite("AAL1 session invalidation", .tags(.aal1, .sessionManagement))
-struct SessionInvalidationTests {
+@Suite(.tags(.aal1, .sessionManagement))
+struct `AAL1 session invalidation` {
 
-    @Test(
-        "§7.1-h: Refresh-token session secret is invalidated on logout",
-        .tags(.aal1, .sessionManagement, .authenticator, .unit, .shall)
-    )
-    func refreshTokenInvalidatedOnLogout() async throws {
+    @Test(.tags(.aal1, .sessionManagement, .authenticator, .unit, .shall))
+    func `§7.1-h: Refresh-token session secret is invalidated on logout`() async throws {
         // Drive the real logout-side storage path: mint a secret, then call
         // `revokeRefreshToken(for: user)` — the exact call `Passage.Tokens
         // .revoke` makes. The invariant: after logout, the formerly-valid

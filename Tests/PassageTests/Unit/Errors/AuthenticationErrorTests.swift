@@ -7,18 +7,18 @@ struct `Authentication Error Tests` {
 
     // MARK: - HTTP Status Code Tests
 
-    @Test("Registration error status codes", arguments: [
+    @Test(arguments: [
         (AuthenticationError.identifierNotSpecified, HTTPResponseStatus.badRequest),
         (AuthenticationError.emailAlreadyRegistered, HTTPResponseStatus.conflict),
         (AuthenticationError.phoneAlreadyRegistered, HTTPResponseStatus.conflict),
         (AuthenticationError.usernameAlreadyRegistered, HTTPResponseStatus.conflict),
         (AuthenticationError.passwordsDoNotMatch, HTTPResponseStatus.badRequest)
     ])
-    func registrationErrorStatusCodes(error: AuthenticationError, expectedStatus: HTTPResponseStatus) {
+    func `Registration error status codes`(error: AuthenticationError, expectedStatus: HTTPResponseStatus) {
         #expect(error.status == expectedStatus)
     }
 
-    @Test("Login error status codes", arguments: [
+    @Test(arguments: [
         (AuthenticationError.invalidEmailOrPassword, HTTPResponseStatus.unauthorized),
         (AuthenticationError.invalidPhoneOrPassword, HTTPResponseStatus.unauthorized),
         (AuthenticationError.invalidUsernameOrPassword, HTTPResponseStatus.unauthorized),
@@ -26,16 +26,16 @@ struct `Authentication Error Tests` {
         (AuthenticationError.phoneIsNotVerified, HTTPResponseStatus.forbidden),
         (AuthenticationError.passwordIsNotSet, HTTPResponseStatus.internalServerError)
     ])
-    func loginErrorStatusCodes(error: AuthenticationError, expectedStatus: HTTPResponseStatus) {
+    func `Login error status codes`(error: AuthenticationError, expectedStatus: HTTPResponseStatus) {
         #expect(error.status == expectedStatus)
     }
 
-    @Test("Token error status codes", arguments: [
+    @Test(arguments: [
         (AuthenticationError.invalidRefreshToken, HTTPResponseStatus.unauthorized),
         (AuthenticationError.refreshTokenExpired, HTTPResponseStatus.unauthorized),
         (AuthenticationError.refreshTokenNotFound, HTTPResponseStatus.notFound)
     ])
-    func tokenErrorStatusCodes(error: AuthenticationError, expectedStatus: HTTPResponseStatus) {
+    func `Token error status codes`(error: AuthenticationError, expectedStatus: HTTPResponseStatus) {
         #expect(error.status == expectedStatus)
     }
 
@@ -45,64 +45,64 @@ struct `Authentication Error Tests` {
         #expect(error.status == .notFound)
     }
 
-    @Test("Email verification error status codes", arguments: [
+    @Test(arguments: [
         (AuthenticationError.emailNotSet, HTTPResponseStatus.badRequest),
         (AuthenticationError.emailAlreadyVerified, HTTPResponseStatus.conflict)
     ])
-    func emailVerificationErrorStatusCodes(error: AuthenticationError, expectedStatus: HTTPResponseStatus) {
+    func `Email verification error status codes`(error: AuthenticationError, expectedStatus: HTTPResponseStatus) {
         #expect(error.status == expectedStatus)
     }
 
-    @Test("Phone verification error status codes", arguments: [
+    @Test(arguments: [
         (AuthenticationError.phoneNotSet, HTTPResponseStatus.badRequest),
         (AuthenticationError.phoneAlreadyVerified, HTTPResponseStatus.conflict)
     ])
-    func phoneVerificationErrorStatusCodes(error: AuthenticationError, expectedStatus: HTTPResponseStatus) {
+    func `Phone verification error status codes`(error: AuthenticationError, expectedStatus: HTTPResponseStatus) {
         #expect(error.status == expectedStatus)
     }
 
-    @Test("Shared verification error status codes", arguments: [
+    @Test(arguments: [
         (AuthenticationError.invalidVerificationCode, HTTPResponseStatus.unauthorized),
         (AuthenticationError.verificationCodeExpiredOrMaxAttempts, HTTPResponseStatus.gone)
     ])
-    func sharedVerificationErrorStatusCodes(error: AuthenticationError, expectedStatus: HTTPResponseStatus) {
+    func `Shared verification error status codes`(error: AuthenticationError, expectedStatus: HTTPResponseStatus) {
         #expect(error.status == expectedStatus)
     }
 
-    @Test("Restoration error status codes", arguments: [
+    @Test(arguments: [
         (AuthenticationError.restorationCodeInvalid, HTTPResponseStatus.unauthorized),
         (AuthenticationError.restorationCodeExpired, HTTPResponseStatus.gone),
         (AuthenticationError.restorationCodeMaxAttempts, HTTPResponseStatus.gone),
         (AuthenticationError.restorationIdentifierNotFound, HTTPResponseStatus.notFound),
         (AuthenticationError.restorationDeliveryNotAvailable, HTTPResponseStatus.serviceUnavailable)
     ])
-    func restorationErrorStatusCodes(error: AuthenticationError, expectedStatus: HTTPResponseStatus) {
+    func `Restoration error status codes`(error: AuthenticationError, expectedStatus: HTTPResponseStatus) {
         #expect(error.status == expectedStatus)
     }
 
-    @Test("Passkey error status codes", arguments: [
+    @Test(arguments: [
         (AuthenticationError.invalidPasskeyChallenge, HTTPResponseStatus.unauthorized),
         (AuthenticationError.unknownPasskey, HTTPResponseStatus.unauthorized),
         (AuthenticationError.discoverableLoginDisabled, HTTPResponseStatus.badRequest)
     ])
-    func passkeyErrorStatusCodes(error: AuthenticationError, expectedStatus: HTTPResponseStatus) {
+    func `Passkey error status codes`(error: AuthenticationError, expectedStatus: HTTPResponseStatus) {
         #expect(error.status == expectedStatus)
     }
 
     // MARK: - Error Reason Tests
 
-    @Test("Registration error reasons", arguments: [
+    @Test(arguments: [
         (AuthenticationError.identifierNotSpecified, "No identifier (email, phone, or username) was specified."),
         (AuthenticationError.emailAlreadyRegistered, "This email is already registered."),
         (AuthenticationError.phoneAlreadyRegistered, "This phone number is already registered."),
         (AuthenticationError.usernameAlreadyRegistered, "This username is already taken."),
         (AuthenticationError.passwordsDoNotMatch, "The passwords do not match.")
     ])
-    func registrationErrorReasons(error: AuthenticationError, expectedReason: String) {
+    func `Registration error reasons`(error: AuthenticationError, expectedReason: String) {
         #expect(error.reason == expectedReason)
     }
 
-    @Test("Login error reasons", arguments: [
+    @Test(arguments: [
         (AuthenticationError.invalidEmailOrPassword, "Invalid email or password."),
         (AuthenticationError.invalidPhoneOrPassword, "Invalid phone or password."),
         (AuthenticationError.invalidUsernameOrPassword, "Invalid username or password."),
@@ -110,16 +110,16 @@ struct `Authentication Error Tests` {
         (AuthenticationError.phoneIsNotVerified, "Phone number is not verified."),
         (AuthenticationError.passwordIsNotSet, "Password is not set for this account.")
     ])
-    func loginErrorReasons(error: AuthenticationError, expectedReason: String) {
+    func `Login error reasons`(error: AuthenticationError, expectedReason: String) {
         #expect(error.reason == expectedReason)
     }
 
-    @Test("Token error reasons", arguments: [
+    @Test(arguments: [
         (AuthenticationError.invalidRefreshToken, "The refresh token is invalid."),
         (AuthenticationError.refreshTokenExpired, "The refresh token has expired."),
         (AuthenticationError.refreshTokenNotFound, "Refresh token not found.")
     ])
-    func tokenErrorReasons(error: AuthenticationError, expectedReason: String) {
+    func `Token error reasons`(error: AuthenticationError, expectedReason: String) {
         #expect(error.reason == expectedReason)
     }
 
@@ -129,47 +129,47 @@ struct `Authentication Error Tests` {
         #expect(error.reason == "User not found.")
     }
 
-    @Test("Email verification error reasons", arguments: [
+    @Test(arguments: [
         (AuthenticationError.emailNotSet, "Email address is not set for this account."),
         (AuthenticationError.emailAlreadyVerified, "Email address is already verified.")
     ])
-    func emailVerificationErrorReasons(error: AuthenticationError, expectedReason: String) {
+    func `Email verification error reasons`(error: AuthenticationError, expectedReason: String) {
         #expect(error.reason == expectedReason)
     }
 
-    @Test("Phone verification error reasons", arguments: [
+    @Test(arguments: [
         (AuthenticationError.phoneNotSet, "Phone number is not set for this account."),
         (AuthenticationError.phoneAlreadyVerified, "Phone number is already verified.")
     ])
-    func phoneVerificationErrorReasons(error: AuthenticationError, expectedReason: String) {
+    func `Phone verification error reasons`(error: AuthenticationError, expectedReason: String) {
         #expect(error.reason == expectedReason)
     }
 
-    @Test("Shared verification error reasons", arguments: [
+    @Test(arguments: [
         (AuthenticationError.invalidVerificationCode, "Invalid verification code."),
         (AuthenticationError.verificationCodeExpiredOrMaxAttempts, "Verification code has expired or maximum attempts exceeded.")
     ])
-    func sharedVerificationErrorReasons(error: AuthenticationError, expectedReason: String) {
+    func `Shared verification error reasons`(error: AuthenticationError, expectedReason: String) {
         #expect(error.reason == expectedReason)
     }
 
-    @Test("Restoration error reasons", arguments: [
+    @Test(arguments: [
         (AuthenticationError.restorationCodeInvalid, "Invalid password reset code."),
         (AuthenticationError.restorationCodeExpired, "Password reset code has expired."),
         (AuthenticationError.restorationCodeMaxAttempts, "Maximum password reset attempts exceeded."),
         (AuthenticationError.restorationIdentifierNotFound, "No account found with this identifier."),
         (AuthenticationError.restorationDeliveryNotAvailable, "Password reset delivery is not available for this identifier type.")
     ])
-    func restorationErrorReasons(error: AuthenticationError, expectedReason: String) {
+    func `Restoration error reasons`(error: AuthenticationError, expectedReason: String) {
         #expect(error.reason == expectedReason)
     }
 
-    @Test("Passkey error reasons", arguments: [
+    @Test(arguments: [
         (AuthenticationError.invalidPasskeyChallenge, "Invalid or expired passkey challenge."),
         (AuthenticationError.unknownPasskey, "Passkey is not registered."),
         (AuthenticationError.discoverableLoginDisabled, "Discoverable passkey login is disabled by server policy.")
     ])
-    func passkeyErrorReasons(error: AuthenticationError, expectedReason: String) {
+    func `Passkey error reasons`(error: AuthenticationError, expectedReason: String) {
         #expect(error.reason == expectedReason)
     }
 

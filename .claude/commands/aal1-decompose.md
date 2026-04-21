@@ -28,7 +28,7 @@ You are populating the AAL1 requirements ledger `docs/AAL1/requirements.yaml` fr
 1. Fetch the source if `$ARGUMENTS` is a URL; otherwise read the local file. Compute SHA256 of the retrieved content.
 2. Draft each record. Preserve the exact `SHALL` / `SHALL NOT` / `SHOULD` / `MAY` language in `requirement`; do not paraphrase.
 3. Write the full ledger to `docs/AAL1/requirements.yaml`. Populate `meta.source_sha256` with the computed hash and `meta.retrieved` with today's ISO-8601 date.
-4. Validate: run `.scripts/aal1-lint.sh`. It should pass on an empty-tests ledger (no @Test prefix violations because no tests exist yet).
+4. Validate: run `.scripts/aal1-lint.sh`. It should pass on an empty-tests ledger (no raw-identifier prefix violations because no tests exist yet).
 5. Report to the user: total record count, breakdown by `testability`, breakdown by `normative`. Do not commit — human review comes first.
 
 **Cautions.**

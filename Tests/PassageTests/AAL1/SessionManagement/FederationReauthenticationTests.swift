@@ -14,14 +14,11 @@ import JWTKit
 // — they will fail to compile until the corresponding configuration and
 // claim fields ship. Compilation failure here IS the signal for Phase 3.
 
-@Suite("AAL1 federation reauthentication", .tags(.aal1, .sessionManagement, .reauthentication))
-struct FederationReauthenticationTests {
+@Suite(.tags(.aal1, .sessionManagement, .reauthentication))
+struct `AAL1 federation reauthentication` {
 
-    @Test(
-        "§7.2.1-b: RP specifies a maximum authentication age so the CSP can enforce reauthentication",
-        .tags(.aal1, .sessionManagement, .reauthentication, .authenticator, .unit, .shall)
-    )
-    func rpSpecifiesMaxAuthenticationAge() async throws {
+    @Test(.tags(.aal1, .sessionManagement, .reauthentication, .authenticator, .unit, .shall))
+    func `§7.2.1-b: RP specifies a maximum authentication age so the CSP can enforce reauthentication`() async throws {
         // §7.2.1-b SHALL: when the protocol supports it, the RP must
         // specify the max acceptable authentication age so the CSP can
         // reauthenticate the subscriber if the last event is older than
@@ -45,11 +42,8 @@ struct FederationReauthenticationTests {
                 "§7.2.1-b: AAL1 RPs must not specify a reauth window exceeding §4.1.3-b's 30-day ceiling")
     }
 
-    @Test(
-        "§7.2.1-c: CSP communicates the authentication-event time to the RP via the iat claim",
-        .tags(.aal1, .sessionManagement, .reauthentication, .authenticator, .unit, .shall)
-    )
-    func cspCommunicatesAuthEventTime() async throws {
+    @Test(.tags(.aal1, .sessionManagement, .reauthentication, .authenticator, .unit, .shall))
+    func `§7.2.1-c: CSP communicates the authentication-event time to the RP via the iat claim`() async throws {
         // §7.2.1-c SHALL: the CSP must communicate the authentication-event
         // time to the RP so the RP can decide whether the assertion is
         // fresh enough for reauth. Passage-as-CSP emits this via the

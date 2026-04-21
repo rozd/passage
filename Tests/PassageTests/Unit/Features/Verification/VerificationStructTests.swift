@@ -136,13 +136,13 @@ struct `Verification Struct Tests` {
         #expect(decoded.userId == payload.userId)
     }
 
-    @Test("SendPhoneCodePayload with different phone formats", arguments: [
+    @Test(arguments: [
         "+1234567890",
         "+44 7700 900000",
         "+81 90-1234-5678",
         "555-0123"
     ])
-    func sendPhoneCodePayloadPhoneFormats(phone: String) {
+    func `SendPhoneCodePayload with different phone formats`(phone: String) {
         let payload = Passage.Verification.SendPhoneCodePayload(
             phone: phone,
             code: "123456",
@@ -280,13 +280,13 @@ struct `Verification Struct Tests` {
 
     // MARK: - Verification Code Format Tests
 
-    @Test("SendEmailCodePayload with different code formats", arguments: [
+    @Test(arguments: [
         "123456",
         "ABC123",
         "A1B2C3",
         "000000"
     ])
-    func sendEmailCodePayloadCodeFormats(code: String) throws {
+    func `SendEmailCodePayload with different code formats`(code: String) throws {
         let url = try #require(URL(string: "https://example.com/verify"))
         let payload = Passage.Verification.SendEmailCodePayload(
             email: "test@example.com",
@@ -297,13 +297,13 @@ struct `Verification Struct Tests` {
         #expect(payload.verificationCode == code)
     }
 
-    @Test("SendPhoneCodePayload with different code formats", arguments: [
+    @Test(arguments: [
         "123456",
         "ABC123",
         "A1B2C3",
         "000000"
     ])
-    func sendPhoneCodePayloadCodeFormats(code: String) {
+    func `SendPhoneCodePayload with different code formats`(code: String) {
         let payload = Passage.Verification.SendPhoneCodePayload(
             phone: "+1234567890",
             code: code,

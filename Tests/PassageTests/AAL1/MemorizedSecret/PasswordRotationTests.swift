@@ -17,14 +17,11 @@ import Queues
 // the PasswordPolicy — Mirror-reflecting the policy is a compile-agnostic
 // way to assert no such field has crept in.
 
-@Suite("AAL1 no arbitrary password rotation", .tags(.aal1, .memorizedSecret))
-struct PasswordRotationTests {
+@Suite(.tags(.aal1, .memorizedSecret))
+struct `AAL1 no arbitrary password rotation` {
 
-    @Test(
-        "§5.1.1.2-s: PasswordPolicy exposes no password-age / rotation-interval field",
-        .tags(.aal1, .memorizedSecret, .authenticator, .unit, .should)
-    )
-    func noPasswordRotationPolicyField() async throws {
+    @Test(.tags(.aal1, .memorizedSecret, .authenticator, .unit, .should))
+    func `§5.1.1.2-s: PasswordPolicy exposes no password-age / rotation-interval field`() async throws {
         // Reflect the default policy and assert no field name hints at a
         // time-based rotation requirement. Using Mirror keeps the test
         // honest if the API shape changes — any future `expirationInterval`,
@@ -77,11 +74,8 @@ struct PasswordRotationTests {
         )
     }
 
-    @Test(
-        "§5.1.1.2-t: Store admin-rotating the password invalidates the old secret and accepts the new one",
-        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall)
-    )
-    func adminForcedRotationInvalidatesOldSecret() async throws {
+    @Test(.tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall))
+    func `§5.1.1.2-t: Store admin-rotating the password invalidates the old secret and accepts the new one`() async throws {
         try await withApp(configure: configure) { app in
             try await app.testing().test(.POST, "auth/register", beforeRequest: { req in
                 try req.content.encode([

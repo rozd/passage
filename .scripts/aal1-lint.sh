@@ -4,8 +4,9 @@
 #
 # Checks performed:
 #   1. docs/AAL1/requirements.yaml exists and has the expected top-level shape.
-#   2. Every @Test string in Tests/PassageTests/AAL1/*.swift begins with a
-#      §<clause-id>(,§<clause-id>)*: prefix (clause ID format matches the ledger).
+#   2. Every @Test function name (raw-identifier, backtick-delimited) under
+#      Tests/PassageTests/AAL1/*.swift begins with a §<clause-id>(,§<clause-id>)*:
+#      prefix (clause ID format matches the ledger).
 #   3. Every clause ID referenced in a test exists in requirements.yaml (no orphans).
 #   4. Every ledger record with status == has_test lists at least one test reference.
 #   5. Every test reference in a ledger record points to a file that exists on disk.
@@ -58,10 +59,19 @@ import pathlib, re, sys
 tests_dir, ledger_ids_file = sys.argv[1], sys.argv[2]
 ledger_ids = set(pathlib.Path(ledger_ids_file).read_text().split())
 
-# Match the first string literal argument to @Test(...).
-# The @Test macro accepts the display-name string as its first positional arg.
-# We match "@Test(" followed by optional whitespace/newlines, then a quoted string.
-test_re = re.compile(r'@Test\s*\(\s*"((?:[^"\\]|\\.)*)"', re.MULTILINE)
+# Match raw-identifier @Test function names (Swift 6.2+ display-name syntax).
+# The AAL1 convention: every test function is declared as `func \`§<id>: ...\`()`,
+# and the backtick-delimited raw identifier IS the test's display name.
+# We locate `@Test` (with or without trailing trait parens) followed by a
+# `func` declaration whose name is a backtick-quoted raw identifier. The
+# annotation's trait parens can contain nested parens (e.g. `.tags(...)`),
+# so we allow balanced two-level nesting rather than `[^)]*`.
+test_re = re.compile(
+    r'@Test\b(?:\s*\((?:[^()]|\([^()]*\))*\))?'
+    r'\s+(?:(?:public|internal|fileprivate|private|final|open)\s+)*'
+    r'func\s+`((?:[^`\\]|\\.)*)`',
+    re.MULTILINE | re.DOTALL,
+)
 # Clause prefix: §N(.N)*(-a)?(,§N(.N)*(-a)?)*: (trailing space)
 prefix_re = re.compile(r'^(§\d+(?:\.\d+)*(?:-[a-z])?)(,§\d+(?:\.\d+)*(?:-[a-z])?)*:\s')
 id_re = re.compile(r'§(\d+(?:\.\d+)*(?:-[a-z])?)')
@@ -72,13 +82,13 @@ referenced_ids = set()
 for swift in sorted(pathlib.Path(tests_dir).rglob("*.swift")):
     text = swift.read_text(encoding="utf-8")
     # Strip // line comments and /* block comments to avoid matching example
-    # @Test strings that live in commented-out scaffolding.
+    # @Test scaffolding that lives in commented-out code.
     text_nocmt = re.sub(r'//[^\n]*', '', text)
     text_nocmt = re.sub(r'/\*.*?\*/', '', text_nocmt, flags=re.DOTALL)
     for m in test_re.finditer(text_nocmt):
         display = m.group(1)
         if not prefix_re.match(display):
-            violations.append(f"{swift}: @Test string missing §<id>: prefix: {display!r}")
+            violations.append(f"{swift}: @Test raw-identifier name missing §<id>: prefix: {display!r}")
             continue
         for cid in id_re.findall(display):
             referenced_ids.add(cid)
@@ -120,5 +130,5 @@ if [ -n "$TEST_REFS" ]; then
 fi
 
 info "ledger at docs/AAL1/requirements.yaml: OK"
-info "all AAL1 @Test strings have valid §<id>: prefixes"
+info "all AAL1 @Test raw-identifier names have valid §<id>: prefixes"
 exit 0

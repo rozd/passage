@@ -17,8 +17,8 @@ import Queues
 // memorized secret — and assert that inputs shorter than 8 characters are
 // rejected before a user record is persisted.
 
-@Suite("AAL1 memorized secret minimum length", .tags(.aal1, .memorizedSecret))
-struct MinimumLengthTests {
+@Suite(.tags(.aal1, .memorizedSecret))
+struct `AAL1 memorized secret minimum length` {
 
     @Sendable private func configure(_ app: Application) async throws {
         await app.jwt.keys.add(
@@ -47,11 +47,8 @@ struct MinimumLengthTests {
         )
     }
 
-    @Test(
-        "§5.1.1.1-a: Registration rejects subscriber-chosen passwords shorter than 8 characters",
-        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall)
-    )
-    func subscriberChosenSecretBelow8CharsIsRejected() async throws {
+    @Test(.tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall))
+    func `§5.1.1.1-a: Registration rejects subscriber-chosen passwords shorter than 8 characters`() async throws {
         try await withApp(configure: configure) { app in
             // 7 characters — one short of the AAL1 §5.1.1.1-a floor.
             try await app.testing().test(.POST, "auth/register", beforeRequest: { req in
@@ -72,11 +69,8 @@ struct MinimumLengthTests {
         }
     }
 
-    @Test(
-        "§5.1.1.2-a: Verifier rejects a password-reset submission whose new secret is shorter than 8 characters",
-        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall)
-    )
-    func verifierRejectsShortNewPasswordAtReset() async throws {
+    @Test(.tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall))
+    func `§5.1.1.2-a: Verifier rejects a password-reset submission whose new secret is shorter than 8 characters`() async throws {
         try await withApp(configure: configure) { app in
             // Seed a verified email user so the reset flow has a user to act
             // on — bypasses the registration/verify mails in a single create.

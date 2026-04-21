@@ -16,8 +16,8 @@ import Queues
 // Appendix A explicitly argues that mandatory mixed-case/digit/special-char
 // rules harm usability without improving strength.
 
-@Suite("AAL1 no extra complexity requirements", .tags(.aal1, .memorizedSecret))
-struct ComplexityTests {
+@Suite(.tags(.aal1, .memorizedSecret))
+struct `AAL1 no extra complexity requirements` {
 
     @Sendable private func configure(_ app: Application) async throws {
         await app.jwt.keys.add(
@@ -46,11 +46,8 @@ struct ComplexityTests {
         )
     }
 
-    @Test(
-        "§5.1.1.1-d: Passwords meeting the length floor are accepted without extra complexity constraints",
-        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .should)
-    )
-    func lengthCompliantLowercasePasswordIsAccepted() async throws {
+    @Test(.tags(.aal1, .memorizedSecret, .authenticator, .integration, .should))
+    func `§5.1.1.1-d: Passwords meeting the length floor are accepted without extra complexity constraints`() async throws {
         try await withApp(configure: configure) { app in
             // 10 characters, all lowercase, no digits, no special chars. Per
             // §5.1.1.1-d this is the smallest counterexample that would be
@@ -74,11 +71,8 @@ struct ComplexityTests {
         }
     }
 
-    @Test(
-        "§5.1.1.2-r: Verifier accepts a repeated-character password without prohibiting consecutive duplicates",
-        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .should)
-    )
-    func repeatedCharacterPasswordIsAccepted() async throws {
+    @Test(.tags(.aal1, .memorizedSecret, .authenticator, .integration, .should))
+    func `§5.1.1.2-r: Verifier accepts a repeated-character password without prohibiting consecutive duplicates`() async throws {
         try await withApp(configure: configure) { app in
             // §5.1.1.2-r specifically calls out "prohibiting consecutively
             // repeated characters" as an anti-pattern. This 8-char

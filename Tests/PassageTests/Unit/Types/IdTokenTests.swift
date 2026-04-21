@@ -35,12 +35,12 @@ struct `ID Token Tests` {
         #expect(token.audience?.value.first == "api.example.com")
     }
 
-    @Test("ID token with optional email and phone", arguments: [
+    @Test(arguments: [
         ("test@example.com", nil),
         (nil, "+1234567890"),
         (nil, nil)
     ])
-    func optionalEmailAndPhone(email: String?, phone: String?) {
+    func `ID token with optional email and phone`(email: String?, phone: String?) {
         let subject = SubjectClaim(value: "user123")
         let expiration = ExpirationClaim(value: Date(timeIntervalSinceNow: 3600))
         let issuedAt = IssuedAtClaim(value: Date())
@@ -108,12 +108,12 @@ struct `ID Token Tests` {
 
     // MARK: - Claims Tests
 
-    @Test("ID token subject claim", arguments: [
+    @Test(arguments: [
         "user123",
         "user-abc-123",
         "test-user-456"
     ])
-    func subjectClaim(userId: String) {
+    func `ID token subject claim`(userId: String) {
         let subject = SubjectClaim(value: userId)
         let expiration = ExpirationClaim(value: Date(timeIntervalSinceNow: 3600))
         let issuedAt = IssuedAtClaim(value: Date())
@@ -171,12 +171,12 @@ struct `ID Token Tests` {
         #expect(token.issuedAt.value.timeIntervalSince1970 == issuedAtDate.timeIntervalSince1970)
     }
 
-    @Test("ID token issuer claim", arguments: [
+    @Test(arguments: [
         "https://auth.example.com",
         "https://example.com",
         nil
     ])
-    func issuerClaim(issuerValue: String?) {
+    func `ID token issuer claim`(issuerValue: String?) {
         let subject = SubjectClaim(value: "user123")
         let expiration = ExpirationClaim(value: Date(timeIntervalSinceNow: 3600))
         let issuedAt = IssuedAtClaim(value: Date())
@@ -195,12 +195,12 @@ struct `ID Token Tests` {
         #expect(token.issuer?.value == issuerValue)
     }
 
-    @Test("ID token audience claim", arguments: [
+    @Test(arguments: [
         "api.example.com",
         "service.example.com",
         nil
     ])
-    func audienceClaim(audienceValue: String?) {
+    func `ID token audience claim`(audienceValue: String?) {
         let subject = SubjectClaim(value: "user123")
         let expiration = ExpirationClaim(value: Date(timeIntervalSinceNow: 3600))
         let issuedAt = IssuedAtClaim(value: Date())

@@ -17,8 +17,8 @@ import Queues
 // not the plaintext password — an attacker with the database snapshot
 // cannot recover the password without a per-hash brute-force.
 
-@Suite("AAL1 memorized secret storage", .tags(.aal1, .memorizedSecret))
-struct HashingTests {
+@Suite(.tags(.aal1, .memorizedSecret))
+struct `AAL1 memorized secret storage` {
 
     @Sendable private func configure(_ app: Application) async throws {
         await app.jwt.keys.add(
@@ -47,11 +47,8 @@ struct HashingTests {
         )
     }
 
-    @Test(
-        "§5.1.1.2-w: Stored passwordHash is an offline-attack-resistant KDF output, not the plaintext",
-        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall)
-    )
-    func storedHashIsNotPlaintext() async throws {
+    @Test(.tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall))
+    func `§5.1.1.2-w: Stored passwordHash is an offline-attack-resistant KDF output, not the plaintext`() async throws {
         let plaintext = "plain-password-42"
 
         try await withApp(configure: configure) { app in
@@ -84,11 +81,8 @@ struct HashingTests {
         }
     }
 
-    @Test(
-        "§5.1.1.2-y: Two users with the same password have distinct salts and hashes stored",
-        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall)
-    )
-    func distinctSaltsAcrossUsers() async throws {
+    @Test(.tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall))
+    func `§5.1.1.2-y: Two users with the same password have distinct salts and hashes stored`() async throws {
         let sharedPassword = "shared-memorized-secret"
 
         try await withApp(configure: configure) { app in

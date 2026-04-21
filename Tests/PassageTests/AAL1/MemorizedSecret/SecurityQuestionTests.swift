@@ -15,8 +15,8 @@ import Queues
 // pet?") when choosing memorized secrets. Passage enforces this
 // structurally by not registering any KBA route.
 
-@Suite("AAL1 no security-question surface", .tags(.aal1, .memorizedSecret))
-struct SecurityQuestionTests {
+@Suite(.tags(.aal1, .memorizedSecret))
+struct `AAL1 no security-question surface` {
 
     @Sendable private func configure(_ app: Application) async throws {
         await app.jwt.keys.add(
@@ -44,11 +44,8 @@ struct SecurityQuestionTests {
         )
     }
 
-    @Test(
-        "§5.1.1.2-k: No security-question / KBA route is registered",
-        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .shallNot)
-    )
-    func noSecurityQuestionRoute() async throws {
+    @Test(.tags(.aal1, .memorizedSecret, .authenticator, .integration, .shallNot))
+    func `§5.1.1.2-k: No security-question / KBA route is registered`() async throws {
         try await withApp(configure: configure) { app in
             // Three canonical KBA URL shapes. If any responds with a
             // non-404 status, a security-question surface has sneaked in.

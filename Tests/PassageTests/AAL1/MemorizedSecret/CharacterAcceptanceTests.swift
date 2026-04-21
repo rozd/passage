@@ -16,8 +16,8 @@ import Queues
 // NOT filter by character class — only length and blocklist membership are
 // grounds for rejection.
 
-@Suite("AAL1 memorized secret character acceptance", .tags(.aal1, .memorizedSecret))
-struct CharacterAcceptanceTests {
+@Suite(.tags(.aal1, .memorizedSecret))
+struct `AAL1 memorized secret character acceptance` {
 
     @Sendable private func configure(_ app: Application) async throws {
         await app.jwt.keys.add(
@@ -46,11 +46,8 @@ struct CharacterAcceptanceTests {
         )
     }
 
-    @Test(
-        "§5.1.1.2-c: Verifier accepts a password containing printable ASCII characters and a space",
-        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .should)
-    )
-    func printableAsciiAndSpaceAreAccepted() async throws {
+    @Test(.tags(.aal1, .memorizedSecret, .authenticator, .integration, .should))
+    func `§5.1.1.2-c: Verifier accepts a password containing printable ASCII characters and a space`() async throws {
         // A 16-character password drawn from punctuation, digits, letters,
         // and a space — one sample per "printable ASCII class". If any class
         // were rejected, registration would return 400.
@@ -83,11 +80,8 @@ struct CharacterAcceptanceTests {
         }
     }
 
-    @Test(
-        "§5.1.1.2-d: Verifier accepts a password containing Unicode characters",
-        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .should)
-    )
-    func unicodeCharactersAreAccepted() async throws {
+    @Test(.tags(.aal1, .memorizedSecret, .authenticator, .integration, .should))
+    func `§5.1.1.2-d: Verifier accepts a password containing Unicode characters`() async throws {
         // Mix Latin, Cyrillic, CJK, and a supplementary-plane emoji to
         // cover BMP + non-BMP. Any verifier that rejected non-ASCII would
         // fail on at least one of these.

@@ -55,13 +55,13 @@ struct `Views Configuration Tests` {
         #expect(view.identifier == .email)
     }
 
-    @Test("LoginView template name", arguments: [
+    @Test(arguments: [
         (Passage.Views.Style.neobrutalism, "login-neobrutalism"),
         (Passage.Views.Style.neomorphism, "login-neomorphism"),
         (Passage.Views.Style.minimalism, "login-minimalism"),
         (Passage.Views.Style.material, "login-material")
     ])
-    func loginViewTemplate(style: Passage.Views.Style, expected: String) {
+    func `LoginView template name`(style: Passage.Views.Style, expected: String) {
         let view = Passage.Configuration.Views.LoginView(
             style: style,
             theme: createTestTheme(),
@@ -256,13 +256,13 @@ struct `Views Configuration Tests` {
         #expect(view.redirect.onSuccess == nil)
     }
 
-    @Test("PasskeyAuthenticateView template name", arguments: [
+    @Test(arguments: [
         (Passage.Views.Style.minimalism, "passkey-authenticate-minimalism"),
         (Passage.Views.Style.material, "passkey-authenticate-material"),
         (Passage.Views.Style.neobrutalism, "passkey-authenticate-neobrutalism"),
         (Passage.Views.Style.neomorphism, "passkey-authenticate-neomorphism"),
     ])
-    func passkeyAuthenticateViewTemplate(style: Passage.Views.Style, expected: String) {
+    func `PasskeyAuthenticateView template name`(style: Passage.Views.Style, expected: String) {
         let view = Passage.Configuration.Views.PasskeyAuthenticateView(
             style: style,
             theme: createTestTheme()

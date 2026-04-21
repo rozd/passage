@@ -18,8 +18,8 @@ import XCTQueues
 // attacker bypasses per-account caps by spreading requests across many
 // accounts.
 
-@Suite("AAL1 online guessing protection", .tags(.aal1, .throttling))
-struct OnlineGuessingTests {
+@Suite(.tags(.aal1, .throttling))
+struct `AAL1 online guessing protection` {
 
     @Sendable private func configure(_ app: Application) async throws {
         await app.jwt.keys.add(
@@ -48,11 +48,8 @@ struct OnlineGuessingTests {
         )
     }
 
-    @Test(
-        "§5.2.2-a: Login endpoint throttles online-guessing spray attacks across many accounts",
-        .tags(.aal1, .throttling, .authenticator, .integration, .shall)
-    )
-    func loginThrottlesSprayAttacks() async throws {
+    @Test(.tags(.aal1, .throttling, .authenticator, .integration, .shall))
+    func `§5.2.2-a: Login endpoint throttles online-guessing spray attacks across many accounts`() async throws {
         try await withApp(configure: configure) { app in
             // Fire 100 failed login attempts against different usernames —
             // a credential-stuffing / username-spray pattern. §5.2.2-a

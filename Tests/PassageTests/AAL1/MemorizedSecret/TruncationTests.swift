@@ -19,8 +19,8 @@ import XCTQueues
 // first 72 bytes. The test registers with a 73-byte password and tries to log
 // in with the 72-byte prefix: if login succeeds, the verifier is truncating.
 
-@Suite("AAL1 memorized secret truncation", .tags(.aal1, .memorizedSecret))
-struct TruncationTests {
+@Suite(.tags(.aal1, .memorizedSecret))
+struct `AAL1 memorized secret truncation` {
 
     @Sendable private func configure(_ app: Application) async throws {
         await app.jwt.keys.add(
@@ -53,11 +53,8 @@ struct TruncationTests {
         )
     }
 
-    @Test(
-        "§5.1.1.2-e: Verifier SHALL NOT accept a truncated prefix of a registered memorized secret",
-        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .shallNot)
-    )
-    func truncatedPrefixMustNotAuthenticate() async throws {
+    @Test(.tags(.aal1, .memorizedSecret, .authenticator, .integration, .shallNot))
+    func `§5.1.1.2-e: Verifier SHALL NOT accept a truncated prefix of a registered memorized secret`() async throws {
         // 73 ASCII characters — one byte past Bcrypt's silent-truncation
         // boundary. The 72-char prefix differs from the full string only by
         // the trailing "Z", so if the verifier honours the full string the

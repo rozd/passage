@@ -108,7 +108,7 @@ struct `Views Theme Tests` {
         #expect(colors.primary == "#BB86FC")
     }
 
-    @Test("All default themes have all required color properties", arguments: [
+    @Test(arguments: [
         Passage.Views.Theme.Colors.defaultLight,
         Passage.Views.Theme.Colors.defaultDark,
         Passage.Views.Theme.Colors.oceanLight,
@@ -116,7 +116,7 @@ struct `Views Theme Tests` {
         Passage.Views.Theme.Colors.forestLight,
         Passage.Views.Theme.Colors.forestDark
     ])
-    func defaultThemesHaveAllColors(colors: Passage.Views.Theme.Colors) {
+    func `All default themes have all required color properties`(colors: Passage.Views.Theme.Colors) {
         #expect(!colors.primary.isEmpty)
         #expect(!colors.onPrimary.isEmpty)
         #expect(!colors.secondary.isEmpty)
@@ -135,11 +135,11 @@ struct `Views Theme Tests` {
         #expect(!colors.outline.isEmpty)
     }
 
-    @Test("All color values are valid hex codes", arguments: [
+    @Test(arguments: [
         Passage.Views.Theme.Colors.defaultLight,
         Passage.Views.Theme.Colors.defaultDark
     ])
-    func colorValuesAreValidHexCodes(colors: Passage.Views.Theme.Colors) {
+    func `All color values are valid hex codes`(colors: Passage.Views.Theme.Colors) {
         let allColors = [
             colors.primary, colors.onPrimary, colors.secondary, colors.onSecondary,
             colors.surface, colors.onSurface, colors.onSurfaceVariant,

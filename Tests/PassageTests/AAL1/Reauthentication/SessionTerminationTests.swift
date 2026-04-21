@@ -10,14 +10,11 @@ import Testing
 // pinning a finite `expiresAt` on every refresh token when it is created, and
 // refusing to rotate a token once `expiresAt` has passed.
 
-@Suite("AAL1 session termination", .tags(.aal1, .reauthentication, .sessionManagement))
-struct SessionTerminationTests {
+@Suite(.tags(.aal1, .reauthentication, .sessionManagement))
+struct `AAL1 session termination` {
 
-    @Test(
-        "§4.1.3-c: Expired refresh token is invalid so the session is effectively terminated",
-        .tags(.aal1, .reauthentication, .sessionManagement, .unit, .should)
-    )
-    func expiredRefreshTokenIsInvalid() async throws {
+    @Test(.tags(.aal1, .reauthentication, .sessionManagement, .unit, .should))
+    func `§4.1.3-c: Expired refresh token is invalid so the session is effectively terminated`() async throws {
         let store = Passage.OnlyForTest.InMemoryStore()
         let user = try await store.users.create(
             identifier: .username("reauth-expiry"),
@@ -45,11 +42,8 @@ struct SessionTerminationTests {
         #expect(stored?.isValid == false, "expired token must not be valid for rotation")
     }
 
-    @Test(
-        "§7.2-f: After session termination, a new session can only be started by a fresh auth event",
-        .tags(.aal1, .reauthentication, .sessionManagement, .authenticator, .unit, .shall)
-    )
-    func terminatedSessionRequiresFreshAuthToResume() async throws {
+    @Test(.tags(.aal1, .reauthentication, .sessionManagement, .authenticator, .unit, .shall))
+    func `§7.2-f: After session termination, a new session can only be started by a fresh auth event`() async throws {
         // §7.2-f SHALL: when a session has been terminated (timeout, logout,
         // admin revocation), the subscriber must establish a *new* session
         // by authenticating again. Passage enforces this via its rotation

@@ -29,7 +29,14 @@ You are writing AAL1 compliance tests under `Tests/PassageTests/AAL1/` against c
    - `testability == design-assertion` → `Tests/PassageTests/AAL1/Architectural.swift`
    Filename pattern: `<BehaviourNoun>Tests.swift` (e.g. `MinimumLengthTests.swift`, `BreachedPasswordTests.swift`). Group tests that exercise the same behaviour cluster in the same file; create a new file if none fits.
 
-3. **Write the test.** Swift Testing syntax; `@Test` display string MUST begin with `§<clause-id>: ` (or comma-separated `§<id>,§<id>: ` if covering multiple clauses). Tags: `.aal1`, at least one module tag (matching the record's tags), one of `.unit` / `.integration`, one of `.shall` / `.shallNot` / `.should` (matching the record's normative level — `SHALL_NOT` maps to `.shallNot`). Function name: clean camelCase verb phrase; no clause ID in the function name.
+3. **Write the test.** Swift Testing syntax. The test function name is declared as a Swift 6.2 raw identifier (backtick-delimited) — `.scripts/aal1-lint.sh` reads the name from there, not from an `@Test` display string. The raw-identifier name MUST begin with `§<clause-id>: ` (or comma-separated `§<id>,§<id>: ` if covering multiple clauses) and should read as a human-readable statement of the behaviour under test, e.g.:
+
+   ```swift
+   @Test(.tags(.aal1, .memorizedSecret, .authenticator, .unit, .shall))
+   func `§5.1.1.2-a: Subscriber-chosen memorized secrets are at least 8 characters`() async throws { ... }
+   ```
+
+   Tags: `.aal1`, at least one module tag (matching the record's tags), one of `.unit` / `.integration`, one of `.shall` / `.shallNot` / `.should` (matching the record's normative level — `SHALL_NOT` maps to `.shallNot`). Do NOT pass a display-name string to `@Test(...)` — the raw identifier IS the display name.
 
    The test MUST exercise a concrete code path — no `#expect(true)` stubs. If the behaviour is not yet implemented, write the test against the API you expect (`Passage.Configuration.PasswordPolicy.minLength`, etc.); the test will fail to compile if the API is missing, which IS the signal to add the feature in Phase 3. Prefer compilation failure over a green placeholder.
 
@@ -50,7 +57,7 @@ You are writing AAL1 compliance tests under `Tests/PassageTests/AAL1/` against c
    yq eval -i '(.requirements[] | select(.id == "<id>")).status = "has_test" | (.requirements[] | select(.id == "<id>")).tests += ["AAL1/<Module>/<File>.swift::<functionName>"]' docs/AAL1/requirements.yaml
    ```
 
-7. **Lint.** Run `.scripts/aal1-lint.sh`. Must exit clean. If it fails, fix the cause (usually a malformed `@Test` prefix or a ledger typo) and re-lint.
+7. **Lint.** Run `.scripts/aal1-lint.sh`. Must exit clean. If it fails, fix the cause (usually a raw-identifier name missing the `§<clause-id>: ` prefix or a ledger typo) and re-lint.
 
 8. **Commit.** Use the Bash tool to commit exactly the two files touched:
    ```bash

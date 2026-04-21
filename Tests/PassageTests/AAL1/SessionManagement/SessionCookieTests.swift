@@ -15,8 +15,8 @@ import Vapor
 // of any session-carrying cookie. These tests pin the properties of that
 // cookie construction against regressions.
 
-@Suite("AAL1 session cookie properties", .tags(.aal1, .sessionManagement))
-struct SessionCookieTests {
+@Suite(.tags(.aal1, .sessionManagement))
+struct `AAL1 session cookie properties` {
 
     // Mirrors the values Passage uses in
     // `Sources/Passage/Features/Linking/Linking+ManualLinkingState.swift:131`
@@ -34,11 +34,8 @@ struct SessionCookieTests {
         )
     }
 
-    @Test(
-        "§7.1.1-a: Session-carrying cookie is tagged Secure (HTTPS only) outside development",
-        .tags(.aal1, .sessionManagement, .unit, .shall)
-    )
-    func sessionCookieIsSecureInProduction() async throws {
+    @Test(.tags(.aal1, .sessionManagement, .unit, .shall))
+    func `§7.1.1-a: Session-carrying cookie is tagged Secure (HTTPS only) outside development`() async throws {
         // Passage flips `isSecure` based on `request.application.environment
         // != .development`, so production, testing, and staging all ship
         // Secure-flagged cookies. Dev opts out intentionally so local HTTP
@@ -54,11 +51,8 @@ struct SessionCookieTests {
                 "dev environment deliberately relaxes Secure for local HTTP — documented exception")
     }
 
-    @Test(
-        "§7.1.1-b: Session-carrying cookie is scoped to the minimum practical set of hostnames and paths",
-        .tags(.aal1, .sessionManagement, .unit, .shall)
-    )
-    func sessionCookieIsScopedMinimally() async throws {
+    @Test(.tags(.aal1, .sessionManagement, .unit, .shall))
+    func `§7.1.1-b: Session-carrying cookie is scoped to the minimum practical set of hostnames and paths`() async throws {
         // §7.1.1-b wants the cookie to not leak beyond the app. Passage
         // scopes to a single origin: `domain: nil` (host-only — never
         // broadened to a parent domain) and `path: "/"` (the entire app,
@@ -73,11 +67,8 @@ struct SessionCookieTests {
                 "§7.1.1-b: cookie path must be \"/\" — the minimum scope for a whole-app session identifier")
     }
 
-    @Test(
-        "§7.1.1-c: Session-carrying cookie is tagged HttpOnly (inaccessible to JavaScript)",
-        .tags(.aal1, .sessionManagement, .unit, .should)
-    )
-    func sessionCookieIsHttpOnly() async throws {
+    @Test(.tags(.aal1, .sessionManagement, .unit, .should))
+    func `§7.1.1-c: Session-carrying cookie is tagged HttpOnly (inaccessible to JavaScript)`() async throws {
         // §7.1.1-c SHOULD: HttpOnly blocks JS (and XSS-injected scripts)
         // from reading the cookie via document.cookie. Passage always sets
         // HttpOnly, including on the clear path (cookie with empty value +
@@ -98,11 +89,8 @@ struct SessionCookieTests {
                 "§7.1.1-c: even the clear-state cookie must keep HttpOnly so XSS cannot smuggle values out")
     }
 
-    @Test(
-        "§7.1.1-d: Session-carrying cookie expires at (or soon after) the session's validity period",
-        .tags(.aal1, .sessionManagement, .unit, .should)
-    )
-    func sessionCookieExpiresWithSession() async throws {
+    @Test(.tags(.aal1, .sessionManagement, .unit, .should))
+    func `§7.1.1-d: Session-carrying cookie expires at (or soon after) the session's validity period`() async throws {
         // §7.1.1-d SHOULD: tag cookies with `expires` matching the session
         // validity period so browsers eventually discard them. Passage's
         // linking cookie uses the state's own `expiresAt` as the cookie's

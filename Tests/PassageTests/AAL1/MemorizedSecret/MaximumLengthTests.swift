@@ -16,8 +16,8 @@ import JWT
 // password-manager output routinely exceed short upper bounds, so this
 // clause blocks the common anti-pattern of a 20-character cap.
 
-@Suite("AAL1 memorized secret maximum length", .tags(.aal1, .memorizedSecret))
-struct MaximumLengthTests {
+@Suite(.tags(.aal1, .memorizedSecret))
+struct `AAL1 memorized secret maximum length` {
 
     @Sendable private func configure(_ app: Application) async throws {
         await app.jwt.keys.add(
@@ -46,11 +46,8 @@ struct MaximumLengthTests {
         )
     }
 
-    @Test(
-        "§5.1.1.2-b: Verifier permits subscriber-chosen memorized secret of at least 64 characters",
-        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .should)
-    )
-    func verifierPermits64CharPassword() async throws {
+    @Test(.tags(.aal1, .memorizedSecret, .authenticator, .integration, .should))
+    func `§5.1.1.2-b: Verifier permits subscriber-chosen memorized secret of at least 64 characters`() async throws {
         // Exactly 64 characters, ASCII — satisfies the §5.1.1.2-b floor and
         // fits inside Bcrypt's 72-byte input window so the verifier can hash
         // it without silent truncation (the separate §5.1.1.2-e concern).

@@ -21,8 +21,8 @@ import Queues
 // compliance work must land. Until that API exists the file is expected to
 // fail to compile; that failure is the Phase 3 trigger, not a regression.
 
-@Suite("AAL1 compromised-value blocklist", .tags(.aal1, .memorizedSecret))
-struct BreachedPasswordTests {
+@Suite(.tags(.aal1, .memorizedSecret))
+struct `AAL1 compromised-value blocklist` {
 
     @Sendable private func configureWithBlocklist(_ app: Application) async throws {
         await app.jwt.keys.add(
@@ -59,11 +59,8 @@ struct BreachedPasswordTests {
         )
     }
 
-    @Test(
-        "§5.1.1.1-c: Blocklisted memorized secret is rejected and a different one succeeds",
-        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall)
-    )
-    func blocklistedSecretForcesSubscriberToChooseAnother() async throws {
+    @Test(.tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall))
+    func `§5.1.1.1-c: Blocklisted memorized secret is rejected and a different one succeeds`() async throws {
         try await withApp(configure: configureWithBlocklist) { app in
             try await app.testing().test(.POST, "auth/register", beforeRequest: { req in
                 try req.content.encode([
@@ -90,11 +87,8 @@ struct BreachedPasswordTests {
         }
     }
 
-    @Test(
-        "§5.1.1.2-l: Verifier compares prospective secret against the blocklist at password change",
-        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall)
-    )
-    func verifierChecksBlocklistAtPasswordChange() async throws {
+    @Test(.tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall))
+    func `§5.1.1.2-l: Verifier compares prospective secret against the blocklist at password change`() async throws {
         try await withApp(configure: configureWithBlocklist) { app in
             // Seed a verified email user so the reset flow has a target.
             let store = app.passage.storage.services.store
@@ -137,11 +131,8 @@ struct BreachedPasswordTests {
         let reason: String
     }
 
-    @Test(
-        "§5.1.1.2-m: Rejection response advises the subscriber to select a different secret",
-        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall)
-    )
-    func rejectionAdvisesSelectingDifferentSecret() async throws {
+    @Test(.tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall))
+    func `§5.1.1.2-m: Rejection response advises the subscriber to select a different secret`() async throws {
         try await withApp(configure: configureWithBlocklist) { app in
             try await app.testing().test(.POST, "auth/register", beforeRequest: { req in
                 try req.content.encode([
@@ -161,11 +152,8 @@ struct BreachedPasswordTests {
         }
     }
 
-    @Test(
-        "§5.1.1.2-n: Rejection response provides a non-empty reason identifying the password as the rejected input",
-        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall)
-    )
-    func rejectionProvidesReason() async throws {
+    @Test(.tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall))
+    func `§5.1.1.2-n: Rejection response provides a non-empty reason identifying the password as the rejected input`() async throws {
         try await withApp(configure: configureWithBlocklist) { app in
             try await app.testing().test(.POST, "auth/register", beforeRequest: { req in
                 try req.content.encode([
@@ -186,11 +174,8 @@ struct BreachedPasswordTests {
         }
     }
 
-    @Test(
-        "§5.1.1.2-o: After a blocklist rejection the subscriber can register successfully with a different secret",
-        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall)
-    )
-    func rejectedSubscriberCanRetryWithDifferentSecret() async throws {
+    @Test(.tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall))
+    func `§5.1.1.2-o: After a blocklist rejection the subscriber can register successfully with a different secret`() async throws {
         try await withApp(configure: configureWithBlocklist) { app in
             // First attempt — blocklisted.
             try await app.testing().test(.POST, "auth/register", beforeRequest: { req in

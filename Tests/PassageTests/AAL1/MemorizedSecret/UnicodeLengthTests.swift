@@ -20,8 +20,8 @@ import XCTQueues
 // floor would reject a perfectly valid 8-code-point password whose clusters
 // happen to combine — contrary to §5.1.1.2-f.
 
-@Suite("AAL1 Unicode code-point counting", .tags(.aal1, .memorizedSecret))
-struct UnicodeLengthTests {
+@Suite(.tags(.aal1, .memorizedSecret))
+struct `AAL1 Unicode code-point counting` {
 
     @Sendable private func configure(_ app: Application) async throws {
         await app.jwt.keys.add(
@@ -50,11 +50,8 @@ struct UnicodeLengthTests {
         )
     }
 
-    @Test(
-        "§5.1.1.2-f: Length is measured in Unicode code points — combining sequences with 8 code points are accepted",
-        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall)
-    )
-    func lengthIsMeasuredInCodePoints() async throws {
+    @Test(.tags(.aal1, .memorizedSecret, .authenticator, .integration, .shall))
+    func `§5.1.1.2-f: Length is measured in Unicode code points — combining sequences with 8 code points are accepted`() async throws {
         // Build "e\u{0301}" four times: 4 grapheme clusters, 8 Unicode
         // scalars. NIST counts this as 8 characters; Swift's
         // String.count reports 4. A compliant verifier MUST accept this as

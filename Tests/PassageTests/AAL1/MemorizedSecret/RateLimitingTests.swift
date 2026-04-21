@@ -22,8 +22,8 @@ import Queues
 // throttling ships, the test will fail with every attempt returning 401
 // instead.
 
-@Suite("AAL1 memorized secret rate limiting", .tags(.aal1, .memorizedSecret, .throttling))
-struct RateLimitingTests {
+@Suite(.tags(.aal1, .memorizedSecret, .throttling))
+struct `AAL1 memorized secret rate limiting` {
 
     @Sendable private func configure(_ app: Application) async throws {
         await app.jwt.keys.add(
@@ -52,11 +52,8 @@ struct RateLimitingTests {
         )
     }
 
-    @Test(
-        "§5.1.1.2-q: Sustained failed login attempts against one account are rate-limited",
-        .tags(.aal1, .memorizedSecret, .throttling, .authenticator, .integration, .shall)
-    )
-    func sustainedFailedLoginsAreRateLimited() async throws {
+    @Test(.tags(.aal1, .memorizedSecret, .throttling, .authenticator, .integration, .shall))
+    func `§5.1.1.2-q: Sustained failed login attempts against one account are rate-limited`() async throws {
         try await withApp(configure: configure) { app in
             // Register the victim account with a real password.
             try await app.testing().test(.POST, "auth/register", beforeRequest: { req in

@@ -12,14 +12,11 @@ import Testing
 // .timeToLive` (default 7 days, §4.1.3-b ceiling 30 days). Beyond the TTL
 // the stored record is `isExpired`, and the rotation path rejects it.
 
-@Suite("AAL1 session-secret timeout", .tags(.aal1, .sessionManagement, .reauthentication))
-struct SessionTimeoutTests {
+@Suite(.tags(.aal1, .sessionManagement, .reauthentication))
+struct `AAL1 session-secret timeout` {
 
-    @Test(
-        "§7.1-l: Session-binding secret times out and is rejected after its TTL",
-        .tags(.aal1, .sessionManagement, .reauthentication, .authenticator, .unit, .shall)
-    )
-    func sessionSecretTimesOutAfterTTL() async throws {
+    @Test(.tags(.aal1, .sessionManagement, .reauthentication, .authenticator, .unit, .shall))
+    func `§7.1-l: Session-binding secret times out and is rejected after its TTL`() async throws {
         // Drive the concrete path: mint a token whose `expiresAt` is in the
         // past (models "now" > TTL lapse), then consult the exact
         // `isExpired` / `isValid` predicates Passage.Tokens.refresh uses.

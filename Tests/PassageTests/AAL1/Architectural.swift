@@ -11,18 +11,16 @@ import Vapor
 // the library delegates to approved dependencies rather than implementing its
 // own primitives, and the test asserts that the delegation is still in place.
 //
-// Each test pairs with an entry in docs/AAL1/attestations.md. The @Test string
-// always begins with the clause ID (e.g. "§5.1.1.2-g: ...") so the matrix
-// generator in .scripts/generate-aal1-matrix.sh can link test to clause.
+// Each test pairs with an entry in docs/AAL1/attestations.md. The test
+// function name — declared as a Swift 6.2 raw identifier (`§5.1.1.2-g: ...`) —
+// always begins with the clause ID so .scripts/aal1-lint.sh can link test
+// to clause.
 
-@Suite("AAL1 architectural attestations", .tags(.aal1))
-struct AAL1ArchitecturalTests {
+@Suite(.tags(.aal1))
+struct `AAL1 architectural attestations` {
 
-    @Test(
-        "§4.1.1-a: AAL1 authenticator surface is drawn from the approved list",
-        .tags(.aal1, .authenticator, .unit, .shall)
-    )
-    func authenticatorSurfaceIsApproved() async throws {
+    @Test(.tags(.aal1, .authenticator, .unit, .shall))
+    func `§4.1.1-a: AAL1 authenticator surface is drawn from the approved list`() async throws {
         // Passage exposes authenticators from two of the nine approved AAL1
         // types listed in SP 800-63B §4.1.1:
         //   * Memorized Secret (§5.1.1) — Credential.password
@@ -41,11 +39,8 @@ struct AAL1ArchitecturalTests {
         #expect(passkey.kind == .passkey, "Cryptographic device (§5.1.7/§5.1.9) must be expressible as a Credential")
     }
 
-    @Test(
-        "§4.1.2-a: Cryptographic authenticators use approved cryptography (Bcrypt)",
-        .tags(.aal1, .authenticator, .unit, .shall)
-    )
-    func cryptographicAuthenticatorsUseApprovedCryptography() async throws {
+    @Test(.tags(.aal1, .authenticator, .unit, .shall))
+    func `§4.1.2-a: Cryptographic authenticators use approved cryptography (Bcrypt)`() async throws {
         // Passage does not implement its own password hash. Every call site
         // that stores or verifies a memorized secret delegates to Vapor's
         // Bcrypt (see Features/Restoration/Restoration+EmailRouteCollection.swift
@@ -63,11 +58,8 @@ struct AAL1ArchitecturalTests {
         #expect(ok, "Bcrypt.verify must round-trip the hash")
     }
 
-    @Test(
-        "§5.1.1.2-x: Memorized secrets are salted and hashed using an approved KDF (Bcrypt)",
-        .tags(.aal1, .memorizedSecret, .authenticator, .unit, .shall)
-    )
-    func saltedHashedWithApprovedKDF() async throws {
+    @Test(.tags(.aal1, .memorizedSecret, .authenticator, .unit, .shall))
+    func `§5.1.1.2-x: Memorized secrets are salted and hashed using an approved KDF (Bcrypt)`() async throws {
         // Bcrypt (OpenBSD, 1999) is the key-derivation function Vapor
         // exposes and Passage delegates to. Its output encodes the KDF
         // variant, the cost factor, a 128-bit random salt, and the
@@ -89,11 +81,8 @@ struct AAL1ArchitecturalTests {
                 "two fresh Bcrypt hashes of the same input must differ — salt must be random")
     }
 
-    @Test(
-        "§7.1-d: Session inherits the AAL properties of the authentication event that created it",
-        .tags(.aal1, .sessionManagement, .unit, .should)
-    )
-    func sessionInheritsAALFromAuthEvent() async throws {
+    @Test(.tags(.aal1, .sessionManagement, .unit, .should))
+    func `§7.1-d: Session inherits the AAL properties of the authentication event that created it`() async throws {
         // §7.1-d SHOULD: a session should inherit AAL from the auth event
         // that triggered its creation. Passage binds the session to a
         // specific user at the moment of authentication: `issue(for:)` mints
@@ -132,11 +121,8 @@ struct AAL1ArchitecturalTests {
                 "§7.1-d: the session must not inherit from any other user's auth event")
     }
 
-    @Test(
-        "§7.1-e: Session is never considered at a higher AAL than the authentication event",
-        .tags(.aal1, .sessionManagement, .unit, .shallNot)
-    )
-    func sessionNotAboveAALOfAuthEvent() async throws {
+    @Test(.tags(.aal1, .sessionManagement, .unit, .shallNot))
+    func `§7.1-e: Session is never considered at a higher AAL than the authentication event`() async throws {
         // §7.1-e SHALL NOT: a session may not be rated higher than the
         // authentication that produced it. Passage does not re-level a
         // session after the fact — there is no public API that escalates a
@@ -180,11 +166,8 @@ struct AAL1ArchitecturalTests {
                 "§7.1-e: a prior session cannot survive (let alone be escalated) past a new auth event")
     }
 
-    @Test(
-        "§7.1.2-a: OAuth access-token presence is not treated as proof of subscriber presence",
-        .tags(.aal1, .sessionManagement, .unit, .shallNot)
-    )
-    func oauthAccessTokenIsNotPresenceSignal() async throws {
+    @Test(.tags(.aal1, .sessionManagement, .unit, .shallNot))
+    func `§7.1.2-a: OAuth access-token presence is not treated as proof of subscriber presence`() async throws {
         // §7.1.2-a SHALL NOT: an OAuth access token (or its refresh token)
         // can outlive the subscriber's authenticated session, so its
         // presence is not a proxy for subscriber presence. Passage models
@@ -207,11 +190,8 @@ struct AAL1ArchitecturalTests {
                 "§7.1.2-a: presence window must be Passage-controlled and ≤ §4.1.3-b AAL1 ceiling")
     }
 
-    @Test(
-        "§7.2.1-a: Federation session is not correlated with Passage's local session",
-        .tags(.aal1, .sessionManagement, .reauthentication, .unit, .shallNot)
-    )
-    func federationSessionNotCorrelatedWithLocalSession() async throws {
+    @Test(.tags(.aal1, .sessionManagement, .reauthentication, .unit, .shallNot))
+    func `§7.2.1-a: Federation session is not correlated with Passage's local session`() async throws {
         // §7.2.1-a SHALL NOT: when a federation protocol brokers auth, the
         // IdP and RP run separate sessions — no correlation is assumed.
         // Passage enforces this by treating the IdP's exchange code as a
@@ -249,11 +229,8 @@ struct AAL1ArchitecturalTests {
                 "§7.2.1-a: the session's lifetime is Passage-controlled, independent of any IdP session")
     }
 
-    @Test(
-        "§5.1.1.2-z: Default KDF cost factor is high enough to deter brute-force (Bcrypt cost ≥ 10)",
-        .tags(.aal1, .memorizedSecret, .authenticator, .unit, .should)
-    )
-    func kdfCostFactorIsHigh() async throws {
+    @Test(.tags(.aal1, .memorizedSecret, .authenticator, .unit, .should))
+    func `§5.1.1.2-z: Default KDF cost factor is high enough to deter brute-force (Bcrypt cost ≥ 10)`() async throws {
         // §5.1.1.2-z targets PBKDF2's iteration count (≥10,000). Passage
         // delegates to Vapor's Bcrypt, whose cost factor is encoded as a
         // two-digit exponent in the output: `$2b$12$...` means 2¹² =

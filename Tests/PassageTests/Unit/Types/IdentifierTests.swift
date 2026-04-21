@@ -82,47 +82,47 @@ struct `Identifier Tests` {
 
     // MARK: - Error Support Tests
 
-    @Test("Identifier error when already registered", arguments: [
+    @Test(arguments: [
         (Identifier.Kind.email, AuthenticationError.emailAlreadyRegistered),
         (Identifier.Kind.phone, AuthenticationError.phoneAlreadyRegistered),
         (Identifier.Kind.username, AuthenticationError.usernameAlreadyRegistered),
         (Identifier.Kind.federated, AuthenticationError.federatedAccountAlreadyLinked)
     ])
-    func errorWhenAlreadyRegistered(kind: Identifier.Kind, expected: AuthenticationError) {
+    func `Identifier error when already registered`(kind: Identifier.Kind, expected: AuthenticationError) {
         let identifier = Identifier(kind: kind, value: "test-value", provider: kind == .federated ? .named("test-provider") : nil)
         #expect(identifier.errorWhenIdentifierAlreadyRegistered == expected)
     }
 
-    @Test("Identifier error when invalid", arguments: [
+    @Test(arguments: [
         (Identifier.Kind.email, AuthenticationError.invalidEmailOrPassword),
         (Identifier.Kind.phone, AuthenticationError.invalidPhoneOrPassword),
         (Identifier.Kind.username, AuthenticationError.invalidUsernameOrPassword),
         (Identifier.Kind.federated, AuthenticationError.federatedLoginFailed)
     ])
-    func errorWhenInvalid(kind: Identifier.Kind, expected: AuthenticationError) {
+    func `Identifier error when invalid`(kind: Identifier.Kind, expected: AuthenticationError) {
         let identifier = Identifier(kind: kind, value: "test-value", provider: kind == .federated ? .named("test-provider") : nil)
         #expect(identifier.errorWhenIdentifierIsInvalid == expected)
     }
 
     // MARK: - Kind Enum Tests
 
-    @Test("Identifier kind raw values", arguments: [
+    @Test(arguments: [
         (Identifier.Kind.email, "email"),
         (Identifier.Kind.phone, "phone"),
         (Identifier.Kind.username, "username"),
         (Identifier.Kind.federated, "federated")
     ])
-    func kindRawValues(kind: Identifier.Kind, expectedRawValue: String) {
+    func `Identifier kind raw values`(kind: Identifier.Kind, expectedRawValue: String) {
         #expect(kind.rawValue == expectedRawValue)
     }
 
-    @Test("Identifier kind from raw value", arguments: [
+    @Test(arguments: [
         ("email", Identifier.Kind.email),
         ("phone", Identifier.Kind.phone),
         ("username", Identifier.Kind.username),
         ("federated", Identifier.Kind.federated)
     ])
-    func kindFromRawValue(rawValue: String, expected: Identifier.Kind?) {
+    func `Identifier kind from raw value`(rawValue: String, expected: Identifier.Kind?) {
         #expect(Identifier.Kind(rawValue: rawValue) == expected)
     }
 

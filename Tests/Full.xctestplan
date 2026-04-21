@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "0519168D-2981-44D4-85AD-7C5E103B1F6F",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "PassageTests",
+        "name" : "PassageTests"
+      }
+    }
+  ],
+  "version" : 1
+}

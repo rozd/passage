@@ -17,8 +17,8 @@ import XCTQueues
 // normalization a user who types the same password on two different keyboards
 // — one producing NFC, the other NFD — cannot log in interchangeably.
 
-@Suite("AAL1 Unicode normalization", .tags(.aal1, .memorizedSecret))
-struct UnicodeNormalizationTests {
+@Suite(.tags(.aal1, .memorizedSecret))
+struct `AAL1 Unicode normalization` {
 
     @Sendable private func configure(_ app: Application) async throws {
         await app.jwt.keys.add(
@@ -47,11 +47,8 @@ struct UnicodeNormalizationTests {
         )
     }
 
-    @Test(
-        "§5.1.1.2-g: Password registered in NFD form authenticates when submitted in NFC form",
-        .tags(.aal1, .memorizedSecret, .authenticator, .integration, .should)
-    )
-    func nfdRegisterAndNfcLoginAreEquivalent() async throws {
+    @Test(.tags(.aal1, .memorizedSecret, .authenticator, .integration, .should))
+    func `§5.1.1.2-g: Password registered in NFD form authenticates when submitted in NFC form`() async throws {
         // "café1234" in NFD (8 graphemes, 9 scalars — 'cafe' + combining
         // acute + "1234") vs NFC (8 scalars where 'é' is a single scalar).
         let nfd = "cafe\u{0301}1234"

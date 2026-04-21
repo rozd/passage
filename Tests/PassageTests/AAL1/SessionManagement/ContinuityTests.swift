@@ -11,14 +11,11 @@ import Testing
 // valid refresh token (the session-binding secret), which the server
 // rotates to issue a fresh access token. No other path extends the session.
 
-@Suite("AAL1 session continuity", .tags(.aal1, .sessionManagement, .reauthentication))
-struct ContinuityTests {
+@Suite(.tags(.aal1, .sessionManagement, .reauthentication))
+struct `AAL1 session continuity` {
 
-    @Test(
-        "§7.2-a: Session continuity depends on presenting a valid session secret",
-        .tags(.aal1, .sessionManagement, .reauthentication, .authenticator, .unit, .shall)
-    )
-    func continuityRequiresValidSessionSecret() async throws {
+    @Test(.tags(.aal1, .sessionManagement, .reauthentication, .authenticator, .unit, .shall))
+    func `§7.2-a: Session continuity depends on presenting a valid session secret`() async throws {
         // The only path by which an authenticated session persists across
         // requests is the refresh-token rotation — the subscriber presents
         // the opaque token, and the server (after verifying it `isValid`)
@@ -58,11 +55,8 @@ struct ContinuityTests {
                 "§7.2-a: once the secret is revoked, continuity ends")
     }
 
-    @Test(
-        "§7.2-c: Periodic reauthentication is enforced — a session cannot survive indefinitely on its secret",
-        .tags(.aal1, .sessionManagement, .reauthentication, .authenticator, .unit, .shall)
-    )
-    func periodicReauthenticationIsEnforced() async throws {
+    @Test(.tags(.aal1, .sessionManagement, .reauthentication, .authenticator, .unit, .shall))
+    func `§7.2-c: Periodic reauthentication is enforced — a session cannot survive indefinitely on its secret`() async throws {
         // §7.2-c SHALL: sessions must be periodically reauthenticated.
         // Passage's mechanism is the finite refresh-token TTL: once the
         // token's `expiresAt` passes, rotation fails (§7.2-a wiring) and
@@ -99,11 +93,8 @@ struct ContinuityTests {
                 "§7.2-c: refresh-token TTL must be finite so reauth is eventually forced")
     }
 
-    @Test(
-        "§7.2-d: Presenting the session secret alone cannot extend the session past the reauth ceiling",
-        .tags(.aal1, .sessionManagement, .reauthentication, .authenticator, .unit, .shallNot)
-    )
-    func secretPresentationCannotExtendPastCeiling() async throws {
+    @Test(.tags(.aal1, .sessionManagement, .reauthentication, .authenticator, .unit, .shallNot))
+    func `§7.2-d: Presenting the session secret alone cannot extend the session past the reauth ceiling`() async throws {
         // §7.2-d SHALL NOT: a session cannot be extended past the
         // reauthentication guidelines based solely on presenting the
         // session secret. Passage enforces this by pinning `expiresAt` at

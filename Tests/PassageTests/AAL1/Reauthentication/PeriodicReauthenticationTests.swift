@@ -12,14 +12,11 @@ import Testing
 // submitting credentials to /auth/login. This file pins the invariants that
 // keep that guarantee intact.
 
-@Suite("AAL1 periodic reauthentication", .tags(.aal1, .reauthentication))
-struct PeriodicReauthenticationTests {
+@Suite(.tags(.aal1, .reauthentication))
+struct `AAL1 periodic reauthentication` {
 
-    @Test(
-        "§4.1.3-a: Refresh token TTL is finite so that periodic reauthentication is enforced",
-        .tags(.aal1, .reauthentication, .authenticator, .unit, .shall)
-    )
-    func refreshTokenTTLIsFinite() async throws {
+    @Test(.tags(.aal1, .reauthentication, .authenticator, .unit, .shall))
+    func `§4.1.3-a: Refresh token TTL is finite so that periodic reauthentication is enforced`() async throws {
         // Passage issues an access token alongside a refresh token. The
         // access token has a short TTL (15m default) and the refresh token
         // has a longer but still finite TTL. When the refresh token expires,
@@ -39,11 +36,8 @@ struct PeriodicReauthenticationTests {
                 "access-token TTL must be shorter than refresh-token TTL")
     }
 
-    @Test(
-        "§4.1.3-b: Default refresh token TTL is at most 30 days (AAL1 SHOULD ceiling)",
-        .tags(.aal1, .reauthentication, .authenticator, .unit, .should)
-    )
-    func refreshTokenTTLWithin30DayCeiling() async throws {
+    @Test(.tags(.aal1, .reauthentication, .authenticator, .unit, .should))
+    func `§4.1.3-b: Default refresh token TTL is at most 30 days (AAL1 SHOULD ceiling)`() async throws {
         // AAL1 SHOULD reauthenticate at least once per 30 days during an
         // extended usage session, regardless of user activity. Passage's
         // refresh-token TTL is the upper bound on how long a session can
@@ -55,11 +49,8 @@ struct PeriodicReauthenticationTests {
                 "default refresh-token TTL must be <= 30 days to satisfy AAL1 §4.1.3-b")
     }
 
-    @Test(
-        "§7.2-e: Presenting an auth factor (AAL1: any one) extends the reauth time limit by minting a fresh session secret",
-        .tags(.aal1, .reauthentication, .sessionManagement, .authenticator, .unit, .shall)
-    )
-    func authFactorPresentationExtendsReauthLimit() async throws {
+    @Test(.tags(.aal1, .reauthentication, .sessionManagement, .authenticator, .unit, .shall))
+    func `§7.2-e: Presenting an auth factor (AAL1: any one) extends the reauth time limit by minting a fresh session secret`() async throws {
         // §7.2-e SHALL: prior to session expiration, the reauth time limit
         // is extended by prompting the subscriber for the AAL-required
         // factor(s) — AAL1's Table 7-1 row reads "Presentation of any one
