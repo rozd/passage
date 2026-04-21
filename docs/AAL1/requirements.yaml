@@ -954,8 +954,9 @@ requirements:
     section: "7.2.1 Reauthentication from a Federation or Assertion"
     tags: [sessionManagement, reauthentication]
     testability: testable
-    status: pending
-    tests: []
+    status: has_test
+    tests:
+      - AAL1/SessionManagement/FederationReauthenticationTests.swift::rpSpecifiesMaxAuthenticationAge
     excluded_reason: null
     requirement: |
       An RP requiring reauthentication through a federation protocol SHALL — if possible within the protocol — specify the maximum acceptable authentication age to the CSP, and the CSP SHALL reauthenticate the subscriber if they have not been authenticated within that time period.
