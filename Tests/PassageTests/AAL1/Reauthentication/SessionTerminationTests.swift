@@ -82,12 +82,16 @@ struct SessionTerminationTests {
         // Terminate it (logout or admin revoke).
         try await store.tokens.revokeRefreshToken(for: user)
 
-        // The secret is gone — rotation via the rotation path would fail
-        // at the `find(refreshTokenHash:)` lookup, which is exactly what
-        // `Passage.Tokens.refresh` relies on before issuing a new token.
+        // The secret no longer resolves to a *live* session: the record is
+        // retained (so `Passage.Tokens.refresh` can detect reuse attempts
+        // and revoke the family) but `isValid` flips to false, which is
+        // exactly the gate the rotation path checks at Passage+Tokens.swift:92
+        // before throwing `.invalidRefreshToken`.
         let lookedUp = try await store.tokens.find(refreshTokenHash: hash)
-        #expect(lookedUp == nil,
+        #expect(lookedUp?.isValid == false,
                 "§7.2-f: after termination, the session secret must not resolve to a live session")
+        #expect(lookedUp?.isRevoked == true,
+                "§7.2-f: termination is recorded via revokedAt — the invariant the rotation path consults")
 
         // A fresh auth event (modelled here by creating a new token via
         // the `issue(for:)`-equivalent storage call) is the only path to
