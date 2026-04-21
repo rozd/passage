@@ -16,6 +16,7 @@ let package = Package(
         .package(url: "https://github.com/vapor/leaf.git", from: "4.5.1"),
         .package(url: "https://github.com/vapor/leaf-kit.git", from: "1.14.2"),
         .package(url: "https://github.com/vapor/queues.git", from: "1.18.0"),
+        .package(url: "https://github.com/apple/swift-crypto.git", from: "4.4.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.12.0"),
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.98.0"),
         .package(url: "https://github.com/swiftlang/swift-docc-plugin.git", from: "1.4.6"),
@@ -24,6 +25,7 @@ let package = Package(
         .target(
             name: "Passage",
             dependencies: [
+                .product(name: "Crypto", package: "swift-crypto"),
                 .product(name: "JWT", package: "jwt"),
                 .product(name: "Leaf", package: "leaf"),
                 .product(name: "LeafKit", package: "leaf-kit"),

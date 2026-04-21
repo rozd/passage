@@ -1,6 +1,6 @@
 import Testing
 import Foundation
-import CryptoKit
+import Crypto
 @testable import Passage
 
 /// `Data.sha256Hex` is the hashing helper used by passkey challenge stores

@@ -1,5 +1,5 @@
+import Crypto
 import Foundation
-import CryptoKit
 import Vapor
 
 // MARK: - Random Generator
