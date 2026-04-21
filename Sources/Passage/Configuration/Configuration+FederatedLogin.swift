@@ -1,5 +1,4 @@
-import Foundation
-import Vapor
+public import Vapor
 
 // MARK: - Federated Login Configuration
 

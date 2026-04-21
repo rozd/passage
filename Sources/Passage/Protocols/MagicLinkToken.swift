@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 /// Base protocol for magic link codes with common properties
 public protocol MagicLinkToken: Sendable {

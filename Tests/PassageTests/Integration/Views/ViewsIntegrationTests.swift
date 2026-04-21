@@ -1,11 +1,13 @@
-import Testing
-import Vapor
-import VaporTesting
-import JWTKit
+import JWT
 import Leaf
 import LeafKit
 @testable import Passage
 @testable import PassageOnlyForTest
+import Queues
+import Testing
+import Vapor
+import VaporTesting
+import XCTQueues
 
 @Suite("Views Integration Tests", .tags(.integration))
 struct ViewsIntegrationTests {

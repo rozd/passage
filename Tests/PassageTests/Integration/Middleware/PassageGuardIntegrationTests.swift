@@ -1,9 +1,10 @@
+import JWT
+@testable import Passage
+@testable import PassageOnlyForTest
+import Queues
 import Testing
 import Vapor
 import VaporTesting
-import JWTKit
-@testable import Passage
-@testable import PassageOnlyForTest
 
 @Suite("PassageGuard Integration Tests", .tags(.integration))
 struct PassageGuardIntegrationTests {

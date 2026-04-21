@@ -1,5 +1,5 @@
-import Passage
-import Foundation
+public import Foundation
+public import Passage
 
 // MARK: - OnlyForTest Email Delivery Mock
 

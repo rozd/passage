@@ -1,4 +1,4 @@
-import Vapor
+public import Vapor
 
 public enum PassageError: Error {
     case notConfigured

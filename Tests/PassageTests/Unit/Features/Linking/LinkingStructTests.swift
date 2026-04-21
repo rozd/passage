@@ -1,9 +1,9 @@
+import JWT
+@testable import Passage
+@testable import PassageOnlyForTest
 import Testing
 import Vapor
 import VaporTesting
-import JWTKit
-@testable import Passage
-@testable import PassageOnlyForTest
 
 @Suite("Linking Struct Tests", .tags(.unit, .federatedLogin))
 struct LinkingStructTests {

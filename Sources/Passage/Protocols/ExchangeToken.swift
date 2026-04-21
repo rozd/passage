@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 /// Temporary, single-use token for OAuth code exchange flow.
 /// Exchange tokens allow OAuth flows to return a short-lived code in redirect URLs

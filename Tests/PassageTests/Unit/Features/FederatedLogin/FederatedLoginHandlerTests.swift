@@ -1,8 +1,8 @@
-import Testing
-import Vapor
-import JWTKit
+import JWT
 @testable import Passage
 @testable import PassageOnlyForTest
+import Testing
+import Vapor
 
 // MARK: - Mock FederatedLoginService
 

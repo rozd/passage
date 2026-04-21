@@ -1,4 +1,4 @@
-import Vapor
+public import Vapor
 
 public protocol Form: Content, Validatable {
 

@@ -1,6 +1,7 @@
-import Testing
 import Foundation
+import RoutingKit
 @testable import Passage
+import Testing
 
 @Suite("Passage Configuration Tests")
 struct PassageConfigurationTests {

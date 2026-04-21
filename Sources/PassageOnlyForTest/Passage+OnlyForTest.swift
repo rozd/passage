@@ -1,4 +1,4 @@
-import Passage
+public import Passage
 
 public extension Passage {
 

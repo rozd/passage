@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 /// Base protocol for password reset codes with common properties
 public protocol RestorationCode: Sendable {

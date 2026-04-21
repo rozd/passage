@@ -1,9 +1,9 @@
+import JWT
+@testable import Passage
+@testable import PassageOnlyForTest
 import Testing
 import Vapor
 import VaporTesting
-import JWTKit
-@testable import Passage
-@testable import PassageOnlyForTest
 
 /// Tests the private `buildRedirectURL(base:code:)` helper inside
 /// `Passage.FederatedLogin` by driving the full `login(identity:)` path and

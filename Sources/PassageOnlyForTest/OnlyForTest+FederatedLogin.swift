@@ -1,5 +1,5 @@
-import Passage
-import Vapor
+public import Passage
+public import Vapor
 
 // MARK: - OnlyForTest Federated Login Mock
 

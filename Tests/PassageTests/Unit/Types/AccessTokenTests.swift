@@ -1,7 +1,7 @@
-import Testing
 import Foundation
-import JWTKit
+import JWT
 @testable import Passage
+import Testing
 
 @Suite("Access Token Tests")
 struct AccessTokenTests {

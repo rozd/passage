@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 /// A passkey credential as persisted by the Relying Party. Concrete storage
 /// backends (Fluent, in-memory, third-party) implement this protocol by

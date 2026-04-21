@@ -1,9 +1,9 @@
-import Testing
-import Vapor
-import JWTKit
 import Foundation
+import JWT
 @testable import Passage
 @testable import PassageOnlyForTest
+import Testing
+import Vapor
 
 @Suite("Account Methods Unit Tests", .tags(.unit))
 struct AccountMethodsTests {

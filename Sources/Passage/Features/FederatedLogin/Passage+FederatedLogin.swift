@@ -14,7 +14,7 @@ public extension Passage {
 
 extension Passage.FederatedLogin {
 
-    var store: Passage.Store {
+    var store: any Passage.Store {
         request.store
     }
 

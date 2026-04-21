@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 /// Base protocol for verification codes with common properties
 public protocol VerificationCode: Sendable {

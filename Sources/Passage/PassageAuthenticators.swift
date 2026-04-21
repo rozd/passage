@@ -1,5 +1,5 @@
-import Vapor
-import JWT
+public import JWT
+public import Vapor
 
 // MARK: - Bearer Authenticator
 
@@ -26,7 +26,7 @@ public struct PassageSessionAuthenticator: AsyncAuthenticator {
 
     public func respond(
         to request: Request,
-        chainingTo next: AsyncResponder,
+        chainingTo next: any AsyncResponder,
     ) async throws -> Response {
         guard request.configuration.sessions.enabled else {
             return try await next.respond(to: request)
