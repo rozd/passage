@@ -1,5 +1,5 @@
+import Crypto
 import Vapor
-import CryptoKit
 
 // MARK: PublicKeyCredentialUserEntity
 
