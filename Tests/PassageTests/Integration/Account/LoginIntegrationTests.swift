@@ -5,7 +5,7 @@ import Testing
 import Vapor
 import VaporTesting
 
-@Suite(.tags(.integration, .login))
+@Suite(.tags(.integration, .login), .primeNIOSingletons)
 struct `Login Integration Tests` {
 
     // MARK: - Configuration Helper

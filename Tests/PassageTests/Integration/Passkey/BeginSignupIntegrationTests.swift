@@ -20,7 +20,7 @@ import VaporTesting
 ///    `PublicKeyCredentialUserEntity` handed to the service.
 /// 5. That the view context carries `signupBeginURL` / `signupFinishURL`
 ///    so the inline JS knows where to POST.
-@Suite(.tags(.integration, .passkey))
+@Suite(.tags(.integration, .passkey), .primeNIOSingletons)
 struct `Passkey Begin Signup Integration Tests` {
 
     // MARK: - Configuration Helpers

@@ -17,7 +17,7 @@ import XCTQueues
 // normalization a user who types the same password on two different keyboards
 // — one producing NFC, the other NFD — cannot log in interchangeably.
 
-@Suite(.tags(.aal1, .memorizedSecret))
+@Suite(.tags(.aal1, .memorizedSecret), .primeNIOSingletons)
 struct `AAL1 Unicode normalization` {
 
     @Sendable private func configure(_ app: Application) async throws {

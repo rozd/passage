@@ -7,7 +7,7 @@ import Vapor
 import VaporTesting
 import XCTQueues
 
-@Suite(.tags(.integration, .resetPassword))
+@Suite(.tags(.integration, .resetPassword), .primeNIOSingletons)
 struct `Password Reset Integration Tests` {
 
     // MARK: - Helpers

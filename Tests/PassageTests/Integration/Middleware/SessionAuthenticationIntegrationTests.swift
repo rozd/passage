@@ -10,7 +10,7 @@ extension Tag {
     @Tag static var session: Self
 }
 
-@Suite(.tags(.integration, .session))
+@Suite(.tags(.integration, .session), .primeNIOSingletons)
 struct `Sessions Authentication Integration Tests` {
 
     // MARK: - Configuration Helper

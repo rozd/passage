@@ -17,7 +17,7 @@ import Queues
 // not the plaintext password — an attacker with the database snapshot
 // cannot recover the password without a per-hash brute-force.
 
-@Suite(.tags(.aal1, .memorizedSecret))
+@Suite(.tags(.aal1, .memorizedSecret), .primeNIOSingletons)
 struct `AAL1 memorized secret storage` {
 
     @Sendable private func configure(_ app: Application) async throws {

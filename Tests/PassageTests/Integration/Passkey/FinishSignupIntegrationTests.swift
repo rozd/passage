@@ -19,7 +19,7 @@ import VaporTesting
 /// The mock `PasskeyService` bypasses cryptographic verification — real
 /// swift-webauthn verification is covered by `passage-webauthn`'s own tests
 /// and by end-to-end browser flows, not here.
-@Suite(.tags(.integration, .passkey))
+@Suite(.tags(.integration, .passkey), .primeNIOSingletons)
 struct `Passkey Finish Signup Integration Tests` {
 
     // MARK: - Fixtures

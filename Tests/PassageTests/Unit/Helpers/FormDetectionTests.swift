@@ -3,7 +3,7 @@ import Vapor
 import NIOCore
 @testable import Passage
 
-@Suite
+@Suite(.primeNIOSingletons)
 struct `Form Detection Tests` {
 
     // MARK: - isFormSubmission Tests

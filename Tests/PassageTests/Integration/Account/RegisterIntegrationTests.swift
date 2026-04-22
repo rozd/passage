@@ -7,7 +7,7 @@ import Vapor
 import VaporTesting
 import XCTQueues
 
-@Suite(.tags(.integration, .register))
+@Suite(.tags(.integration, .register), .primeNIOSingletons)
 struct `Register Integration Tests` {
 
     // MARK: - Sendable Capture Helper

@@ -18,7 +18,7 @@ import XCTQueues
 // attacker bypasses per-account caps by spreading requests across many
 // accounts.
 
-@Suite(.tags(.aal1, .throttling))
+@Suite(.tags(.aal1, .throttling), .primeNIOSingletons)
 struct `AAL1 online guessing protection` {
 
     @Sendable private func configure(_ app: Application) async throws {

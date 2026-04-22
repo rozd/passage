@@ -19,7 +19,7 @@ import XCTQueues
 // first 72 bytes. The test registers with a 73-byte password and tries to log
 // in with the 72-byte prefix: if login succeeds, the verifier is truncating.
 
-@Suite(.tags(.aal1, .memorizedSecret))
+@Suite(.tags(.aal1, .memorizedSecret), .primeNIOSingletons)
 struct `AAL1 memorized secret truncation` {
 
     @Sendable private func configure(_ app: Application) async throws {

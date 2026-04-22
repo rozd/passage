@@ -16,7 +16,7 @@ import Queues
 // NOT filter by character class — only length and blocklist membership are
 // grounds for rejection.
 
-@Suite(.tags(.aal1, .memorizedSecret))
+@Suite(.tags(.aal1, .memorizedSecret), .primeNIOSingletons)
 struct `AAL1 memorized secret character acceptance` {
 
     @Sendable private func configure(_ app: Application) async throws {

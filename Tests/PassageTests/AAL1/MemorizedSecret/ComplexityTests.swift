@@ -16,7 +16,7 @@ import Queues
 // Appendix A explicitly argues that mandatory mixed-case/digit/special-char
 // rules harm usability without improving strength.
 
-@Suite(.tags(.aal1, .memorizedSecret))
+@Suite(.tags(.aal1, .memorizedSecret), .primeNIOSingletons)
 struct `AAL1 no extra complexity requirements` {
 
     @Sendable private func configure(_ app: Application) async throws {

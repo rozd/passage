@@ -17,7 +17,7 @@ import Queues
 // memorized secret — and assert that inputs shorter than 8 characters are
 // rejected before a user record is persisted.
 
-@Suite(.tags(.aal1, .memorizedSecret))
+@Suite(.tags(.aal1, .memorizedSecret), .primeNIOSingletons)
 struct `AAL1 memorized secret minimum length` {
 
     @Sendable private func configure(_ app: Application) async throws {

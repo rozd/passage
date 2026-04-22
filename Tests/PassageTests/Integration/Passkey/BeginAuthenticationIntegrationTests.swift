@@ -12,7 +12,7 @@ import VaporTesting
 /// the endpoint accepts no body (empty `{}` from the browser is fine),
 /// always forwards `allowCredentials: nil` to the service, and persists
 /// a kind=.authentication challenge with `user == nil`.
-@Suite(.tags(.integration, .passkey))
+@Suite(.tags(.integration, .passkey), .primeNIOSingletons)
 struct `Passkey Begin Authentication Integration Tests` {
 
     // MARK: - Fixtures

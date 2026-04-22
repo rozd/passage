@@ -9,7 +9,7 @@ import Vapor
 import VaporTesting
 import XCTQueues
 
-@Suite(.tags(.integration))
+@Suite(.tags(.integration), .primeNIOSingletons)
 struct `Views Integration Tests` {
 
     // MARK: - Helpers

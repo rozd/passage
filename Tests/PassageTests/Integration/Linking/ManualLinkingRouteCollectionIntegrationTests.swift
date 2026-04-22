@@ -5,7 +5,7 @@ import Testing
 import Vapor
 import VaporTesting
 
-@Suite(.tags(.integration, .federatedLogin))
+@Suite(.tags(.integration, .federatedLogin), .primeNIOSingletons)
 struct `Manual Linking Route Collection Integration Tests` {
 
     // MARK: - Test Request/Response Types
