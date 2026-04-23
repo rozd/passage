@@ -11,7 +11,22 @@ jobs:
     permissions:
       contents: read
     uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
+    with:
+      # --num-workers 1 works around TSan false positives from Swift Concurrency's task allocator
+      extra_flags: '--explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable --parallel --num-workers 1'
     secrets: inherit
+
+  test-parallel:
+    permissions:
+      contents: read
+    if: ${{ !(github.event.pull_request.draft || false) }}
+    runs-on: ubuntu-latest
+    container: swift:6.3
+    steps:
+      - name: Check out Passage
+        uses: actions/checkout@v6
+      - name: Run tests
+        run: swift test --parallel
 
   submit-dependencies:
     permissions:
