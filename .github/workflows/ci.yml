@@ -1,93 +1,23 @@
 name: CI
-
-on:
-  pull_request:
-    types: [opened, reopened, synchronize, ready_for_review]
-
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+on:
+  pull_request: { types: [opened, reopened, synchronize, ready_for_review] }
+  push: { branches: [ main ] }
 
 jobs:
-  build-and-test:
-    if: ${{ !(github.event.pull_request.draft || false) }}
-    runs-on: macos-26
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+  unit-tests:
+    permissions:
+      contents: read
+    uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
+    with:
+      with_tsan: false
+    secrets: inherit
 
-      - name: Setup Swift
-        uses: swift-actions/setup-swift@v3
-        with:
-          swift-version: '6.3'
-
-      - name: Cache Swift packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            .build/checkouts
-            .build/repositories
-          key: ${{ runner.os }}-swift-6.3-spm-${{ hashFiles('Package.resolved') }}
-          restore-keys: |
-            ${{ runner.os }}-swift-6.3-spm-
-
-      - name: Build
-        run: swift build
-
-      - name: Test
-        run: swift test --enable-code-coverage
-
-      - name: Generate coverage report
-        id: coverage
-        run: |
-          PROFDATA=$(find .build -name "default.profdata" -type f | head -1)
-          XCTEST_BUNDLE=$(find .build -name "*.xctest" -type d | head -1)
-          if [ -n "$XCTEST_BUNDLE" ]; then
-            TEST_BINARY="$XCTEST_BUNDLE/Contents/MacOS/passagePackageTests"
-          fi
-          if [ -z "$TEST_BINARY" ] || [ ! -f "$TEST_BINARY" ]; then
-            TEST_BINARY=$(find .build -name "passagePackageTests" -type f -perm +111 | head -1)
-          fi
-
-          echo "PROFDATA: $PROFDATA"
-          echo "TEST_BINARY: $TEST_BINARY"
-
-          if [ -n "$PROFDATA" ] && [ -n "$TEST_BINARY" ] && [ -f "$TEST_BINARY" ]; then
-            xcrun llvm-cov report "$TEST_BINARY" -instr-profile="$PROFDATA" \
-              --ignore-filename-regex=".build|Tests" > coverage.txt
-            COVERAGE=$(tail -1 coverage.txt | awk '{print $10}' | sed 's/%//')
-            echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
-            echo "Coverage: $COVERAGE%"
-            cat coverage.txt
-          else
-            echo "coverage=0" >> $GITHUB_OUTPUT
-            echo "Could not find coverage data"
-          fi
-
-      - name: Export coverage to lcov
-        run: |
-          PROFDATA=$(find .build -name "default.profdata" -type f | head -1)
-          XCTEST_BUNDLE=$(find .build -name "*.xctest" -type d | head -1)
-          if [ -n "$XCTEST_BUNDLE" ]; then
-            TEST_BINARY="$XCTEST_BUNDLE/Contents/MacOS/passagePackageTests"
-          fi
-          if [ -z "$TEST_BINARY" ] || [ ! -f "$TEST_BINARY" ]; then
-            TEST_BINARY=$(find .build -name "passagePackageTests" -type f -perm +111 | head -1)
-          fi
-
-          if [ -n "$PROFDATA" ] && [ -n "$TEST_BINARY" ]; then
-            xcrun llvm-cov export "$TEST_BINARY" \
-              -instr-profile="$PROFDATA" \
-              -format=lcov \
-              --ignore-filename-regex=".build|Tests" > coverage.lcov
-          fi
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: coverage.lcov
-          fail_ci_if_error: false
-          verbose: true
+  submit-dependencies:
+    permissions:
+      contents: write
+    if: ${{ github.event_name == 'push' }}
+    uses: vapor/ci/.github/workflows/submit-deps.yml@main
+    secrets: inherit
