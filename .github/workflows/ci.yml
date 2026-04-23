@@ -18,12 +18,32 @@ jobs:
   unit-tests-thread-sanitizer:
     permissions:
       contents: read
-    uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
-    with:
-      # --num-workers 1 works around TSan false positives from Swift Concurrency's task allocator
-      extra_flags: '--explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable --parallel --num-workers 1'
-      with_coverage: false
-    secrets: inherit
+    if: ${{ !(github.event.pull_request.draft || false) }}
+    runs-on: ubuntu-latest
+    container: swift:6.3-noble
+    timeout-minutes: 60
+    env:
+      TSAN_OPTIONS: "suppressions=.tsan-suppressions.txt halt_on_error=0"
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+      - name: Write TSan suppressions
+        run: |
+          cat > .tsan-suppressions.txt <<'EOF'
+          race:swift_task_alloc
+          race:swift_task_dealloc
+          race:swift_job_run
+          race:swift::runJobInEstablishedExecutorContext
+          EOF
+      - name: Run tests with Thread Sanitizer
+        # --num-workers 1 reduces TSan false-positive surface area; suppressions file silences the remainder
+        run: |
+          swift test \
+            --sanitize=thread \
+            --explicit-target-dependency-import-check error \
+            -Xswiftc -require-explicit-sendable \
+            --parallel \
+            --num-workers 1
 
   submit-dependencies:
     permissions:

@@ -14,3 +14,5 @@ db.sqlite
 # Coverage
 coverage-report/
 coverage.lcov
+
+.tsan-suppressions.txt
