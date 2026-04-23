@@ -15,6 +15,16 @@ jobs:
       with_tsan: false
     secrets: inherit
 
+  unit-tests-thread-sanitizer:
+    permissions:
+      contents: read
+    uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
+    with:
+      # --num-workers 1 works around TSan false positives from Swift Concurrency's task allocator
+      extra_flags: '--explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable --parallel --num-workers 1'
+      with_coverage: false
+    secrets: inherit
+
   submit-dependencies:
     permissions:
       contents: write
