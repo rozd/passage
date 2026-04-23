@@ -50,7 +50,7 @@ jobs:
       - name: Get version from tags
         id: get-version
         run: |
-          LATEST_TAG="$({ git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0" ; } | cut -c 2-)"
+          LATEST_TAG="$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")"
           echo "Latest tag: ${LATEST_TAG}"
           echo "version=${LATEST_TAG}" >>"${GITHUB_OUTPUT}"
 
@@ -106,7 +106,7 @@ jobs:
       - name: Calculate next version
         id: calculate
         run: |
-          LATEST_TAG="$({ git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0" ; } | cut -c 2-)"
+          LATEST_TAG="$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")"
 
           echo "Latest tag: $LATEST_TAG"
           IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_TAG"
@@ -137,8 +137,8 @@ jobs:
 
           echo "Bump type: ${BUMP_TYPE}"
           echo "New version: ${NEW_VERSION}"
-          echo "version=${NEW_VERSION}" >>"${GITHUB_OUTPUT}
-          echo "previous-tag=${LATEST_TAG}" >>"${GITHUB_OUTPUT}"
+          echo "version=${NEW_VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "previous-tag=${LATEST_TAG}" >> "${GITHUB_OUTPUT}"
 
   public-release:
     runs-on: ubuntu-latest
