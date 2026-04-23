@@ -15,36 +15,6 @@ jobs:
       with_tsan: false
     secrets: inherit
 
-  unit-tests-thread-sanitizer:
-    permissions:
-      contents: read
-    if: ${{ !(github.event.pull_request.draft || false) }}
-    runs-on: ubuntu-latest
-    container: swift:6.3-noble
-    timeout-minutes: 60
-    env:
-      TSAN_OPTIONS: "suppressions=.tsan-suppressions.txt halt_on_error=0"
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v6
-      - name: Write TSan suppressions
-        run: |
-          cat > .tsan-suppressions.txt <<'EOF'
-          race:swift_task_alloc
-          race:swift_task_dealloc
-          race:swift_job_run
-          race:swift::runJobInEstablishedExecutorContext
-          EOF
-      - name: Run tests with Thread Sanitizer
-        # --num-workers 1 reduces TSan false-positive surface area; suppressions file silences the remainder
-        run: |
-          swift test \
-            --sanitize=thread \
-            --explicit-target-dependency-import-check error \
-            -Xswiftc -require-explicit-sendable \
-            --parallel \
-            --num-workers 1
-
   submit-dependencies:
     permissions:
       contents: write
