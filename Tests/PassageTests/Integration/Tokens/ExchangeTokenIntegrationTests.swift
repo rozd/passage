@@ -6,7 +6,7 @@ import Testing
 import Vapor
 import VaporTesting
 
-@Suite(.tags(.integration, .exchangeCode), .primeNIOSingletons)
+@Suite(.tags(.integration, .exchangeCode))
 struct `Exchange Token Integration Tests` {
 
     // MARK: - Configuration Helper

@@ -17,7 +17,7 @@ import Queues
 // the user protocol. The test probes the public route table for any
 // hint-adjacent endpoint reachable without authentication.
 
-@Suite(.tags(.aal1, .memorizedSecret), .primeNIOSingletons)
+@Suite(.tags(.aal1, .memorizedSecret))
 struct `AAL1 no password hint surface` {
 
     @Sendable private func configure(_ app: Application) async throws {

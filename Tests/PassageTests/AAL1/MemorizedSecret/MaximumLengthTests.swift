@@ -16,7 +16,7 @@ import JWT
 // password-manager output routinely exceed short upper bounds, so this
 // clause blocks the common anti-pattern of a 20-character cap.
 
-@Suite(.tags(.aal1, .memorizedSecret), .primeNIOSingletons)
+@Suite(.tags(.aal1, .memorizedSecret))
 struct `AAL1 memorized secret maximum length` {
 
     @Sendable private func configure(_ app: Application) async throws {

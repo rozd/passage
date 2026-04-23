@@ -17,7 +17,7 @@ import Queues
 // the PasswordPolicy — Mirror-reflecting the policy is a compile-agnostic
 // way to assert no such field has crept in.
 
-@Suite(.tags(.aal1, .memorizedSecret), .primeNIOSingletons)
+@Suite(.tags(.aal1, .memorizedSecret))
 struct `AAL1 no arbitrary password rotation` {
 
     @Test(.tags(.aal1, .memorizedSecret, .authenticator, .unit, .should))

@@ -14,7 +14,7 @@ import VaporTesting
 /// matches the user the challenge was issued to at `begin` time; a mismatch
 /// is surfaced as `invalidPasskeyChallenge` (401) rather than being silently
 /// attributed to the wrong account.
-@Suite(.tags(.integration, .passkey), .primeNIOSingletons)
+@Suite(.tags(.integration, .passkey))
 struct `Passkey Finish Registration (authenticated) Integration Tests` {
 
     private static let minimalFinishBody = #"{"id":"any","type":"public-key","rawId":"any","response":{"clientDataJSON":"","attestationObject":"","transports":["internal"]}}"#

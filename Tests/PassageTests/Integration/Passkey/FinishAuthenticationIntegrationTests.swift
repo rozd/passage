@@ -16,7 +16,7 @@ import VaporTesting
 /// finds the seeded challenge, the stored credential's sign-count is updated,
 /// the challenge is consumed (one-shot), and the response carries an exchange
 /// code.
-@Suite(.tags(.integration, .passkey), .primeNIOSingletons)
+@Suite(.tags(.integration, .passkey))
 struct `Passkey Finish Authentication Integration Tests` {
 
     // MARK: - Fixtures

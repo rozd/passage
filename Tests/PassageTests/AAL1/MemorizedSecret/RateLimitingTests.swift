@@ -22,7 +22,7 @@ import Queues
 // throttling ships, the test will fail with every attempt returning 401
 // instead.
 
-@Suite(.tags(.aal1, .memorizedSecret, .throttling), .primeNIOSingletons)
+@Suite(.tags(.aal1, .memorizedSecret, .throttling))
 struct `AAL1 memorized secret rate limiting` {
 
     @Sendable private func configure(_ app: Application) async throws {

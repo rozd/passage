@@ -14,7 +14,7 @@ import VaporTesting
 /// the bearer/session, not the request body.
 ///
 /// The parallel public signup flow lives at `BeginSignupIntegrationTests`.
-@Suite(.tags(.integration, .passkey), .primeNIOSingletons)
+@Suite(.tags(.integration, .passkey))
 struct `Passkey Begin Registration (authenticated) Integration Tests` {
 
     final class Holder: @unchecked Sendable {

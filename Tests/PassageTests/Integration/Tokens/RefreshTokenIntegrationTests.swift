@@ -5,7 +5,7 @@ import Testing
 import Vapor
 import VaporTesting
 
-@Suite(.tags(.integration), .primeNIOSingletons)
+@Suite(.tags(.integration))
 struct `Refresh Token Integration Tests` {
 
     // MARK: - Configuration Helper

@@ -6,7 +6,7 @@ import Testing
 import Vapor
 import VaporTesting
 
-@Suite(.tags(.integration), .primeNIOSingletons)
+@Suite(.tags(.integration))
 struct `PassageGuard Integration Tests` {
 
     // MARK: - Configuration Helpers

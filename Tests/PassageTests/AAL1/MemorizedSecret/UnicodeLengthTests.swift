@@ -20,7 +20,7 @@ import XCTQueues
 // floor would reject a perfectly valid 8-code-point password whose clusters
 // happen to combine — contrary to §5.1.1.2-f.
 
-@Suite(.tags(.aal1, .memorizedSecret), .primeNIOSingletons)
+@Suite(.tags(.aal1, .memorizedSecret))
 struct `AAL1 Unicode code-point counting` {
 
     @Sendable private func configure(_ app: Application) async throws {

@@ -15,7 +15,7 @@ import Queues
 // pet?") when choosing memorized secrets. Passage enforces this
 // structurally by not registering any KBA route.
 
-@Suite(.tags(.aal1, .memorizedSecret), .primeNIOSingletons)
+@Suite(.tags(.aal1, .memorizedSecret))
 struct `AAL1 no security-question surface` {
 
     @Sendable private func configure(_ app: Application) async throws {

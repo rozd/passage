@@ -21,7 +21,7 @@ import Queues
 // compliance work must land. Until that API exists the file is expected to
 // fail to compile; that failure is the Phase 3 trigger, not a regression.
 
-@Suite(.tags(.aal1, .memorizedSecret), .primeNIOSingletons)
+@Suite(.tags(.aal1, .memorizedSecret))
 struct `AAL1 compromised-value blocklist` {
 
     @Sendable private func configureWithBlocklist(_ app: Application) async throws {

@@ -7,7 +7,7 @@ import Vapor
 import VaporTesting
 import XCTQueues
 
-@Suite(.tags(.integration, .passwordless), .primeNIOSingletons)
+@Suite(.tags(.integration, .passwordless))
 struct `Passwordless Authentication Integration Tests` {
 
     // MARK: - Helpers
