@@ -86,7 +86,12 @@ struct `Passkey Finish Signup Integration Tests` {
                 phone: .init(codeLength: 6, codeExpiration: 600, maxAttempts: 5),
                 useQueues: false
             ),
-            passkey: .init()
+            passkey: .init(
+                routes: .init(
+                    signupBegin: .default,
+                    signupFinish: .default
+                )
+            )
         )
 
         try await app.passage.configure(services: services, configuration: configuration)
@@ -388,7 +393,10 @@ struct `Passkey Finish Signup Integration Tests` {
         // route path. We inline the whole config here to isolate the
         // customization.
         let holder = Holder()
+        // Signup registers only when both sides are set; pair the custom finish
+        // with the default begin to exercise the override on finish alone.
         let customRoutes = Passage.Configuration.Passkey.Routes(
+            signupBegin: .default,
             signupFinish: .init(path: "done")
         )
         try await withApp(configure: { app in

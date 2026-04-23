@@ -34,12 +34,18 @@ struct `Passkey Begin Signup Integration Tests` {
     /// Defaults used across the suite: RP "example.com" on localhost, 5-minute
     /// challenge TTL. Override `passkeyService` to test failure paths or to
     /// assert what the service received.
+    ///
+    /// Signup is opt-in on `Passkey.Routes`; this suite exercises that flow,
+    /// so the default `passkeyRoutes` enables it via `.default` on both sides.
     @Sendable private func configure(
         _ app: Application,
         passkeyService: (any Passage.PasskeyService)? = MockPasskeyService(),
         views: Passage.Configuration.Views = .init(),
         routes: Passage.Configuration.Routes = .init(),
-        passkeyRoutes: Passage.Configuration.Passkey.Routes = .init(),
+        passkeyRoutes: Passage.Configuration.Passkey.Routes = .init(
+            signupBegin: .default,
+            signupFinish: .default
+        ),
         includePasskeyConfig: Bool = true
     ) async throws {
         await app.jwt.keys.add(
@@ -213,6 +219,10 @@ struct `Passkey Begin Signup Integration Tests` {
                     useQueues: false
                 ),
                 passkey: .init(
+                    routes: .init(
+                        signupBegin: .default,
+                        signupFinish: .default
+                    ),
                     policy: policy
                 )
             )
@@ -374,8 +384,11 @@ struct `Passkey Begin Signup Integration Tests` {
 
     @Test
     func `Begin route honors custom registerBegin path from configuration`() async throws {
+        // Signup registers only when both sides are set; pair the custom begin
+        // with the default finish to exercise the override on begin alone.
         let customRoutes = Passage.Configuration.Passkey.Routes(
-            signupBegin: .init(path: "start")
+            signupBegin: .init(path: "start"),
+            signupFinish: .default
         )
 
         try await withApp(configure: { app in
