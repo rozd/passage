@@ -12,7 +12,7 @@ jobs:
       contents: read
     uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
     with:
-      with_tasn: false
+      with_tsan: false
     secrets: inherit
 
   submit-dependencies:
