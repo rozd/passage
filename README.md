@@ -1,8 +1,13 @@
+<div align="center">
+
 # Passage
-[![Release](https://img.shields.io/github/v/release/vapor-community/passage)](https://github.com/vapor-community/passage/releases)
-[![Swift 6.3](https://img.shields.io/badge/Swift-6.3-orange.svg)](https://swift.org)
-[![License](https://img.shields.io/github/license/vapor-community/passage)](LICENSE)
-[![codecov](https://codecov.io/gh/vapor-community/passage/branch/main/graph/badge.svg)](https://codecov.io/gh/vapor-community/passage)
+[![Release](https://img.shields.io/github/v/release/vapor-community/passage?style=plastic&logo=github&logoColor=ccc)](https://github.com/vapor-community/passage/releases)
+[![Swift 6.3+](https://design.vapor.codes/images/swift63up.svg)](https://swift.org)
+[![License](https://design.vapor.codes/images/mitlicense.svg)](./LICENSE)
+[![Continous integration](https://img.shields.io/github/actions/workflow/status/vapor-community/passage/ci.yml?event=push&style=plastic&logo=github&label=tests&logoColor=ccc)](https://github.com/vapor-community/passage/actions/workflows/ci.yml)
+[![Code coverage](https://img.shields.io/codecov/c/github/vapor-community/passage?style=plastic&logo=codecov&label=codecov)](https://codecov.io/gh/vapor-community/passage)
+
+</div>
 
 A comprehensive identity management and authentication framework for Vapor applications built with Swift. Passage provides secure authentication with minimal configuration while remaining highly extensible through protocol-based architecture.
 
@@ -30,7 +35,7 @@ Use with caution. The library is functional, but the API is subject to change be
 
 ## Standards Compliance
 
-Passage targets **NIST SP 800-63B Authenticator Assurance Level 1 (AAL1)**, and ships an executable compliance suite at [`Tests/PassageTests/AAL1/`](./Tests/PassageTests/AAL1/) that pins behavior to specific spec clauses. Coverage spans memorized secrets (§5.1.1), session management (§7.1), reauthentication (§4.1.3 / §7.2), and online-guessing throttling (§5.2.2) — every test name cites the clause it asserts, so the suite doubles as a machine-checked compliance ledger.
+Passage targets [**NIST SP 800-63B Authenticator Assurance Level 1 (AAL1)**](https://pages.nist.gov/800-63-3-Implementation-Resources/63B/AAL/), and ships an executable compliance suite at [`Tests/PassageTests/AAL1/`](./Tests/PassageTests/AAL1/) that pins behavior to specific spec clauses. Coverage spans memorized secrets (§5.1.1), session management (§7.1), reauthentication (§4.1.3 / §7.2), and online-guessing throttling (§5.2.2) — every test name cites the clause it asserts, so the suite doubles as a machine-checked compliance ledger.
 
 ## Getting Started
 
@@ -41,7 +46,7 @@ Add Passage to your `Package.swift`:
 ```swift
 dependencies: [
     // 🛂 Authentication and user management for Vapor.
-    .package(url: "https://github.com/vapor-community/passage", branch: "main"),
+    .package(url: "https://github.com/vapor-community/passage.git", from: "0.3.0"),
 ]
 ```
 
