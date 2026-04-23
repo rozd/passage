@@ -12,10 +12,14 @@ extension Passage.Passkey {
 
             grouped.group(routes.group) { group in
                 // Registration ceremony for new users — discoverable, public.
-                group
-                    .post(routes.signupBegin.path, use: self.beginSignup)
-                group
-                    .post(routes.signupFinish.path, use: self.finishSignup)
+                // Opt-in: the routes register only when both sides are set.
+                if let signupBegin = routes.signupBegin,
+                   let signupFinish = routes.signupFinish {
+                    group
+                        .post(signupBegin.path, use: self.beginSignup)
+                    group
+                        .post(signupFinish.path, use: self.finishSignup)
+                }
 
                 // Registration ceremony – discoverable, but requires authentication to initiate and complete.
                 let authed = group
@@ -41,6 +45,9 @@ extension Passage.Passkey {
 extension Passage.Passkey.RouteCollection {
 
     fileprivate func beginSignup(_ req: Request) async throws -> Response {
+        guard let signupBeginPath = routes.signupBeginPath else {
+            throw Abort(.notFound)
+        }
         do {
             let form = try req.decodeContentAsFormOfType(req.contracts.passkeySignupForm)
             let body = try await req.passkey.beginSignup(form: form)
@@ -51,7 +58,7 @@ extension Passage.Passkey.RouteCollection {
 
             return req.views.handlePasskeySignupFormSuccess(
                 of: view,
-                at: groupPath + routes.signupBeginPath,
+                at: groupPath + signupBeginPath,
             )
         } catch {
             guard req.isFormSubmission, req.isWaitingForHTML, let view = req.configuration.views.passkeySignup else {
@@ -60,7 +67,7 @@ extension Passage.Passkey.RouteCollection {
 
             return req.views.handlePasskeySignupFormFailure(
                 of: view,
-                at: groupPath + routes.signupBeginPath,
+                at: groupPath + signupBeginPath,
                 with: error
             )
         }

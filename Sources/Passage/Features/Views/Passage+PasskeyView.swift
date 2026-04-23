@@ -11,8 +11,14 @@ extension Passage.Views {
         let params = try request.query.decode(PasskeySignupViewParams.self)
 
         let group = request.configuration.routes.group
-        let beginURL = "/" + (group + request.configuration.passkey.routes.signupBeginPath).string
-        let finishURL = "/" + (group + request.configuration.passkey.routes.signupFinishPath).string
+
+        let beginURL = request.configuration.passkey.routes.signupBeginPath.map {
+            "/" + (group + $0).string
+        }
+
+        let finishURL = request.configuration.passkey.routes.signupFinishPath.map {
+            "/" + (group + $0).string
+        }
 
         return try await request.view.render(
             view.template,

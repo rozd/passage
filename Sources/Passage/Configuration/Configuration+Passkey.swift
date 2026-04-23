@@ -71,8 +71,8 @@ public extension Passage.Configuration {
             }
 
             public let group: [PathComponent]
-            public let signupBegin: SignupBegin
-            public let signupFinish: SignupFinish
+            public let signupBegin: SignupBegin?
+            public let signupFinish: SignupFinish?
             public let registerBegin: RegisterBegin
             public let registerFinish: RegisterFinish
             public let authenticateBegin: AuthenticateBegin
@@ -80,8 +80,8 @@ public extension Passage.Configuration {
 
             public init(
                 group: [PathComponent] = ["passkey"],
-                signupBegin: SignupBegin = .default,
-                signupFinish: SignupFinish = .default,
+                signupBegin: SignupBegin? = nil,
+                signupFinish: SignupFinish? = nil,
                 registerBegin: RegisterBegin = .default,
                 registerFinish: RegisterFinish = .default,
                 authenticateBegin: AuthenticateBegin = .default,
@@ -139,12 +139,18 @@ public extension Passage.Configuration {
 // MARK: -
 
 extension Passage.Configuration.Passkey.Routes {
-    var signupBeginPath: [PathComponent] {
-        return group + signupBegin.path
+    var signupBeginPath: [PathComponent]? {
+        guard let path = signupBegin?.path else {
+            return nil
+        }
+        return group + path
     }
 
-    var signupFinishPath: [PathComponent] {
-        return group + signupFinish.path
+    var signupFinishPath: [PathComponent]? {
+        guard let path = signupFinish?.path else {
+            return nil
+        }
+        return group + path
     }
 
     var registerBeginPath: [PathComponent] {
