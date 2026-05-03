@@ -52,6 +52,30 @@ public extension Passage.Hooks {
             for user: any User,
             on request: Request,
         ) async
+
+        // MARK: Authentication Hooks
+
+        func willBeginAuthentication(
+            on request: Request,
+        ) async throws
+
+        func didBeginAuthentication(
+            with result: PasskeyBeginResult,
+            on request: Request,
+        ) async
+
+        func willFinishAuthentication(
+            with credential: StoredPasskeyCredential,
+            for user: any User,
+            on request: Request,
+        ) async throws
+
+        func didFinishAuthentication(
+            with credential: StoredPasskeyCredential,
+            for user: any User,
+            code: String,
+            on request: Request,
+        ) async
     }
 
 }
@@ -104,6 +128,28 @@ public extension Passage.Hooks.Passkey {
         for user: any User,
         on request: Request,
     ) async {}
+
+    func willBeginAuthentication(
+        on request: Request,
+    ) async throws {}
+
+    func didBeginAuthentication(
+        with result: PasskeyBeginResult,
+        on request: Request,
+    ) async {}
+
+    func willFinishAuthentication(
+        with credential: StoredPasskeyCredential,
+        for user: any User,
+        on request: Request,
+    ) async throws {}
+
+    func didFinishAuthentication(
+        with credential: StoredPasskeyCredential,
+        for user: any User,
+        code: String,
+        on request: Request,
+    ) async {}
 }
 
 // MARK: - Closure-Based Hooks
@@ -119,6 +165,11 @@ public struct _PasskeyHooksClosures: Passage.Hooks.Passkey {
     let _didBeginRegistration: (@Sendable (PasskeyBeginResult, any User, Request) async -> Void)?
     let _willFinishRegistration: (@Sendable ((any User)?, Request) async throws -> Void)?
     let _didFinishRegistration: (@Sendable (any User, Request, StoredPasskeyCredential) async -> Void)?
+
+    let _willBeginAuthentication: (@Sendable (Request) async throws -> Void)?
+    let _didBeginAuthentication: (@Sendable (PasskeyBeginResult, Request) async -> Void)?
+    let _willFinishAuthentication: (@Sendable (StoredPasskeyCredential, any User, Request) async throws -> Void)?
+    let _didFinishAuthentication: (@Sendable (StoredPasskeyCredential, any User, String, Request) async -> Void)?
 
     public func willBeginGuestRegistration(
         with form: any PasskeySignupForm,
@@ -143,9 +194,9 @@ public struct _PasskeyHooksClosures: Passage.Hooks.Passkey {
     }
 
     public func didFinishGuestRegistration(
+        with credential: StoredPasskeyCredential,
         for user: any User,
         on request: Request,
-        with credential: StoredPasskeyCredential,
     ) async {
         await _didFinishGuestRegistration?(user, request, credential)
     }
@@ -174,11 +225,41 @@ public struct _PasskeyHooksClosures: Passage.Hooks.Passkey {
     }
 
     public func didFinishRegistration(
+        with credential: StoredPasskeyCredential,
         for user: any User,
         on request: Request,
-        with credential: StoredPasskeyCredential,
     ) async {
         try await _didFinishRegistration?(user, request, credential)
+    }
+
+    public func willBeginAuthentication(
+        on request: Request,
+    ) async throws {
+        try await _willBeginAuthentication?(request)
+    }
+
+    public func didBeginAuthentication(
+        with result: PasskeyBeginResult,
+        on request: Request,
+    ) async {
+        await _didBeginAuthentication?(result, request)
+    }
+
+    public func willFinishAuthentication(
+        with credential: StoredPasskeyCredential,
+        for user: any User,
+        on request: Request,
+    ) async throws {
+        try await _willFinishAuthentication?(credential, user, request)
+    }
+
+    public func didFinishAuthentication(
+        with credential: StoredPasskeyCredential,
+        for user: any User,
+        code: String,
+        on request: Request,
+    ) async {
+        await _didFinishAuthentication?(credential, user, code, request)
     }
 }
 
@@ -193,7 +274,12 @@ public extension Passage.Hooks.Passkey where Self == _PasskeyHooksClosures {
         willBeginRegistration       : (@Sendable (any User, PublicKeyCredentialUserEntity, Request) async throws -> Void)? = nil,
         didBeginRegistration        : (@Sendable (PasskeyBeginResult, any User, Request) async -> Void)? = nil,
         willFinishRegistration      : (@Sendable ((any User)?, Request) async throws -> Void)? = nil,
-        didFinishRegistration       : (@Sendable (any User, Request, StoredPasskeyCredential) async -> Void)? = nil
+        didFinishRegistration       : (@Sendable (any User, Request, StoredPasskeyCredential) async -> Void)? = nil,
+
+        willBeginAuthentication     : (@Sendable (Request) async throws -> Void)? = nil,
+        didBeginAuthentication      : (@Sendable (PasskeyBeginResult, Request) async -> Void)? = nil,
+        willFinishAuthentication    : (@Sendable (StoredPasskeyCredential, any User, Request) async throws -> Void)? = nil,
+        didFinishAuthentication     : (@Sendable (StoredPasskeyCredential, any User, String, Request) async -> Void)? = nil,
     ) -> some Passage.Hooks.Passkey {
         _PasskeyHooksClosures(
             _willBeginGuestRegistration : willBeginGuestRegistration,
@@ -203,7 +289,11 @@ public extension Passage.Hooks.Passkey where Self == _PasskeyHooksClosures {
             _willBeginRegistration      : willBeginRegistration,
             _didBeginRegistration       : didBeginRegistration,
             _willFinishRegistration     : willFinishRegistration,
-            _didFinishRegistration      : didFinishRegistration
+            _didFinishRegistration      : didFinishRegistration,
+            _willBeginAuthentication    : willBeginAuthentication,
+            _didBeginAuthentication     : didBeginAuthentication,
+            _willFinishAuthentication   : willFinishAuthentication,
+            _didFinishAuthentication    : didFinishAuthentication
         )
     }
 

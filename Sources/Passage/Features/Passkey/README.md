@@ -514,8 +514,12 @@ Passkey ceremonies expose `will*` / `did*` lifecycle hooks via `Passage.Hooks.Pa
 | `willFinishRegistration(for: user, on: request)` | After the bound-user equality check passes |
 | `didFinishGuestRegistration(with: credential, for: user, on: request)` | After the credential is persisted and the challenge consumed (guest flow) |
 | `didFinishRegistration(with: credential, for: user, on: request)` | After the credential is persisted and the challenge consumed (auth flow) |
+| `willBeginAuthentication(on: request)` | After the discoverable-login policy check, before `service.beginAuthentication` runs |
+| `didBeginAuthentication(with: result, on: request)` | After the authentication challenge is persisted, before responding |
+| `willFinishAuthentication(with: credential, for: user, on: request)` | After signature verification + user resolution, **before** sign-count update / challenge consumption / session login / exchange-code mint. The auth-equivalent of `Account.willLogin` — gate post-authentication policy here (suspended account, revoked credential, MFA step-up). |
+| `didFinishAuthentication(with: credential, for: user, code: String, on: request)` | After the session is established and the exchange code minted, before responding |
 
-The `willFinish*` hooks are deliberately ordered **after** the binding/TOCTOU checks — handlers see only ceremonies that will succeed, so audit logs / notifications are not attributed to victims on hijack attempts.
+The `willFinish*` hooks are deliberately ordered **after** the binding/TOCTOU/signature checks — handlers see only ceremonies that will succeed, so audit logs / notifications are not attributed to victims on hijack attempts. Throwing from any `will*` hook aborts the ceremony before any state changes (no challenge consumed, no sign-count bumped, no session established).
 
 Wire hooks via the `.hook(...)` factory on `Passage.Hooks.Passkey`:
 
@@ -527,6 +531,18 @@ hooks: .init(
         },
         willFinishRegistration: { user, request in
             // gate authenticated-flow finishes on a custom policy
+        },
+        willFinishAuthentication: { credential, user, request in
+            // post-auth policy: suspended accounts, MFA step-up, etc.
+            guard !user.isSuspended else {
+                throw Abort(.forbidden, reason: "Account suspended")
+            }
+        },
+        didFinishAuthentication: { credential, user, code, request in
+            await analytics.recordPasskeyLogin(
+                userID: user.id, credentialID: credential.credentialID,
+                isBackedUp: credential.isBackedUp
+            )
         }
     )
 )

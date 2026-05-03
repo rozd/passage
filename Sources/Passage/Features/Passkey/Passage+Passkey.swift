@@ -196,6 +196,8 @@ extension Passage.Passkey {
             throw AuthenticationError.discoverableLoginDisabled
         }
 
+        try await request.hooks.passkey?.willBeginAuthentication(on: request)
+
         let result = try await service.beginAuthentication(
             allowCredentials: nil,
             policy: config.policy,
@@ -203,6 +205,10 @@ extension Passage.Passkey {
         )
 
         try await challenges.createPasskeyChallenge(from: result.challenge)
+
+        await request.hooks.passkey?.didBeginAuthentication(
+            with: result, on: request
+        )
 
         return result.body
     }
@@ -238,6 +244,11 @@ extension Passage.Passkey {
             },
         )
 
+        let user = result.matchedCredential.user
+        try await request.hooks.passkey?.willFinishAuthentication(
+            with: result.matchedCredential, for: user, on: request
+        )
+
         try await credentials.updatePasskeyCredentialAfterAuthentication(
             forCredentialID: result.matchedCredential.credentialID,
             newSignCount: result.newSignCount,
@@ -245,9 +256,13 @@ extension Passage.Passkey {
         )
         try await challenges.consume(passkeyChallenge: result.matchedChallenge)
 
-        let user = result.matchedCredential.user
         request.passage.login(user)
         let code = try await request.tokens.createExchangeCode(for: user)
+
+        await request.hooks.passkey?.didFinishAuthentication(
+            with: result.matchedCredential, for: user, code: code, on: request
+        )
+
         return (user, code)
     }
 

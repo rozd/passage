@@ -632,7 +632,7 @@ Hook protocols expose `will*` / `did*` pairs around each flow. `will*` methods a
 
 `willLogin` fires **after** the password check passes — it is the gate where you enforce post-authentication policy (account suspension, license expiry, forced MFA), not credential validation.
 
-**`Passage.Hooks.Passkey`** — Passkey ceremonies (guest registration, authenticated registration). `will*` hooks for the finish path fire **after** the binding / TOCTOU checks, so handlers see only ceremonies that will succeed and audit logs are not attributed to victims on hijack attempts.
+**`Passage.Hooks.Passkey`** — Passkey ceremonies (guest registration, authenticated registration, authentication). `will*` hooks for the finish path fire **after** the binding / TOCTOU / signature checks, so handlers see only ceremonies that will succeed and audit logs are not attributed to victims on hijack attempts.
 
 | Hook                              | Fires…                                                                   |
 |-----------------------------------|--------------------------------------------------------------------------|
@@ -644,6 +644,10 @@ Hook protocols expose `will*` / `did*` pairs around each flow. `will*` methods a
 | `willFinishRegistration`          | After the bound-user equality check passes (authenticated flow)          |
 | `didFinishGuestRegistration`      | After the credential is persisted and challenge consumed (guest flow)    |
 | `didFinishRegistration`           | After the credential is persisted and challenge consumed (authenticated) |
+| `willBeginAuthentication`         | After the discoverable-login policy check, before the WebAuthn service   |
+| `didBeginAuthentication`          | After the authentication challenge is persisted                          |
+| `willFinishAuthentication`        | After signature verification + user resolution, before sign-count update / challenge consumption / login (auth-equivalent of `Account.willLogin` — gate suspended accounts, MFA step-up, etc.) |
+| `didFinishAuthentication`         | After the session is established and the exchange code minted            |
 
 `Passage.Hooks` covers Account and Passkey today and is shaped to grow additional domains over time.
 
