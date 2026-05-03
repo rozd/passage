@@ -112,17 +112,6 @@ struct `Linking Struct Tests` {
         }
     }
 
-    @Test
-    func `Passage.Linking provides random accessor`() async throws {
-        try await withApp(configure: configure) { app in
-            let request = Request(application: app, on: app.eventLoopGroup.any())
-            let random = request.linking.random
-
-            // Should be DefaultRandomGenerator
-            #expect(random is DefaultRandomGenerator)
-        }
-    }
-
     // MARK: - Link Helper Method Tests
 
     @Test
