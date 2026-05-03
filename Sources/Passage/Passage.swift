@@ -16,12 +16,14 @@ public struct Passage: Sendable {
         services: Services,
         contracts: Contracts = .init(),
         configuration: Configuration,
+        hooks: Hooks = .init(),
     ) async throws {
 
         self.storage = Storage(
             services: services,
             contracts: contracts,
-            configuration: configuration
+            configuration: configuration,
+            hooks: hooks,
         )
 
         try await app.jwt.keys.add(jwksJSON: configuration.jwt.jwks.json)
@@ -127,4 +129,7 @@ extension Passage {
         storage.configuration
     }
 
+    var hooks: Hooks {
+        storage.hooks
+    }
 }

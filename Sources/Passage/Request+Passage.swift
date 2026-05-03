@@ -46,4 +46,7 @@ extension Request {
         application.passage.throttle
     }
 
+    var hooks: Passage.Hooks {
+        application.passage.hooks
+    }
 }

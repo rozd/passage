@@ -31,6 +31,7 @@ Use with caution. The library is functional, but the API is subject to change be
 - 📋 **Web Forms** - Built-in Leaf templates for registration, login, and password reset
 - ⚡ **Async Queue Support** - Optional background job processing via Vapor Queues
 - 🔧 **Protocol-Based Services** - Pluggable storage, email, phone, and OAuth providers
+- 🪝 **Lifecycle Hooks** - Async will/did callbacks around register, login, and logout for custom policy and audit
 - 🎨 **Fully Customizable** - Configure routes, tokens, templates, and behavior
 
 ## Standards Compliance
@@ -131,6 +132,7 @@ Passage is designed for flexibility through:
 - **Protocol-Based Services** - Implement your own storage, email delivery, phone delivery, or OAuth providers
 - **Extensible Forms** - Default form types can be replaced with custom implementations via contracts
 - **Stylable Default Views** - Default Leaf views with different styles and themes
+- **Lifecycle Hooks** - Inject async pre/post callbacks around register, login, and logout flows; throw from `will*` hooks to gate flows on custom policy
 
 ## Services to Implement
 
@@ -576,6 +578,54 @@ Four styles ship (`.neobrutalism`, `.neomorphism`, `.minimalism`, `.material`) a
 
 #### Feature guide
 See [`Sources/Passage/Features/Views/README.md`](./Sources/Passage/Features/Views/README.md) for the full view list, theme options, and custom-color recipes.
+
+#### Example
+_No dedicated example yet — see [rozd/passage-example](https://github.com/rozd/passage-example) for the canonical walkthrough._
+</details>
+
+<details>
+<summary><h3>🪝 Hooks</h3> — async lifecycle callbacks fired around register, login, and logout flows.</summary>
+
+#### Configuration
+Hooks are an optional fourth parameter on `app.passage.configure(...)`, alongside `services`, `contracts`, and `configuration`:
+
+```swift
+try await app.passage.configure(
+    services: .init(/* ... */),
+    configuration: .init(/* ... */),
+    hooks: .init(
+        account: .hook(
+            didRegisterUser: { user, request in
+                request.logger.info("registered \(user.id ?? "?")")
+            },
+            willLoginUser: { user, request in
+                guard !user.isSuspended else {
+                    throw Abort(.forbidden, reason: "Account suspended")
+                }
+            },
+            didLoginUser: { user, request in
+                try? await analytics.track(.login, user: user)
+            }
+        )
+    )
+)
+```
+
+`Passage.Hooks.Account` exposes three `will*` / `did*` pairs — one per Account flow. `will*` methods are `async throws` and abort the flow when they throw; `did*` methods are non-throwing observers that fire after the flow has succeeded. All methods have empty default implementations, so a custom `Passage.Hooks.Account` type only overrides the events it cares about. The `.hook(...)` factory shown above is convenient for ad-hoc wiring; for richer behavior conform a type to `Passage.Hooks.Account` directly.
+
+| Hook                | Fires…                                                              |
+|---------------------|---------------------------------------------------------------------|
+| `willRegister`      | Before password validation and user creation                        |
+| `didRegister`       | After user creation, before the verification code is dispatched     |
+| `willLogin`         | After credentials succeed, before the session is established        |
+| `didLogin`          | After the session is established, before access tokens are issued   |
+| `willLogout`        | Before the session is cleared                                       |
+| `didLogout`         | After the session is cleared, before the refresh token is revoked   |
+
+`willLogin` fires **after** the password check passes — it is the gate where you enforce post-authentication policy (account suspension, license expiry, forced MFA), not credential validation. Hooks currently cover the Account flows; the `Passage.Hooks` container is shaped to grow additional domains over time.
+
+#### Feature guide
+See [`Sources/Passage/Hooks/Passage+Hooks.swift`](./Sources/Passage/Hooks/Passage+Hooks.swift) for the container struct and [`Sources/Passage/Hooks/Hooks+Account.swift`](./Sources/Passage/Hooks/Hooks+Account.swift) for the `Account` protocol, default implementations, and the `.hook(...)` factory.
 
 #### Example
 _No dedicated example yet — see [rozd/passage-example](https://github.com/rozd/passage-example) for the canonical walkthrough._

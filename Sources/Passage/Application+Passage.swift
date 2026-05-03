@@ -12,15 +12,18 @@ extension Passage {
         let services: Services
         let contracts: Contracts
         let configuration: Configuration
+        let hooks: Hooks
 
         init(
             services: Services,
             contracts: Contracts,
-            configuration: Configuration
+            configuration: Configuration,
+            hooks: Hooks,
         ) {
             self.services = services
             self.contracts = contracts
             self.configuration = configuration
+            self.hooks = hooks
         }
     }
 }
