@@ -7,7 +7,7 @@ import Testing
 import Vapor
 import VaporTesting
 
-/// End-to-end coverage of `POST /auth/passkey/signup/finish` — the second
+/// End-to-end coverage of `POST /auth/passkey/guest/registration/finish` — the second
 /// leg of the registration ceremony. Pairs with `BeginSignupIntegrationTests`.
 ///
 /// The tests seed a challenge via the store (mimicking what `POST begin`
@@ -88,24 +88,20 @@ struct `Passkey Finish Signup Integration Tests` {
             ),
             passkey: .init(
                 routes: .init(
-                    signupBegin: .default,
-                    signupFinish: .default
+                    guestRegistrationBegin: .default,
+                    guestRegistrationFinish: .default
                 )
             )
         )
 
         try await app.passage.configure(services: services, configuration: configuration)
 
-        // Seed a user + challenge so the finish handler has something to
-        // resolve. The mock `lookupChallenge` closure will match on the raw
-        // bytes the mock "extracts" from the body.
+        // Seed an identifier-bound challenge so the finish handler has
+        // something to resolve. Guest signup does not pre-create the user
+        // — that happens during finishRegistration. The mock
+        // `lookupChallenge` closure will match on the raw bytes the mock
+        // "extracts" from the body.
         if seedValidChallenge || seedConsumedChallenge {
-            let user = try await store.users.create(
-                identifier: .email("alice@example.com"),
-                with: nil
-            )
-            holder.seededUser = user
-
             guard let challenges = store.passkeyChallenges else {
                 Issue.record("InMemoryStore.passkeyChallenges was nil")
                 return
@@ -116,7 +112,7 @@ struct `Passkey Finish Signup Integration Tests` {
                 : Date().addingTimeInterval(300)
 
             let stored = try await challenges.createPasskeyChallenge(
-                for: user,
+                for: .email("alice@example.com"),
                 from: PasskeyChallenge(
                     bytes: Self.sharedChallengeBytes,
                     kind: .registration,
@@ -129,10 +125,15 @@ struct `Passkey Finish Signup Integration Tests` {
         }
 
         if seedExistingCredential {
-            guard
-                let user = holder.seededUser,
-                let credentials = store.passkeyCredentials
-            else {
+            // Pre-create the user so we can attach the conflicting credential
+            // to it. The finish handler's confirmUnused check will reject the
+            // ceremony before user-resolution runs.
+            let user = try await store.users.create(
+                identifier: .email("alice@example.com"),
+                with: nil
+            )
+            holder.seededUser = user
+            guard let credentials = store.passkeyCredentials else {
                 Issue.record("missing prerequisites for existing credential seed")
                 return
             }
@@ -162,7 +163,7 @@ struct `Passkey Finish Signup Integration Tests` {
             try await self.configure(app, holder: holder)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/signup/finish",
+                .POST, "/auth/passkey/guest/registration/finish",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: Self.minimalFinishBody)
             ) { res in
@@ -182,7 +183,7 @@ struct `Passkey Finish Signup Integration Tests` {
             try await self.configure(app, holder: holder)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/signup/finish",
+                .POST, "/auth/passkey/guest/registration/finish",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: Self.minimalFinishBody)
             ) { res in
@@ -204,7 +205,7 @@ struct `Passkey Finish Signup Integration Tests` {
             try await self.configure(app, holder: holder)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/signup/finish",
+                .POST, "/auth/passkey/guest/registration/finish",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: Self.minimalFinishBody)
             ) { res in
@@ -228,7 +229,7 @@ struct `Passkey Finish Signup Integration Tests` {
             try await self.configure(app, holder: holder)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/signup/finish",
+                .POST, "/auth/passkey/guest/registration/finish",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: Self.minimalFinishBody)
             ) { res in
@@ -242,6 +243,66 @@ struct `Passkey Finish Signup Integration Tests` {
         }
     }
 
+    @Test
+    func `POST finish creates a user from the challenge identifier`() async throws {
+        let holder = Holder()
+        try await withApp(configure: { app in
+            try await self.configure(app, holder: holder)
+            // Sanity: no user exists for the identifier before finish runs.
+            let store = app.passage.storage.services.store
+            let pre = try await store.users.find(byIdentifier: .email("alice@example.com"))
+            #expect(pre == nil)
+        }) { app in
+            try await app.testing().test(
+                .POST, "/auth/passkey/guest/registration/finish",
+                headers: ["Content-Type": "application/json"],
+                body: .init(string: Self.minimalFinishBody)
+            ) { res in
+                #expect(res.status == .created)
+            }
+
+            let store = try #require(holder.store)
+            let materialised = try await store.users.find(byIdentifier: .email("alice@example.com"))
+            let user = try #require(materialised)
+
+            let credentials = try #require(store.passkeyCredentials)
+            let credential = try #require(try await credentials.find(byCredentialID: "credential-id-mock"))
+            let credentialUserId = try credential.user.requiredIdAsString
+            let materialisedUserId = try user.requiredIdAsString
+            #expect(credentialUserId == materialisedUserId)
+        }
+    }
+
+    @Test
+    func `POST finish returns 401 when the identifier was claimed between begin and finish (TOCTOU)`() async throws {
+        let holder = Holder()
+        try await withApp(configure: { app in
+            try await self.configure(app, holder: holder)
+            // Simulate a concurrent signup that claims the identifier
+            // between begin (which seeded the challenge) and finish. The
+            // finish must reject the now-conflicting ceremony rather than
+            // silently bind the credential to the racing account.
+            let store = app.passage.storage.services.store
+            _ = try await store.users.create(
+                identifier: .email("alice@example.com"),
+                with: nil
+            )
+        }) { app in
+            try await app.testing().test(
+                .POST, "/auth/passkey/guest/registration/finish",
+                headers: ["Content-Type": "application/json"],
+                body: .init(string: Self.minimalFinishBody)
+            ) { res in
+                #expect(res.status == .unauthorized)
+            }
+
+            // The racing user must not have a passkey bound to them.
+            let credentials = try #require(holder.store?.passkeyCredentials)
+            let after = try await credentials.find(byCredentialID: "credential-id-mock")
+            #expect(after == nil)
+        }
+    }
+
     // MARK: - Challenge resolution failures (HTTP 401)
 
     @Test
@@ -251,7 +312,7 @@ struct `Passkey Finish Signup Integration Tests` {
             try await self.configure(app, holder: holder, seedValidChallenge: false)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/signup/finish",
+                .POST, "/auth/passkey/guest/registration/finish",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: Self.minimalFinishBody)
             ) { res in
@@ -267,7 +328,7 @@ struct `Passkey Finish Signup Integration Tests` {
             try await self.configure(app, holder: holder, seedConsumedChallenge: true)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/signup/finish",
+                .POST, "/auth/passkey/guest/registration/finish",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: Self.minimalFinishBody)
             ) { res in
@@ -283,7 +344,7 @@ struct `Passkey Finish Signup Integration Tests` {
             try await self.configure(app, holder: holder, seedExistingCredential: true)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/signup/finish",
+                .POST, "/auth/passkey/guest/registration/finish",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: Self.minimalFinishBody)
             ) { res in
@@ -337,7 +398,7 @@ struct `Passkey Finish Signup Integration Tests` {
             try await app.passage.configure(services: services, configuration: configuration)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/signup/finish",
+                .POST, "/auth/passkey/guest/registration/finish",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: Self.minimalFinishBody)
             ) { res in
@@ -353,7 +414,7 @@ struct `Passkey Finish Signup Integration Tests` {
             try await self.configure(app, holder: holder, includePasskeyConfig: false)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/signup/finish",
+                .POST, "/auth/passkey/guest/registration/finish",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: Self.minimalFinishBody)
             ) { res in
@@ -376,7 +437,7 @@ struct `Passkey Finish Signup Integration Tests` {
             try await self.configure(app, holder: holder, passkeyService: service)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/signup/finish",
+                .POST, "/auth/passkey/guest/registration/finish",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: Self.minimalFinishBody)
             ) { res in
@@ -396,8 +457,8 @@ struct `Passkey Finish Signup Integration Tests` {
         // Signup registers only when both sides are set; pair the custom finish
         // with the default begin to exercise the override on finish alone.
         let customRoutes = Passage.Configuration.Passkey.Routes(
-            signupBegin: .default,
-            signupFinish: .init(path: "done")
+            guestRegistrationBegin: .default,
+            guestRegistrationFinish: .init(path: "done")
         )
         try await withApp(configure: { app in
             await app.jwt.keys.add(
@@ -442,13 +503,11 @@ struct `Passkey Finish Signup Integration Tests` {
             )
             try await app.passage.configure(services: services, configuration: configuration)
 
-            // Seed a valid challenge under the custom configuration.
-            let user = try await store.users.create(
-                identifier: .email("alice@example.com"), with: nil
-            )
+            // Seed an identifier-bound challenge — guest signup creates the
+            // user during finishRegistration.
             let challenges = try #require(store.passkeyChallenges)
             _ = try await challenges.createPasskeyChallenge(
-                for: user,
+                for: .email("alice@example.com"),
                 from: PasskeyChallenge(
                     bytes: Self.sharedChallengeBytes,
                     kind: .registration,
@@ -457,7 +516,7 @@ struct `Passkey Finish Signup Integration Tests` {
             )
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/signup/finish",
+                .POST, "/auth/passkey/guest/registration/finish",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: Self.minimalFinishBody)
             ) { res in

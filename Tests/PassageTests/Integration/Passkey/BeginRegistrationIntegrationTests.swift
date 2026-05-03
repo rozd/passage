@@ -7,7 +7,7 @@ import Testing
 import Vapor
 import VaporTesting
 
-/// End-to-end coverage of `POST /auth/passkey/register/begin` — the
+/// End-to-end coverage of `POST /auth/passkey/registration/begin` — the
 /// authenticated "add a passkey to my existing account" flow. This is the
 /// WebAuthn-spec-default way to onboard passkeys per FIDO/Apple/Google
 /// guidance, and the trust model differs from signup: identity comes from
@@ -108,7 +108,7 @@ struct `Passkey Begin Registration (authenticated) Integration Tests` {
             try await self.configure(app, holder: holder)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/register/begin",
+                .POST, "/auth/passkey/registration/begin",
                 headers: [
                     "Content-Type": "application/json",
                     "Accept": "application/json"
@@ -127,7 +127,7 @@ struct `Passkey Begin Registration (authenticated) Integration Tests` {
             try await self.configure(app, holder: holder)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/register/begin",
+                .POST, "/auth/passkey/registration/begin",
                 headers: [
                     "Content-Type": "application/json",
                     "Accept": "application/json",
@@ -151,7 +151,7 @@ struct `Passkey Begin Registration (authenticated) Integration Tests` {
             let token = try await self.createUserAndLogin(app: app)
 
             try await app.testing().test(
-                .POST, "/auth/passkey/register/begin",
+                .POST, "/auth/passkey/registration/begin",
                 headers: [
                     "Content-Type": "application/json",
                     "Accept": "application/json",
@@ -179,7 +179,7 @@ struct `Passkey Begin Registration (authenticated) Integration Tests` {
             let token = try await self.createUserAndLogin(app: app)
 
             try await app.testing().test(
-                .POST, "/auth/passkey/register/begin",
+                .POST, "/auth/passkey/registration/begin",
                 headers: [
                     "Content-Type": "application/json",
                     "Accept": "application/json",
@@ -209,7 +209,7 @@ struct `Passkey Begin Registration (authenticated) Integration Tests` {
             let token = try await self.createUserAndLogin(app: app, email: "bob@example.com")
 
             try await app.testing().test(
-                .POST, "/auth/passkey/register/begin",
+                .POST, "/auth/passkey/registration/begin",
                 headers: [
                     "Content-Type": "application/json",
                     "Accept": "application/json",

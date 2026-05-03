@@ -7,7 +7,7 @@ import Testing
 import Vapor
 import VaporTesting
 
-/// End-to-end coverage of `POST /auth/passkey/authenticate/begin` —
+/// End-to-end coverage of `POST /auth/passkey/authentication/begin` —
 /// the first leg of the authentication ceremony. Discoverable-only flow:
 /// the endpoint accepts no body (empty `{}` from the browser is fine),
 /// always forwards `allowCredentials: nil` to the service, and persists
@@ -85,7 +85,7 @@ struct `Passkey Begin Authentication Integration Tests` {
             try await self.configure(app, holder: holder)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/authenticate/begin",
+                .POST, "/auth/passkey/authentication/begin",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: "{}")
             ) { res in
@@ -108,7 +108,7 @@ struct `Passkey Begin Authentication Integration Tests` {
             try await self.configure(app, holder: holder)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/authenticate/begin",
+                .POST, "/auth/passkey/authentication/begin",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: "{}")
             ) { res in
@@ -127,7 +127,7 @@ struct `Passkey Begin Authentication Integration Tests` {
             try await self.configure(app, holder: holder)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/authenticate/begin",
+                .POST, "/auth/passkey/authentication/begin",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: "{}")
             ) { res in
@@ -150,7 +150,7 @@ struct `Passkey Begin Authentication Integration Tests` {
             try await self.configure(app, holder: holder)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/authenticate/begin"
+                .POST, "/auth/passkey/authentication/begin"
             ) { res in
                 #expect(res.status == .ok)
             }
@@ -166,7 +166,7 @@ struct `Passkey Begin Authentication Integration Tests` {
             try await self.configure(app, holder: holder, allowDiscoverableLogin: false)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/authenticate/begin",
+                .POST, "/auth/passkey/authentication/begin",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: "{}")
             ) { res in
@@ -184,7 +184,7 @@ struct `Passkey Begin Authentication Integration Tests` {
             try await self.configure(app, holder: holder, includePasskeyConfig: false)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/authenticate/begin",
+                .POST, "/auth/passkey/authentication/begin",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: "{}")
             ) { res in
@@ -233,7 +233,7 @@ struct `Passkey Begin Authentication Integration Tests` {
             try await app.passage.configure(services: services, configuration: configuration)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/authenticate/begin",
+                .POST, "/auth/passkey/authentication/begin",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: "{}")
             ) { res in
@@ -255,7 +255,7 @@ struct `Passkey Begin Authentication Integration Tests` {
             try await self.configure(app, holder: holder, passkeyService: service)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/authenticate/begin",
+                .POST, "/auth/passkey/authentication/begin",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: "{}")
             ) { res in

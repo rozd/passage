@@ -88,12 +88,12 @@ struct `Passkey Configuration Tests` {
     @Test
     func `Composed guestRegistration paths are nil when only one side is set`() {
         let onlyBegin = Passage.Configuration.Passkey.Routes(guestRegistrationBegin: .default)
-        #expect(onlyBegin.guestRegistrationBeginPath?.map { $0.description } == ["passkey", "guestRegistration", "begin"])
+        #expect(onlyBegin.guestRegistrationBeginPath?.map { $0.description } == ["passkey", "guest", "registration", "begin"])
         #expect(onlyBegin.guestRegistrationFinishPath == nil)
 
         let onlyFinish = Passage.Configuration.Passkey.Routes(guestRegistrationFinish: .default)
         #expect(onlyFinish.guestRegistrationBeginPath == nil)
-        #expect(onlyFinish.guestRegistrationFinishPath?.map { $0.description } == ["passkey", "guestRegistration", "finish"])
+        #expect(onlyFinish.guestRegistrationFinishPath?.map { $0.description } == ["passkey", "guest", "registration", "finish"])
     }
 
     @Test
@@ -102,10 +102,10 @@ struct `Passkey Configuration Tests` {
             guestRegistrationBegin: .default,
             guestRegistrationFinish: .default
         )
-        #expect(routes.guestRegistrationBegin?.path.map { $0.description } == ["guestRegistration", "begin"])
-        #expect(routes.guestRegistrationFinish?.path.map { $0.description } == ["guestRegistration", "finish"])
-        #expect(routes.guestRegistrationBeginPath?.map { $0.description } == ["passkey", "guestRegistration", "begin"])
-        #expect(routes.guestRegistrationFinishPath?.map { $0.description } == ["passkey", "guestRegistration", "finish"])
+        #expect(routes.guestRegistrationBegin?.path.map { $0.description } == ["guest", "registration", "begin"])
+        #expect(routes.guestRegistrationFinish?.path.map { $0.description } == ["guest", "registration", "finish"])
+        #expect(routes.guestRegistrationBeginPath?.map { $0.description } == ["passkey", "guest", "registration", "begin"])
+        #expect(routes.guestRegistrationFinishPath?.map { $0.description } == ["passkey", "guest", "registration", "finish"])
     }
 
     @Test

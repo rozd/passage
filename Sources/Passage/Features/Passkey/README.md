@@ -19,15 +19,16 @@ The Passkey feature lets users register a public-key credential (passkey) bound 
 
 | Capability | Status |
 |------------|--------|
-| Signup ceremony (begin + finish) — public, form-driven | ✅ Implemented |
-| Register ceremony (begin + finish) — authenticated user adds a passkey | ✅ Implemented |
+| Guest registration ceremony (begin + finish) — public, form-driven | ✅ Implemented |
+| Registration ceremony (begin + finish) — authenticated user adds a passkey | ✅ Implemented |
 | Authentication ceremony (begin) | ✅ Implemented (discoverable-only) |
 | Authentication ceremony (finish) | ✅ Implemented — sign-count update + session + exchange code |
+| Lifecycle hooks (`will*` / `did*` for begin & finish, both flows) | ✅ Implemented in `Passage.Hooks.Passkey` |
 | `WebAuthnPasskeyService` backend | ✅ Implemented in `passage-webauthn` (both ceremonies) |
 | `PasskeyCredentialStore` / `PasskeyChallengeStore` protocols | ✅ Defined |
 | In-memory store impls (for tests) | ✅ In `PassageOnlyForTest` |
 | Fluent-backed store impls | ❌ Not yet in `passage-fluent` |
-| Leaf view for signup | ✅ `passkey-signup-minimalism` template |
+| Leaf view for guest registration | ✅ `passkey-signup-minimalism` template |
 | Leaf view for authentication | ✅ `passkey-authenticate-minimalism` template |
 | `allowDiscoverableLogin` policy flag | ✅ Enforced at `beginAuthentication` — when `false`, begin returns `400 discoverableLoginDisabled` |
 | Hinted (username-first) authentication | ⚠️ Reserved at the protocol layer (`allowCredentials: [PasskeyCredentialDescriptor]?`) but orchestration is discoverable-only — no HTTP endpoint accepts a user hint |
@@ -109,59 +110,67 @@ Relying-party identity and allowed origins are configured on the `PasskeyService
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `group` | `[PathComponent]` | `["passkey"]` | Subpath under `Configuration.Routes.group` |
-| `signupBegin.path` | `[PathComponent]` | `["signup", "begin"]` | Begin signup (public) |
-| `signupFinish.path` | `[PathComponent]` | `["signup", "finish"]` | Finish signup (public) |
-| `registerBegin.path` | `[PathComponent]` | `["register", "begin"]` | Begin register (authenticated) |
-| `registerFinish.path` | `[PathComponent]` | `["register", "finish"]` | Finish register (authenticated) |
-| `authenticateBegin.path` | `[PathComponent]` | `["authenticate", "begin"]` | Begin authentication endpoint |
-| `authenticateFinish.path` | `[PathComponent]` | `["authenticate", "finish"]` | Finish authentication endpoint |
+| `guestRegistrationBegin.path` | `[PathComponent]` | `["guest", "registration", "begin"]` | Begin guest registration (public). Opt-in: pass `.default` (or a custom `.init(path:)`) — `nil` skips the route. |
+| `guestRegistrationFinish.path` | `[PathComponent]` | `["guest", "registration", "finish"]` | Finish guest registration (public). Opt-in alongside `guestRegistrationBegin`. |
+| `registrationBegin.path` | `[PathComponent]` | `["registration", "begin"]` | Begin authenticated registration |
+| `registrationFinish.path` | `[PathComponent]` | `["registration", "finish"]` | Finish authenticated registration |
+| `authenticationBegin.path` | `[PathComponent]` | `["authentication", "begin"]` | Begin authentication endpoint |
+| `authenticationFinish.path` | `[PathComponent]` | `["authentication", "finish"]` | Finish authentication endpoint |
+
+The two `guestRegistration*` routes are opt-in — they register only when both sides are non-`nil` on `Routes`. The two `registration*` routes are always registered behind `PassageSessionAuthenticator` + `PassageBearerAuthenticator` + `PassageGuard`; unauthenticated requests return `401`.
 
 ## Registration Ceremonies
 
-Passage exposes two separate registration flows with distinct trust models:
+Passage exposes two registration flows with distinct trust models. Both ultimately call the same `finishRegistration` orchestration method — the begin paths and route gating differ, but the finish path is shared and dispatches on the challenge's stored subject.
 
-### Signup (`POST /auth/passkey/signup/{begin,finish}`) — public
+### Guest Registration (`POST /auth/passkey/guest/registration/{begin,finish}`) — public
 
-Public, form-driven flow for new users who want to create an account using a passkey as their primary credential. Identity is self-asserted via a form identifier (email / phone / username).
+Public, form-driven flow for **new** users creating an account with a passkey as their primary credential. Identity is self-asserted via a form identifier (email / phone / username).
 
 1. Client POSTs a `PasskeySignupForm` with one of `email` / `phone` / `username` plus `displayName`.
-2. Orchestration resolves the identifier to a `User` (finding or creating via `UserStore`).
-3. `PasskeyService.beginRegistration(with:policy:challengeTTL:)` produces a raw challenge plus an opaque creation-options body.
-4. Core persists the challenge bound to the resolved user. The `PasskeyChallengeStore` SHA-256-hashes the raw bytes internally — plaintext never reaches the DB.
+2. Orchestration calls `UserStore.find(byIdentifier:)`. If a user already exists, the begin **rejects with `409 identifierAlreadyRegistered`** — guest registration is for new accounts; returning users must authenticate first and use the `/registration/begin` flow.
+3. `PasskeyService.beginRegistration(with:policy:challengeTTL:)` produces a raw challenge plus an opaque creation-options body. The user entity is derived from the identifier (`PublicKeyCredentialUserEntity.init(for: identifier, displayName:)`).
+4. Core persists the challenge bound to the **identifier** (`(user: nil, identifier: x)`); no user record is created at begin time. The `PasskeyChallengeStore` SHA-256-hashes the raw bytes internally — plaintext never reaches the DB.
 5. Response on `/begin`: `PublicKeyCredentialCreationOptions` JSON (`Accept: application/json`) or a redirect back to the configured `views.passkeySignup` Leaf view (form submission with `Accept: text/html`).
-6. Browser calls `navigator.credentials.create()` and POSTs the result to `/signup/finish`.
-7. Service verifies the attestation via `lookupChallenge` + `confirmUnused`; core persists the credential and consumes the challenge.
-8. Response on `/finish`: `201 Created` with `PasskeyRegistrationResponse { credentialID }`.
+6. Browser calls `navigator.credentials.create()` and POSTs the result to `/guest/registration/finish`.
+7. Service verifies the attestation via `lookupChallenge` + `confirmUnused`; core re-checks `UserStore.find(byIdentifier:)` (TOCTOU) — if a user with that identifier was created between begin and finish, the ceremony is rejected with `401 invalidPasskeyChallenge`.
+8. Otherwise core creates the user via `UserStore.create(identifier:with: nil)`, persists the credential, and consumes the challenge.
+9. Response on `/finish`: `201 Created` with `PasskeyRegistrationResponse { credentialID }`.
 
-### Register (`POST /auth/passkey/register/{begin,finish}`) — authenticated
+### Registration (`POST /auth/passkey/registration/{begin,finish}`) — authenticated
 
-Authenticated flow for users who already have an account (created via password, OAuth, magic-link, or a prior passkey) and want to add a new passkey. This is the FIDO / Apple / Google recommended default. Both endpoints are guarded by `PassageSessionAuthenticator` + `PassageBearerAuthenticator` — unauthenticated requests return `401`.
+Authenticated flow for users who already have an account (created via password, OAuth, magic-link, or a prior passkey) and want to add a new passkey. This is the FIDO / Apple / Google recommended default. Both endpoints sit behind `PassageSessionAuthenticator` + `PassageBearerAuthenticator` + `PassageGuard` — unauthenticated requests return `401` at the middleware layer.
 
-1. Client POSTs an optional `PasskeyRegisterRequest` body to `/register/begin` with `{ "displayName": "…" }` (or no body); the authenticated user is resolved via `request.auth`. Display name defaults to `user.username ?? user.email ?? user.phone ?? "Passkey"`.
-2. Same challenge-issuance path as signup — the challenge is bound to the authenticated user.
+1. Client POSTs an optional `PasskeyRegisterRequest` body to `/registration/begin` with `{ "displayName": "…" }` (or no body); the authenticated user is resolved via `request.passage.user`. Display name defaults to `user.username ?? user.email ?? user.phone ?? "Passkey"`.
+2. Core persists the challenge bound to the **user** (`(user: x, identifier: nil)`).
 3. Response on `/begin`: `PublicKeyCredentialCreationOptions` JSON. JSON only; no Leaf view.
-4. Browser calls `navigator.credentials.create()` and POSTs to `/register/finish` with the same bearer/session.
-5. Core recovers the user from the matched challenge and **asserts it equals the authenticated user** — a mismatch is rejected with `401 invalidPasskeyChallenge` as defense-in-depth against cross-session challenge swapping.
+4. Browser calls `navigator.credentials.create()` and POSTs to `/registration/finish` with the same bearer/session.
+5. The shared finish handler recovers the user from the matched challenge and **asserts it equals `request.passage.user`** — a mismatch (or no authenticated user at all) is rejected with `401 invalidPasskeyChallenge` as defense-in-depth against cross-session challenge swapping.
 6. Core persists the credential and consumes the challenge.
 7. Response on `/finish`: `201 Created` with `PasskeyRegistrationResponse { credentialID }`.
 
-### Shared machinery
+### Shared finish handler
 
-Both flows delegate to a private `beginRegistrationCore(for:userEntity:)` and `finishRegistrationCore(rawBody:authenticatedUser:)` in `Passage+Passkey.swift`. The `PasskeyService` protocol sees a single registration ceremony — the signup-vs-register distinction is an HTTP/orchestration concern, not a cryptographic one.
+Both flows route to one orchestration method — `Passage.Passkey.finishRegistration(rawBody:)` — which dispatches on the challenge's stored subject:
+
+- `matchedChallenge.user != nil` (auth flow): require `request.passage.user.equals(to: bound)`; reject otherwise.
+- `matchedChallenge.identifier != nil` (guest flow): require `find(byIdentifier:) == nil`; create the user; bind the credential.
+
+The two routes that mount this method differ only in their middleware chain — `/registration/finish` sits behind `PassageGuard` (so the auth-flow branch always sees an authenticated session); `/guest/registration/finish` is public (so the guest-flow branch sees no session, but the auth-flow branch's `request.passage.user` throws `401` if a stolen user-bound challenge is submitted there). The `PasskeyService` protocol sees a single registration ceremony — the guest-vs-authenticated distinction is an HTTP/orchestration concern, not a cryptographic one.
 
 ## Authentication Ceremony
 
 **Discoverable-only.** The endpoint takes no user-supplied identifier — the authenticator reveals which credential the user picked, and the server recovers the user from that credential's stored record. A typed form would defeat the UX win of passkeys. When `policy.allowDiscoverableLogin` is `false` the begin endpoint returns `400 discoverableLoginDisabled`; hinted/username-first authentication is not exposed over HTTP today.
 
-### Begin (`POST /auth/passkey/authenticate/begin`)
+### Begin (`POST /auth/passkey/authentication/begin`)
 
 1. Browser POSTs an empty body (`{}` is fine; content-type is ignored).
 2. Orchestration calls `PasskeyService.beginAuthentication(allowCredentials: nil, policy:, challengeTTL:)`.
 3. The service returns raw challenge bytes plus an opaque `PublicKeyCredentialRequestOptions` body.
-4. Core persists the challenge via `PasskeyChallengeStore.createPasskeyChallenge(for: nil, from:)` — `user == nil` because the picker hasn't chosen yet; the kind is `.authentication`.
+4. Core persists the challenge via `PasskeyChallengeStore.createPasskeyChallenge(from:)` — neither `user` nor `identifier` is set because the picker hasn't chosen yet; the kind is `.authentication`.
 5. Response: the WebAuthn `PublicKeyCredentialRequestOptions` JSON (`challenge`, `rpId`, `timeout`, `allowCredentials: null`, `userVerification`).
 
-### Finish (`POST /auth/passkey/authenticate/finish`)
+### Finish (`POST /auth/passkey/authentication/finish`)
 
 1. Browser POSTs the raw WebAuthn JSON (the result of `navigator.credentials.get()`).
 2. Route handler reads the raw body and hands it to `PasskeyService.finishAuthentication(rawBody:policy:lookupChallenge:lookupCredential:)`.
@@ -176,16 +185,16 @@ Both flows delegate to a private `beginRegistrationCore(for:userEntity:)` and `f
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| GET  | `/auth/passkey/signup/begin` | public | Renders the Leaf form (only when `views.passkeySignup` is configured) |
-| POST | `/auth/passkey/signup/begin` | public | Begins signup ceremony (form-driven) |
-| POST | `/auth/passkey/signup/finish` | public | Finalizes signup ceremony |
-| POST | `/auth/passkey/register/begin` | session/bearer | Begins register ceremony (authenticated user adds a passkey) |
-| POST | `/auth/passkey/register/finish` | session/bearer | Finalizes register ceremony — asserts session user matches challenge user |
-| GET  | `/auth/passkey/authenticate/begin` | public | Renders the Leaf form (only when `views.passkeyAuthenticate` is configured) |
-| POST | `/auth/passkey/authenticate/begin` | public | Begins authentication ceremony (discoverable) |
-| POST | `/auth/passkey/authenticate/finish` | public | Finalizes authentication ceremony, issues session + exchange code |
+| GET  | `/auth/passkey/guest/registration/begin` | public | Renders the Leaf form (only when `views.passkeySignup` is configured) |
+| POST | `/auth/passkey/guest/registration/begin` | public | Begins guest registration (form-driven). Rejects existing identifiers with `409`. |
+| POST | `/auth/passkey/guest/registration/finish` | public | Finalizes guest registration. Creates the user from the challenge identifier. |
+| POST | `/auth/passkey/registration/begin` | session/bearer + guard | Begins authenticated registration (existing user adds a passkey) |
+| POST | `/auth/passkey/registration/finish` | session/bearer + guard | Finalizes authenticated registration — asserts session user matches challenge user |
+| GET  | `/auth/passkey/authentication/begin` | public | Renders the Leaf form (only when `views.passkeyAuthenticate` is configured) |
+| POST | `/auth/passkey/authentication/begin` | public | Begins authentication ceremony (discoverable) |
+| POST | `/auth/passkey/authentication/finish` | public | Finalizes authentication ceremony, issues session + exchange code |
 
-All paths honor `Configuration.Passkey.Routes` overrides.
+All paths honor `Configuration.Passkey.Routes` overrides. The two `guest/registration/*` routes are opt-in (omit `guestRegistrationBegin` / `guestRegistrationFinish` from `Routes` to skip them).
 
 ## Flow Diagrams
 
@@ -199,21 +208,40 @@ sequenceDiagram
     participant Svc as PasskeyService
     participant Store as Store (users / credentials / challenges)
 
-    Browser->>Routes: POST /register/begin {identifier, displayName}
-    Routes->>Orch: beginRegistration(form:)
-    Orch->>Store: users.find(byIdentifier:) / create
-    Orch->>Svc: beginRegistration(user, policy, challengeTTL)
-    Svc-->>Orch: PasskeyBeginResult {challenge, body}
-    Orch->>Store: challenges.createPasskeyChallenge(for:from:)
-    Orch-->>Routes: any AsyncResponseEncodable
-    Routes-->>Browser: 200 OK {rp, user, challenge, pubKeyCredParams, ...}
+    Note over Browser,Store: Begin path differs by flow
+
+    alt Guest registration
+        Browser->>Routes: POST /guest/registration/begin {identifier, displayName}
+        Routes->>Orch: beginGuestRegistration(form:)
+        Orch->>Store: users.find(byIdentifier:)
+        alt user exists
+            Orch-->>Routes: throw identifierAlreadyRegistered
+            Routes-->>Browser: 409 Conflict
+        else user does not exist
+            Orch->>Svc: beginRegistration(userEntity from identifier, policy, ttl)
+            Svc-->>Orch: PasskeyBeginResult {challenge, body}
+            Orch->>Store: challenges.createPasskeyChallenge(for: identifier, from:)
+            Orch-->>Routes: body
+            Routes-->>Browser: 200 OK {rp, user, challenge, ...}
+        end
+    else Authenticated registration
+        Browser->>Routes: POST /registration/begin {displayName?} (with session/bearer)
+        Routes->>Orch: beginRegistration(request:)
+        Orch->>Orch: request.passage.user
+        Orch->>Svc: beginRegistration(userEntity from user, policy, ttl)
+        Svc-->>Orch: PasskeyBeginResult {challenge, body}
+        Orch->>Store: challenges.createPasskeyChallenge(for: user, from:)
+        Orch-->>Routes: body
+        Routes-->>Browser: 200 OK {rp, user, challenge, ...}
+    end
 
     Browser->>Browser: navigator.credentials.create()
 
-    Browser->>Routes: POST /register/finish {credential}
+    Note over Browser,Store: Finish path is shared
+
+    Browser->>Routes: POST /(guest/)registration/finish {credential}
     Routes->>Orch: finishRegistration(rawBody:)
     Orch->>Svc: finishRegistration(rawBody, policy, lookupChallenge, confirmUnused)
-    Svc->>Svc: Decode RegistrationCredential + CollectedClientData
     Svc->>Orch: lookupChallenge(bytes)
     Orch->>Store: challenges.find(passkeyChallengeMatching:)
     Store-->>Orch: any StoredPasskeyChallenge?
@@ -224,7 +252,18 @@ sequenceDiagram
     Orch-->>Svc: Bool
     Svc->>Svc: verify attestation (swift-webauthn)
     Svc-->>Orch: PasskeyFinishRegistrationResult {credential, matchedChallenge}
-    Orch->>Store: credentials.createPasskeyCredential(for:from:)
+    alt matchedChallenge.user != nil (auth flow)
+        Orch->>Orch: request.passage.user.equals(to: bound)?
+        Orch-->>Routes: throw invalidPasskeyChallenge if mismatch (or no auth → 401)
+    else matchedChallenge.identifier != nil (guest flow)
+        Orch->>Store: users.find(byIdentifier:)
+        alt identifier was claimed mid-flight
+            Orch-->>Routes: throw invalidPasskeyChallenge
+        else identifier still free
+            Orch->>Store: users.create(identifier: identifier, with: nil)
+        end
+    end
+    Orch->>Store: credentials.createPasskeyCredential(for: user, from:)
     Orch->>Store: challenges.consume(passkeyChallenge:)
     Orch-->>Routes: any StoredPasskeyCredential
     Routes-->>Browser: 201 Created {credentialID}
@@ -241,17 +280,17 @@ sequenceDiagram
     participant Store as Store (credentials / challenges / tokens)
     participant Session as Passage.login + tokens
 
-    Browser->>Routes: POST /authenticate/begin {} (empty)
+    Browser->>Routes: POST /authentication/begin {} (empty)
     Routes->>Orch: beginAuthentication()
     Orch->>Svc: beginAuthentication(allowCredentials: nil, policy, challengeTTL)
     Svc-->>Orch: PasskeyBeginResult {challenge, body}
-    Orch->>Store: challenges.createPasskeyChallenge(for: nil, from:)
+    Orch->>Store: challenges.createPasskeyChallenge(from:)
     Orch-->>Routes: any AsyncResponseEncodable
     Routes-->>Browser: 200 OK {challenge, rpId, timeout, userVerification}
 
     Browser->>Browser: navigator.credentials.get()
 
-    Browser->>Routes: POST /authenticate/finish {assertion}
+    Browser->>Routes: POST /authentication/finish {assertion}
     Routes->>Orch: finishAuthentication(rawBody:)
     Orch->>Svc: finishAuthentication(rawBody, policy, lookupChallenge, lookupCredential)
     Svc->>Svc: Decode AuthenticationCredential + CollectedClientData
@@ -391,10 +430,14 @@ struct PasskeyAuthenticationResponse: Content {
 
 | Method | Purpose |
 |--------|---------|
-| `createPasskeyChallenge(for:from:)` | Persist a challenge; implementation SHA-256-hashes `bytes` internally |
-| `find(passkeyChallengeMatching:)` | Look up by the raw bytes the authenticator echoed back |
+| `createPasskeyChallenge(from:)` | Persist a challenge with no subject — used by discoverable authentication. Stored record has `user == nil && identifier == nil`. |
+| `createPasskeyChallenge(for: User, from:)` | Persist a challenge bound to a known user (authenticated registration). Stored record has `user == bound && identifier == nil`. |
+| `createPasskeyChallenge(for: Identifier, from:)` | Persist a challenge bound to a pending identifier (guest registration). Stored record has `user == nil && identifier == x` — the user is materialised at finish time. |
+| `find(passkeyChallengeMatching:)` | Look up by the raw bytes the authenticator echoed back; implementation SHA-256-hashes internally |
 | `consume(passkeyChallenge:)` | One-shot consumption |
 | `cleanupExpiredPasskeyChallenges(before:)` | Maintenance |
+
+Implementations SHA-256-hash `challenge.bytes` before persisting — plaintext never touches the database. The three `create*` overloads make the issuance subject explicit at the call site; the stored record's `user` and `identifier` fields are mutually exclusive for registration challenges (`user != nil` xor `identifier != nil`).
 
 Both store protocols are **optional** on `Passage.Store` — third-party conformances default them to `nil`. Passage's orchestration throws `PassageError.passkeyNotConfigured` if they're unset.
 
@@ -451,11 +494,43 @@ views: .init(
 )
 ```
 
-**Signup view** — When `passkeySignup` is configured, `GET /auth/passkey/signup/begin` renders `passkey-signup-minimalism.leaf` with inline JavaScript that collects the identifier + display name, calls `navigator.credentials.create()`, and POSTs to the finish endpoint. HTML form submissions to the begin endpoint redirect back to the view with `?success=` or `?error=` query parameters.
+**Signup view** — When `passkeySignup` is configured, `GET /auth/passkey/guest/registration/begin` renders `passkey-signup-minimalism.leaf` with inline JavaScript that collects the identifier + display name, calls `navigator.credentials.create()`, and POSTs to the finish endpoint. HTML form submissions to the begin endpoint redirect back to the view with `?success=` or `?error=` query parameters.
 
-**Authentication view** — When `passkeyAuthenticate` is configured, `GET /auth/passkey/authenticate/begin` renders `passkey-authenticate-minimalism.leaf`. The form posts **no identifier** — the page fires `navigator.credentials.get({publicKey: options})` with the options returned by `POST /authenticate/begin` (empty body) and then POSTs the assertion to `/authenticate/finish`. On success, the JS navigates to `view.redirect.onSuccess` with the returned `code` appended as `?code=...` (matching the OAuth exchange-code handoff pattern). If `redirect.onSuccess` is not set, the page shows an inline success message.
+**Authentication view** — When `passkeyAuthenticate` is configured, `GET /auth/passkey/authentication/begin` renders `passkey-authenticate-minimalism.leaf`. The form posts **no identifier** — the page fires `navigator.credentials.get({publicKey: options})` with the options returned by `POST /authentication/begin` (empty body) and then POSTs the assertion to `/authentication/finish`. On success, the JS navigates to `view.redirect.onSuccess` with the returned `code` appended as `?code=...` (matching the OAuth exchange-code handoff pattern). If `redirect.onSuccess` is not set, the page shows an inline success message.
 
 Without a configured view, the GET route returns 404 while the POST ceremony endpoints keep working for JS-driven SPA clients.
+
+### Hooks
+
+Passkey ceremonies expose `will*` / `did*` lifecycle hooks via `Passage.Hooks.Passkey`. `will*` hooks fire `async throws` and abort the flow when they throw; `did*` hooks are non-throwing observers that fire after the underlying step has succeeded. All have empty default implementations.
+
+| Hook | Fires… |
+|------|--------|
+| `willBeginGuestRegistration(with: form, as: entity, on: request)` | Before `service.beginRegistration` runs, after the identifier-already-registered check passes |
+| `didBeginGuestRegistration(with: result, on: request)` | After the challenge is persisted, before responding |
+| `willBeginRegistration(for: user, as: entity, on: request)` | Before `service.beginRegistration` runs in the authenticated flow |
+| `didBeginRegistration(with: result, for: user, on: request)` | After the challenge is persisted in the authenticated flow |
+| `willFinishGuestRegistration(with: identifier, on: request)` | After the TOCTOU identifier check passes, before user creation |
+| `willFinishRegistration(for: user, on: request)` | After the bound-user equality check passes |
+| `didFinishGuestRegistration(with: credential, for: user, on: request)` | After the credential is persisted and the challenge consumed (guest flow) |
+| `didFinishRegistration(with: credential, for: user, on: request)` | After the credential is persisted and the challenge consumed (auth flow) |
+
+The `willFinish*` hooks are deliberately ordered **after** the binding/TOCTOU checks — handlers see only ceremonies that will succeed, so audit logs / notifications are not attributed to victims on hijack attempts.
+
+Wire hooks via the `.hook(...)` factory on `Passage.Hooks.Passkey`:
+
+```swift
+hooks: .init(
+    passkey: .hook(
+        didFinishGuestRegistration: { credential, user, request in
+            request.logger.info("new passkey for \(user.id ?? "?")")
+        },
+        willFinishRegistration: { user, request in
+            // gate authenticated-flow finishes on a custom policy
+        }
+    )
+)
+```
 
 ## Error Handling
 
@@ -463,9 +538,11 @@ Without a configured view, the GET route returns 404 while the POST ceremony end
 |-------|---------|
 | `PassageError.passkeyNotConfigured` | `configuration.passkey` is nil, or `Store.passkeyCredentials` / `Store.passkeyChallenges` returns nil |
 | `PassageError.passkeyServiceNotAvailable` | No `PasskeyService` registered in services |
-| `AuthenticationError.invalidPasskeyChallenge` | Challenge lookup failed, expired, already consumed, wrong kind, or the service could not extract challenge bytes from `clientDataJSON` → `401` |
+| `AuthenticationError.identifierAlreadyRegistered` | Guest registration begin: the form identifier already maps to a `User`. Returning users must authenticate first and use `/registration/begin` → `409` |
+| `AuthenticationError.invalidPasskeyChallenge` | Challenge lookup failed, expired, already consumed, wrong kind; service could not extract challenge bytes from `clientDataJSON`; auth-flow finish where the session user does not equal the bound user; or guest-flow finish where the identifier was claimed between begin and finish (TOCTOU) → `401` |
+| `Abort(.unauthorized)` | `/registration/finish` (or `/registration/begin`) called without a valid session/bearer — raised by `PassageGuard` middleware before the handler runs → `401` |
 | `AuthenticationError.unknownPasskey` | Authentication finish: the posted credential ID does not match any record in `PasskeyCredentialStore` → `401` |
-| `AuthenticationError.discoverableLoginDisabled` | `POST /authenticate/begin` when `policy.allowDiscoverableLogin == false`. No hinted-flow endpoint exists to fall back to → `400` |
+| `AuthenticationError.discoverableLoginDisabled` | `POST /authentication/begin` when `policy.allowDiscoverableLogin == false`. No hinted-flow endpoint exists to fall back to → `400` |
 
 ## Related Features
 

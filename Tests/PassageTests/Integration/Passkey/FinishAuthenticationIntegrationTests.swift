@@ -7,7 +7,7 @@ import Testing
 import Vapor
 import VaporTesting
 
-/// End-to-end coverage of `POST /auth/passkey/authenticate/finish`.
+/// End-to-end coverage of `POST /auth/passkey/authentication/finish`.
 ///
 /// The tests seed a user + credential + authentication challenge directly in
 /// the in-memory store (mimicking what `POST begin` + a prior
@@ -120,7 +120,6 @@ struct `Passkey Finish Authentication Integration Tests` {
                 ? Date().addingTimeInterval(-1)
                 : Date().addingTimeInterval(300)
             let stored = try await challenges.createPasskeyChallenge(
-                for: nil,
                 from: PasskeyChallenge(
                     bytes: Self.sharedChallengeBytes,
                     kind: seedChallengeKind,
@@ -142,7 +141,7 @@ struct `Passkey Finish Authentication Integration Tests` {
             try await self.configure(app, holder: holder)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/authenticate/finish",
+                .POST, "/auth/passkey/authentication/finish",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: Self.minimalFinishBody)
             ) { res in
@@ -164,7 +163,7 @@ struct `Passkey Finish Authentication Integration Tests` {
             try await self.configure(app, holder: holder, passkeyService: service)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/authenticate/finish",
+                .POST, "/auth/passkey/authentication/finish",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: Self.minimalFinishBody)
             ) { res in
@@ -187,7 +186,7 @@ struct `Passkey Finish Authentication Integration Tests` {
             try await self.configure(app, holder: holder)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/authenticate/finish",
+                .POST, "/auth/passkey/authentication/finish",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: Self.minimalFinishBody)
             ) { res in
@@ -210,7 +209,7 @@ struct `Passkey Finish Authentication Integration Tests` {
             try await self.configure(app, holder: holder)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/authenticate/finish",
+                .POST, "/auth/passkey/authentication/finish",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: Self.minimalFinishBody)
             ) { res in
@@ -233,7 +232,7 @@ struct `Passkey Finish Authentication Integration Tests` {
             try await self.configure(app, holder: holder, seedChallenge: false)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/authenticate/finish",
+                .POST, "/auth/passkey/authentication/finish",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: Self.minimalFinishBody)
             ) { res in
@@ -249,7 +248,7 @@ struct `Passkey Finish Authentication Integration Tests` {
             try await self.configure(app, holder: holder, seedConsumedChallenge: true)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/authenticate/finish",
+                .POST, "/auth/passkey/authentication/finish",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: Self.minimalFinishBody)
             ) { res in
@@ -267,7 +266,7 @@ struct `Passkey Finish Authentication Integration Tests` {
             try await self.configure(app, holder: holder, seedChallengeKind: .registration)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/authenticate/finish",
+                .POST, "/auth/passkey/authentication/finish",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: Self.minimalFinishBody)
             ) { res in
@@ -283,7 +282,7 @@ struct `Passkey Finish Authentication Integration Tests` {
             try await self.configure(app, holder: holder, seedCredential: false)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/authenticate/finish",
+                .POST, "/auth/passkey/authentication/finish",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: Self.minimalFinishBody)
             ) { res in
@@ -334,7 +333,7 @@ struct `Passkey Finish Authentication Integration Tests` {
             try await app.passage.configure(services: services, configuration: configuration)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/authenticate/finish",
+                .POST, "/auth/passkey/authentication/finish",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: Self.minimalFinishBody)
             ) { res in
@@ -350,7 +349,7 @@ struct `Passkey Finish Authentication Integration Tests` {
             try await self.configure(app, holder: holder, includePasskeyConfig: false)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/authenticate/finish",
+                .POST, "/auth/passkey/authentication/finish",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: Self.minimalFinishBody)
             ) { res in
@@ -371,7 +370,7 @@ struct `Passkey Finish Authentication Integration Tests` {
             try await self.configure(app, holder: holder, passkeyService: service)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/authenticate/finish",
+                .POST, "/auth/passkey/authentication/finish",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: Self.minimalFinishBody)
             ) { res in
