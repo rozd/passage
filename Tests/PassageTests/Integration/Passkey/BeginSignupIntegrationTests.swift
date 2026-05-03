@@ -10,18 +10,18 @@ import VaporTesting
 /// End-to-end coverage of `POST /auth/passkey/guest/registration/begin` plus the
 /// `GET` view that serves its HTML entry point. These tests pin down:
 ///
-/// 1. The JSON contract the browser JS in `passkey-signup-minimalism.leaf`
+/// 1. The JSON contract the browser JS in `passkey-guest-registration-minimalism.leaf`
 ///    relies on (base64url binary fields, nested `rp`/`user`, etc.).
 /// 2. The dual-mode response pattern (`Accept: application/json` returns
 ///    options; HTML form submit with `Accept: text/html` and a configured
 ///    passkey view redirects back to that view).
-/// 3. That the handler references `views.passkeySignup` (not `views.login`).
+/// 3. That the handler references `views.passkeyGuestRegistration` (not `views.login`).
 /// 4. That the orchestration forwards the identifier + displayName into the
 ///    `PublicKeyCredentialUserEntity` handed to the service.
 /// 5. That the view context carries `signupBeginURL` / `signupFinishURL`
 ///    so the inline JS knows where to POST.
 @Suite(.tags(.integration, .passkey))
-struct `Passkey Begin Signup Integration Tests` {
+struct `Passkey Begin GuestRegistration Integration Tests` {
 
     // MARK: - Configuration Helpers
 
@@ -35,7 +35,7 @@ struct `Passkey Begin Signup Integration Tests` {
     /// challenge TTL. Override `passkeyService` to test failure paths or to
     /// assert what the service received.
     ///
-    /// Signup is opt-in on `Passkey.Routes`; this suite exercises that flow,
+    /// GuestRegistration is opt-in on `Passkey.Routes`; this suite exercises that flow,
     /// so the default `passkeyRoutes` enables it via `.default` on both sides.
     @Sendable private func configure(
         _ app: Application,
@@ -416,7 +416,7 @@ struct `Passkey Begin Signup Integration Tests` {
 
     @Test
     func `Begin route honors custom registerBegin path from configuration`() async throws {
-        // Signup registers only when both sides are set; pair the custom begin
+        // GuestRegistration registers only when both sides are set; pair the custom begin
         // with the default finish to exercise the override on begin alone.
         let customRoutes = Passage.Configuration.Passkey.Routes(
             guestRegistrationBegin: .init(path: "start"),
@@ -455,10 +455,10 @@ struct `Passkey Begin Signup Integration Tests` {
     // MARK: - Dual-mode HTML fallback
 
     @Test
-    func `HTML form submission with passkeySignup view configured redirects to the passkey view`() async throws {
+    func `HTML form submission with passkeyGuestRegistration view configured redirects to the passkey view`() async throws {
         let theme = Passage.Views.Theme(colors: .defaultLight)
         let viewsConfig = Passage.Configuration.Views(
-            passkeySignup: .init(style: .minimalism, theme: theme, identifier: .email)
+            passkeyGuestRegistration: .init(style: .minimalism, theme: theme, identifier: .email)
         )
 
         try await withApp(configure: { app in
@@ -494,7 +494,7 @@ struct `Passkey Begin Signup Integration Tests` {
 
         let theme = Passage.Views.Theme(colors: .defaultLight)
         let viewsConfig = Passage.Configuration.Views(
-            passkeySignup: .init(style: .minimalism, theme: theme, identifier: .email)
+            passkeyGuestRegistration: .init(style: .minimalism, theme: theme, identifier: .email)
         )
 
         try await withApp(configure: { app in
@@ -522,7 +522,7 @@ struct `Passkey Begin Signup Integration Tests` {
     @Test
     func `HTML Accept without a configured passkey view still returns JSON`() async throws {
         try await withApp(configure: { app in
-            // No views.passkeySignup — guard falls through to JSON.
+            // No views.passkeyGuestRegistration — guard falls through to JSON.
             try await self.configure(app)
         }) { app in
             try await app.testing().test(
@@ -545,7 +545,7 @@ struct `Passkey Begin Signup Integration Tests` {
     // MARK: - View (GET) — begin endpoint as HTML entry point
 
     @Test
-    func `GET begin view returns 404 when passkeySignup view is not configured`() async throws {
+    func `GET begin view returns 404 when passkeyGuestRegistration view is not configured`() async throws {
         try await withApp(configure: { app in
             try await self.configure(app)
         }) { app in
@@ -558,7 +558,7 @@ struct `Passkey Begin Signup Integration Tests` {
     @Test
     func `GET begin view renders passkey-register template with identifier flags`() async throws {
         let viewsConfig = Passage.Configuration.Views(
-            passkeySignup: .init(
+            passkeyGuestRegistration: .init(
                 style: .minimalism,
                 theme: Passage.Views.Theme(colors: .defaultLight),
                 identifier: .email
@@ -573,9 +573,9 @@ struct `Passkey Begin Signup Integration Tests` {
 
             try await app.testing().test(.GET, "/auth/passkey/guest/registration/begin") { res in
                 #expect(res.status == .ok)
-                #expect(renderer.templatePath == "passkey-signup-minimalism")
+                #expect(renderer.templatePath == "passkey-guest-registration-minimalism")
 
-                let ctx = renderer.capturedContext as? Passage.Views.Context<Passage.Views.PasskeySignupViewParams>
+                let ctx = renderer.capturedContext as? Passage.Views.Context<Passage.Views.PasskeyGuestRegistrationViewParams>
                 let params = try #require(ctx?.params)
                 #expect(params.byEmail == true)
                 #expect(params.byPhone == false)
@@ -587,7 +587,7 @@ struct `Passkey Begin Signup Integration Tests` {
     @Test
     func `GET begin view passes signupBeginURL and signupFinishURL to the template`() async throws {
         let viewsConfig = Passage.Configuration.Views(
-            passkeySignup: .init(
+            passkeyGuestRegistration: .init(
                 style: .minimalism,
                 theme: Passage.Views.Theme(colors: .defaultLight),
                 identifier: .email
@@ -603,7 +603,7 @@ struct `Passkey Begin Signup Integration Tests` {
             try await app.testing().test(.GET, "/auth/passkey/guest/registration/begin") { res in
                 #expect(res.status == .ok)
 
-                let ctx = renderer.capturedContext as? Passage.Views.Context<Passage.Views.PasskeySignupViewParams>
+                let ctx = renderer.capturedContext as? Passage.Views.Context<Passage.Views.PasskeyGuestRegistrationViewParams>
                 let params = try #require(ctx?.params)
 
                 // The leaf template reads these to drive its `fetch` calls.
@@ -622,7 +622,7 @@ struct `Passkey Begin Signup Integration Tests` {
         )
 
         let viewsConfig = Passage.Configuration.Views(
-            passkeySignup: .init(
+            passkeyGuestRegistration: .init(
                 style: .minimalism,
                 theme: Passage.Views.Theme(colors: .defaultLight),
                 identifier: .email
@@ -638,7 +638,7 @@ struct `Passkey Begin Signup Integration Tests` {
             try await app.testing().test(.GET, "/auth/pk/start") { res in
                 #expect(res.status == .ok)
 
-                let ctx = renderer.capturedContext as? Passage.Views.Context<Passage.Views.PasskeySignupViewParams>
+                let ctx = renderer.capturedContext as? Passage.Views.Context<Passage.Views.PasskeyGuestRegistrationViewParams>
                 let params = try #require(ctx?.params)
 
                 #expect(params.signupBeginURL == "/auth/pk/start")

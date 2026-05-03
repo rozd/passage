@@ -7,7 +7,7 @@ public extension Passage.Hooks {
         // MARK: Guest Registration Hooks
 
         func willBeginGuestRegistration(
-            with form: any PasskeySignupForm,
+            with form: any PasskeyGuestRegistrationForm,
             as entity: PublicKeyCredentialUserEntity,
             on request: Request,
         ) async throws
@@ -85,7 +85,7 @@ public extension Passage.Hooks {
 public extension Passage.Hooks.Passkey {
 
     func willBeginGuestRegistration(
-        with form: any PasskeySignupForm,
+        with form: any PasskeyGuestRegistrationForm,
         as entity: PublicKeyCredentialUserEntity,
         on request: Request,
     ) async throws {}
@@ -156,15 +156,15 @@ public extension Passage.Hooks.Passkey {
 
 public struct _PasskeyHooksClosures: Passage.Hooks.Passkey {
 
-    let _willBeginGuestRegistration: (@Sendable (any PasskeySignupForm, PublicKeyCredentialUserEntity, Request) async throws -> Void)?
+    let _willBeginGuestRegistration: (@Sendable (any PasskeyGuestRegistrationForm, PublicKeyCredentialUserEntity, Request) async throws -> Void)?
     let _didBeginGuestRegistration: (@Sendable (PasskeyBeginResult, Request) async -> Void)?
     let _willFinishGuestRegistration: (@Sendable (Identifier?, Request) async throws -> Void)?
-    let _didFinishGuestRegistration: (@Sendable (any User, Request, StoredPasskeyCredential) async -> Void)?
+    let _didFinishGuestRegistration: (@Sendable (StoredPasskeyCredential, any User, Request) async -> Void)?
 
     let _willBeginRegistration: (@Sendable (any User, PublicKeyCredentialUserEntity, Request) async throws -> Void)?
     let _didBeginRegistration: (@Sendable (PasskeyBeginResult, any User, Request) async -> Void)?
     let _willFinishRegistration: (@Sendable ((any User)?, Request) async throws -> Void)?
-    let _didFinishRegistration: (@Sendable (any User, Request, StoredPasskeyCredential) async -> Void)?
+    let _didFinishRegistration: (@Sendable (StoredPasskeyCredential, any User, Request) async -> Void)?
 
     let _willBeginAuthentication: (@Sendable (Request) async throws -> Void)?
     let _didBeginAuthentication: (@Sendable (PasskeyBeginResult, Request) async -> Void)?
@@ -172,7 +172,7 @@ public struct _PasskeyHooksClosures: Passage.Hooks.Passkey {
     let _didFinishAuthentication: (@Sendable (StoredPasskeyCredential, any User, String, Request) async -> Void)?
 
     public func willBeginGuestRegistration(
-        with form: any PasskeySignupForm,
+        with form: any PasskeyGuestRegistrationForm,
         as entity: PublicKeyCredentialUserEntity,
         on request: Request,
     ) async throws {
@@ -198,7 +198,7 @@ public struct _PasskeyHooksClosures: Passage.Hooks.Passkey {
         for user: any User,
         on request: Request,
     ) async {
-        await _didFinishGuestRegistration?(user, request, credential)
+        await _didFinishGuestRegistration?(credential, user, request)
     }
 
     public func willBeginRegistration(
@@ -229,7 +229,7 @@ public struct _PasskeyHooksClosures: Passage.Hooks.Passkey {
         for user: any User,
         on request: Request,
     ) async {
-        try await _didFinishRegistration?(user, request, credential)
+        try await _didFinishRegistration?(credential, user, request)
     }
 
     public func willBeginAuthentication(
@@ -266,15 +266,15 @@ public struct _PasskeyHooksClosures: Passage.Hooks.Passkey {
 public extension Passage.Hooks.Passkey where Self == _PasskeyHooksClosures {
 
     static func hook(
-        willBeginGuestRegistration  : (@Sendable (any PasskeySignupForm, PublicKeyCredentialUserEntity, Request) async throws -> Void)? = nil,
+        willBeginGuestRegistration  : (@Sendable (any PasskeyGuestRegistrationForm, PublicKeyCredentialUserEntity, Request) async throws -> Void)? = nil,
         didBeginGuestRegistration   : (@Sendable (PasskeyBeginResult, Request) async -> Void)? = nil,
         willFinishGuestRegistration : (@Sendable (Identifier?, Request) async throws -> Void)? = nil,
-        didFinishGuestRegistration  : (@Sendable (any User, Request, StoredPasskeyCredential) async -> Void)? = nil,
+        didFinishGuestRegistration  : (@Sendable (StoredPasskeyCredential, any User, Request) async -> Void)? = nil,
 
         willBeginRegistration       : (@Sendable (any User, PublicKeyCredentialUserEntity, Request) async throws -> Void)? = nil,
         didBeginRegistration        : (@Sendable (PasskeyBeginResult, any User, Request) async -> Void)? = nil,
         willFinishRegistration      : (@Sendable ((any User)?, Request) async throws -> Void)? = nil,
-        didFinishRegistration       : (@Sendable (any User, Request, StoredPasskeyCredential) async -> Void)? = nil,
+        didFinishRegistration       : (@Sendable (StoredPasskeyCredential, any User, Request) async -> Void)? = nil,
 
         willBeginAuthentication     : (@Sendable (Request) async throws -> Void)? = nil,
         didBeginAuthentication      : (@Sendable (PasskeyBeginResult, Request) async -> Void)? = nil,

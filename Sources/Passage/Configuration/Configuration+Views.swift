@@ -13,8 +13,8 @@ public extension Passage.Configuration {
         let magicLinkVerify: MagicLinkVerifyView?
         let linkAccountSelect: LinkAccountSelectView?
         let linkAccountVerify: LinkAccountVerifyView?
-        let passkeySignup: PasskeySignupView?
-        let passkeyAuthenticate: PasskeyAuthenticateView?
+        let passkeyGuestRegistration: PasskeyGuestRegistrationView?
+        let passkeyAuthentication: PasskeyAuthenticationView?
 
         public init(
             register: RegisterView? = nil,
@@ -25,8 +25,8 @@ public extension Passage.Configuration {
             magicLinkVerify: MagicLinkVerifyView? = nil,
             linkAccountSelect: LinkAccountSelectView? = nil,
             linkAccountVerify: LinkAccountVerifyView? = nil,
-            passkeySignup: PasskeySignupView? = nil,
-            passkeyAuthenticate: PasskeyAuthenticateView? = nil,
+            passkeyGuestRegistration: PasskeyGuestRegistrationView? = nil,
+            passkeyAuthentication: PasskeyAuthenticationView? = nil,
         ) {
             self.register = register
             self.login = login
@@ -36,8 +36,8 @@ public extension Passage.Configuration {
             self.magicLinkVerify = magicLinkVerify
             self.linkAccountSelect = linkAccountSelect
             self.linkAccountVerify = linkAccountVerify
-            self.passkeySignup = passkeySignup
-            self.passkeyAuthenticate = passkeyAuthenticate
+            self.passkeyGuestRegistration = passkeyGuestRegistration
+            self.passkeyAuthentication = passkeyAuthentication
         }
     }
 }
@@ -55,8 +55,8 @@ extension Passage.Configuration.Views {
         magicLinkVerify != nil ||
         linkAccountSelect != nil ||
         linkAccountVerify != nil ||
-        passkeySignup != nil ||
-        passkeyAuthenticate != nil
+        passkeyGuestRegistration != nil ||
+        passkeyAuthentication != nil
     }
 }
 
@@ -275,8 +275,8 @@ public extension Passage.Configuration.Views {
 
 public extension Passage.Configuration.Views {
 
-    struct PasskeySignupView: Sendable, View {
-        let name: String = "passkey-signup"
+    struct PasskeyGuestRegistrationView: Sendable, View {
+        let name: String = "passkey-guest-registration"
         let style: Passage.Views.Style
         let theme: Passage.Views.Theme
         let redirect: Redirect
@@ -295,8 +295,8 @@ public extension Passage.Configuration.Views {
         }
     }
 
-    struct PasskeyAuthenticateView: Sendable, View {
-        let name: String = "passkey-authenticate"
+    struct PasskeyAuthenticationView: Sendable, View {
+        let name: String = "passkey-authentication"
         let style: Passage.Views.Style
         let theme: Passage.Views.Theme
         let redirect: Redirect

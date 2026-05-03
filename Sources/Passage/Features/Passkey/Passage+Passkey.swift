@@ -32,10 +32,10 @@ extension Passage.Passkey {
 
 extension Passage.Passkey {
 
-    // MARK: Signup — public, form-driven
+    // MARK: Guest Registration — unauthenticated user starting registration with an identifier
 
     func beginGuestRegistration(
-        form: any PasskeySignupForm
+        form: any PasskeyGuestRegistrationForm
     ) async throws -> any AsyncResponseEncodable & Sendable {
         guard let service else {
             throw PassageError.passkeyServiceNotAvailable

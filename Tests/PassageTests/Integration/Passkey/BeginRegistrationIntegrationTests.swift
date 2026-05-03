@@ -13,7 +13,7 @@ import VaporTesting
 /// guidance, and the trust model differs from signup: identity comes from
 /// the bearer/session, not the request body.
 ///
-/// The parallel public signup flow lives at `BeginSignupIntegrationTests`.
+/// The parallel public signup flow lives at `BeginGueswtRegistrationIntegrationTests`.
 @Suite(.tags(.integration, .passkey))
 struct `Passkey Begin Registration (authenticated) Integration Tests` {
 

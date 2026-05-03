@@ -1,8 +1,6 @@
 import Vapor
 
-// MARK: - Signup — Begin
-
-public protocol PasskeySignupForm: Form {
+public protocol PasskeyGuestRegistrationForm: Form {
     var email: String? { get }
     var phone: String? { get }
     var username: String? { get }
@@ -11,7 +9,9 @@ public protocol PasskeySignupForm: Form {
     func validate() throws
 }
 
-extension PasskeySignupForm {
+// MARK: - Identifier Conversion
+
+extension PasskeyGuestRegistrationForm {
 
     func asIdentifier() throws -> Identifier {
         if let email = email {

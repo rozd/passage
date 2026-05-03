@@ -8,7 +8,7 @@ import Vapor
 import VaporTesting
 
 /// End-to-end coverage of `POST /auth/passkey/guest/registration/finish` — the second
-/// leg of the registration ceremony. Pairs with `BeginSignupIntegrationTests`.
+/// leg of the registration ceremony. Pairs with `BeginGuestRegistrationIntegrationTests`.
 ///
 /// The tests seed a challenge via the store (mimicking what `POST begin`
 /// would persist), then POST a finish body and assert the expected orchestration:
@@ -20,7 +20,7 @@ import VaporTesting
 /// swift-webauthn verification is covered by `passage-webauthn`'s own tests
 /// and by end-to-end browser flows, not here.
 @Suite(.tags(.integration, .passkey))
-struct `Passkey Finish Signup Integration Tests` {
+struct `Passkey Finish Guest Registration Integration Tests` {
 
     // MARK: - Fixtures
 
@@ -454,7 +454,7 @@ struct `Passkey Finish Signup Integration Tests` {
         // route path. We inline the whole config here to isolate the
         // customization.
         let holder = Holder()
-        // Signup registers only when both sides are set; pair the custom finish
+        // Guest Registration registers only when both sides are set; pair the custom finish
         // with the default begin to exercise the override on finish alone.
         let customRoutes = Passage.Configuration.Passkey.Routes(
             guestRegistrationBegin: .default,

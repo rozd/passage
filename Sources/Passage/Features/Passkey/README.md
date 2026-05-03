@@ -28,8 +28,8 @@ The Passkey feature lets users register a public-key credential (passkey) bound 
 | `PasskeyCredentialStore` / `PasskeyChallengeStore` protocols | ✅ Defined |
 | In-memory store impls (for tests) | ✅ In `PassageOnlyForTest` |
 | Fluent-backed store impls | ❌ Not yet in `passage-fluent` |
-| Leaf view for guest registration | ✅ `passkey-signup-minimalism` template |
-| Leaf view for authentication | ✅ `passkey-authenticate-minimalism` template |
+| Leaf view for guest registration | ✅ `passkey-guest-registration-minimalism` template |
+| Leaf view for authentication | ✅ `passkey-authentication-minimalism` template |
 | `allowDiscoverableLogin` policy flag | ✅ Enforced at `beginAuthentication` — when `false`, begin returns `400 discoverableLoginDisabled` |
 | Hinted (username-first) authentication | ⚠️ Reserved at the protocol layer (`allowCredentials: [PasskeyCredentialDescriptor]?`) but orchestration is discoverable-only — no HTTP endpoint accepts a user hint |
 | `allowAutoRegistration` linking flag | ⚠️ Reserved — discoverable flow without a stored credential currently returns `401 unknownPasskey`; auto-create-user-from-userHandle not implemented |
@@ -127,11 +127,11 @@ Passage exposes two registration flows with distinct trust models. Both ultimate
 
 Public, form-driven flow for **new** users creating an account with a passkey as their primary credential. Identity is self-asserted via a form identifier (email / phone / username).
 
-1. Client POSTs a `PasskeySignupForm` with one of `email` / `phone` / `username` plus `displayName`.
+1. Client POSTs a `PasskeyGuestRegistrationForm` with one of `email` / `phone` / `username` plus `displayName`.
 2. Orchestration calls `UserStore.find(byIdentifier:)`. If a user already exists, the begin **rejects with `409 identifierAlreadyRegistered`** — guest registration is for new accounts; returning users must authenticate first and use the `/registration/begin` flow.
 3. `PasskeyService.beginRegistration(with:policy:challengeTTL:)` produces a raw challenge plus an opaque creation-options body. The user entity is derived from the identifier (`PublicKeyCredentialUserEntity.init(for: identifier, displayName:)`).
 4. Core persists the challenge bound to the **identifier** (`(user: nil, identifier: x)`); no user record is created at begin time. The `PasskeyChallengeStore` SHA-256-hashes the raw bytes internally — plaintext never reaches the DB.
-5. Response on `/begin`: `PublicKeyCredentialCreationOptions` JSON (`Accept: application/json`) or a redirect back to the configured `views.passkeySignup` Leaf view (form submission with `Accept: text/html`).
+5. Response on `/begin`: `PublicKeyCredentialCreationOptions` JSON (`Accept: application/json`) or a redirect back to the configured `views.passkeyGuestRegistration` Leaf view (form submission with `Accept: text/html`).
 6. Browser calls `navigator.credentials.create()` and POSTs the result to `/guest/registration/finish`.
 7. Service verifies the attestation via `lookupChallenge` + `confirmUnused`; core re-checks `UserStore.find(byIdentifier:)` (TOCTOU) — if a user with that identifier was created between begin and finish, the ceremony is rejected with `401 invalidPasskeyChallenge`.
 8. Otherwise core creates the user via `UserStore.create(identifier:with: nil)`, persists the credential, and consumes the challenge.
@@ -185,12 +185,12 @@ The two routes that mount this method differ only in their middleware chain — 
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| GET  | `/auth/passkey/guest/registration/begin` | public | Renders the Leaf form (only when `views.passkeySignup` is configured) |
+| GET  | `/auth/passkey/guest/registration/begin` | public | Renders the Leaf form (only when `views.passkeyGuestRegistration` is configured) |
 | POST | `/auth/passkey/guest/registration/begin` | public | Begins guest registration (form-driven). Rejects existing identifiers with `409`. |
 | POST | `/auth/passkey/guest/registration/finish` | public | Finalizes guest registration. Creates the user from the challenge identifier. |
 | POST | `/auth/passkey/registration/begin` | session/bearer + guard | Begins authenticated registration (existing user adds a passkey) |
 | POST | `/auth/passkey/registration/finish` | session/bearer + guard | Finalizes authenticated registration — asserts session user matches challenge user |
-| GET  | `/auth/passkey/authentication/begin` | public | Renders the Leaf form (only when `views.passkeyAuthenticate` is configured) |
+| GET  | `/auth/passkey/authentication/begin` | public | Renders the Leaf form (only when `views.passkeyAuthentication` is configured) |
 | POST | `/auth/passkey/authentication/begin` | public | Begins authentication ceremony (discoverable) |
 | POST | `/auth/passkey/authentication/finish` | public | Finalizes authentication ceremony, issues session + exchange code |
 
@@ -481,12 +481,12 @@ Leaf-backed UI is opt-in per ceremony (signup and authenticate). The authenticat
 
 ```swift
 views: .init(
-    passkeySignup: .init(
+    passkeyGuestRegistration: .init(
         style: .minimalism,
         theme: .init(colors: .defaultLight),
         identifier: .email
     ),
-    passkeyAuthenticate: .init(
+    passkeyAuthentication: .init(
         style: .minimalism,
         theme: .init(colors: .defaultLight),
         redirect: .init(onSuccess: "/")          // navigated to with ?code=... appended on success
@@ -494,9 +494,9 @@ views: .init(
 )
 ```
 
-**Signup view** — When `passkeySignup` is configured, `GET /auth/passkey/guest/registration/begin` renders `passkey-signup-minimalism.leaf` with inline JavaScript that collects the identifier + display name, calls `navigator.credentials.create()`, and POSTs to the finish endpoint. HTML form submissions to the begin endpoint redirect back to the view with `?success=` or `?error=` query parameters.
+**Guest Registration view** — When `passkeyGuestRegistration` is configured, `GET /auth/passkey/guest/registration/begin` renders `passkey-guest-registration-minimalism.leaf` with inline JavaScript that collects the identifier + display name, calls `navigator.credentials.create()`, and POSTs to the finish endpoint. HTML form submissions to the begin endpoint redirect back to the view with `?success=` or `?error=` query parameters.
 
-**Authentication view** — When `passkeyAuthenticate` is configured, `GET /auth/passkey/authentication/begin` renders `passkey-authenticate-minimalism.leaf`. The form posts **no identifier** — the page fires `navigator.credentials.get({publicKey: options})` with the options returned by `POST /authentication/begin` (empty body) and then POSTs the assertion to `/authentication/finish`. On success, the JS navigates to `view.redirect.onSuccess` with the returned `code` appended as `?code=...` (matching the OAuth exchange-code handoff pattern). If `redirect.onSuccess` is not set, the page shows an inline success message.
+**Authentication view** — When `passkeyAuthentication` is configured, `GET /auth/passkey/authentication/begin` renders `passkey-authentication-minimalism.leaf`. The form posts **no identifier** — the page fires `navigator.credentials.get({publicKey: options})` with the options returned by `POST /authentication/begin` (empty body) and then POSTs the assertion to `/authentication/finish`. On success, the JS navigates to `view.redirect.onSuccess` with the returned `code` appended as `?code=...` (matching the OAuth exchange-code handoff pattern). If `redirect.onSuccess` is not set, the page shows an inline success message.
 
 Without a configured view, the GET route returns 404 while the POST ceremony endpoints keep working for JS-driven SPA clients.
 

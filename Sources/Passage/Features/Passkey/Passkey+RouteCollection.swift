@@ -41,34 +41,34 @@ extension Passage.Passkey {
     }
 }
 
-// MARK: - Signup (public)
+// MARK: - Guest Registration
 
 extension Passage.Passkey.RouteCollection {
 
     fileprivate func beginGuestRegistration(_ req: Request) async throws -> Response {
-        guard let signupBeginPath = routes.guestRegistrationBeginPath else {
+        guard let beginPath = routes.guestRegistrationBeginPath else {
             throw Abort(.notFound)
         }
         do {
-            let form = try req.decodeContentAsFormOfType(req.contracts.passkeySignupForm)
+            let form = try req.decodeContentAsFormOfType(req.contracts.passkeyGuestRegistrationForm)
             let body = try await req.passkey.beginGuestRegistration(form: form)
 
-            guard req.isFormSubmission, req.isWaitingForHTML, let view = req.configuration.views.passkeySignup else {
+            guard req.isFormSubmission, req.isWaitingForHTML, let view = req.configuration.views.passkeyGuestRegistration else {
                 return try await body.encodeResponse(for: req)
             }
 
-            return req.views.handlePasskeySignupFormSuccess(
+            return req.views.handlePasskeyGuestRegistrationFormSuccess(
                 of: view,
-                at: groupPath + signupBeginPath,
+                at: groupPath + beginPath,
             )
         } catch {
-            guard req.isFormSubmission, req.isWaitingForHTML, let view = req.configuration.views.passkeySignup else {
+            guard req.isFormSubmission, req.isWaitingForHTML, let view = req.configuration.views.passkeyGuestRegistration else {
                 throw error
             }
 
-            return req.views.handlePasskeySignupFormFailure(
+            return req.views.handlePasskeyGuestRegistrationFormFailure(
                 of: view,
-                at: groupPath + signupBeginPath,
+                at: groupPath + beginPath,
                 with: error
             )
         }

@@ -3,18 +3,18 @@ import Foundation
 import Vapor
 @testable import Passage
 
-/// Exercises the `PasskeySignupForm` contract that the Begin-Signup
+/// Exercises the `PasskeyGuestRegistrationForm` contract that the Begin-GuestRegistration
 /// handler consumes before calling the service. These tests pin down the
 /// identifier-extraction rules that drive the shape of the
 /// `PublicKeyCredentialUserEntity` passed into `PasskeyService.beginRegistration`.
 @Suite(.tags(.unit, .passkey))
-struct `Passkey Signup Form Tests` {
+struct `Passkey GuestRegistration Form Tests` {
 
     // MARK: - asIdentifier priority
 
     @Test
     func `asIdentifier returns email when only email is set`() throws {
-        let form = Passage.DefaultPasskeySignupForm(
+        let form = Passage.DefaultPasskeyGuestRegistrationForm(
             email: "alice@example.com",
             phone: nil,
             username: nil,
@@ -29,7 +29,7 @@ struct `Passkey Signup Form Tests` {
 
     @Test
     func `asIdentifier returns phone when only phone is set`() throws {
-        let form = Passage.DefaultPasskeySignupForm(
+        let form = Passage.DefaultPasskeyGuestRegistrationForm(
             email: nil,
             phone: "+15551234567",
             username: nil,
@@ -44,7 +44,7 @@ struct `Passkey Signup Form Tests` {
 
     @Test
     func `asIdentifier returns username when only username is set`() throws {
-        let form = Passage.DefaultPasskeySignupForm(
+        let form = Passage.DefaultPasskeyGuestRegistrationForm(
             email: nil,
             phone: nil,
             username: "alice",
@@ -61,7 +61,7 @@ struct `Passkey Signup Form Tests` {
     func `asIdentifier prefers email when multiple identifiers are present`() throws {
         // email > phone > username: begin-registration should never be
         // ambiguous when the client accidentally submits two identifiers.
-        let form = Passage.DefaultPasskeySignupForm(
+        let form = Passage.DefaultPasskeyGuestRegistrationForm(
             email: "alice@example.com",
             phone: "+15551234567",
             username: "alice",
@@ -76,7 +76,7 @@ struct `Passkey Signup Form Tests` {
 
     @Test
     func `asIdentifier throws identifierNotSpecified when all are nil`() throws {
-        let form = Passage.DefaultPasskeySignupForm(
+        let form = Passage.DefaultPasskeyGuestRegistrationForm(
             email: nil,
             phone: nil,
             username: nil,
@@ -101,13 +101,13 @@ struct `Passkey Signup Form Tests` {
     // MARK: - Content decoding
 
     @Test
-    func `DefaultPasskeySignupForm decodes from url-encoded form body`() throws {
+    func `DefaultPasskeyGuestRegistrationForm decodes from url-encoded form body`() throws {
         // Validate the Content wiring that the Begin-Registration route uses:
         // a url-encoded POST body must decode into the default form with the
         // optional identifier fields untouched.
         let decoder = URLEncodedFormDecoder()
         let form = try decoder.decode(
-            Passage.DefaultPasskeySignupForm.self,
+            Passage.DefaultPasskeyGuestRegistrationForm.self,
             from: "email=alice%40example.com&displayName=Alice%20A"
         )
 
@@ -120,7 +120,7 @@ struct `Passkey Signup Form Tests` {
     @Test
     func `Form validation rejects a malformed email value`() throws {
         var validations = Validations()
-        Passage.DefaultPasskeySignupForm.validations(&validations)
+        Passage.DefaultPasskeyGuestRegistrationForm.validations(&validations)
 
         let result = try validations.validate(json: """
             { "email": "not-an-email", "displayName": "x" }
@@ -133,7 +133,7 @@ struct `Passkey Signup Form Tests` {
     @Test
     func `Form validation accepts a nil email when using phone or username`() throws {
         var validations = Validations()
-        Passage.DefaultPasskeySignupForm.validations(&validations)
+        Passage.DefaultPasskeyGuestRegistrationForm.validations(&validations)
 
         let result = try validations.validate(json: """
             { "phone": "+15551234567", "displayName": "x" }
