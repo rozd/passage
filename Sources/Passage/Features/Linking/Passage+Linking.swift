@@ -52,10 +52,6 @@ extension Passage.Linking {
         request.store
     }
 
-    var random: any Passage.RandomGenerator {
-        request.random
-    }
-
 }
 
 

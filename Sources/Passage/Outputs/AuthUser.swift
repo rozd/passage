@@ -1,6 +1,6 @@
-import Vapor
+public import Vapor
 
-struct AuthUser: Content {
+public struct AuthUser: Content {
     struct User: Content, UserInfo {
         let id: String
         let email: String?

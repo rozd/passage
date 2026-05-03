@@ -32,3 +32,17 @@ extension PassageContext {
         }
     }
 }
+
+// MARK: - Expose Passage Features
+
+public extension PassageContext {
+
+    var verification: Passage.Verification {
+        request.verification
+    }
+
+    var passwordless: Passage.Passwordless {
+        request.passwordless
+    }
+}
+

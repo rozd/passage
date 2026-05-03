@@ -56,7 +56,7 @@ extension Passage.Verification {
     /// Code is generated and stored synchronously.
     /// Delivery is dispatched to queue if available, otherwise sent synchronously.
     @discardableResult
-    func sendEmailCode(to user: any User) async throws -> String {
+    public func sendEmailCode(to user: any User) async throws -> String {
         guard emailDelivery != nil else {
             throw PassageError.emailDeliveryNotConfigured
         }
@@ -93,7 +93,7 @@ extension Passage.Verification {
     /// Used for account linking verification where we need the plain text code.
     /// - Parameter email: The email address to send the code to
     /// - Returns: The plain text verification code sent
-    func sendEmailCode(toEmail email: String) async throws -> String {
+    public func sendEmailCode(toEmail email: String) async throws -> String {
         guard emailDelivery != nil else {
             throw PassageError.emailDeliveryNotConfigured
         }
@@ -108,7 +108,7 @@ extension Passage.Verification {
 
     /// Send phone verification code to a user.
     @discardableResult
-    func sendPhoneCode(to user: any User) async throws -> String {
+    public func sendPhoneCode(to user: any User) async throws -> String {
         guard phoneDelivery != nil else {
             throw PassageError.phoneDeliveryNotConfigured
         }
@@ -141,7 +141,7 @@ extension Passage.Verification {
         return code
     }
 
-    func sendPhoneCode(toPhone phone: String) async throws -> String {
+    public func sendPhoneCode(toPhone phone: String) async throws -> String {
         guard phoneDelivery != nil else {
             throw PassageError.phoneDeliveryNotConfigured
         }
@@ -155,7 +155,7 @@ extension Passage.Verification {
     }
 
     /// Send verification code based on identifier kind.
-    func sendVerificationCode(for user: any User, identifierKind: Identifier.Kind) async throws {
+    public func sendVerificationCode(for user: any User, identifierKind: Identifier.Kind) async throws {
         switch identifierKind {
         case .email:
             try await sendEmailCode(to: user)

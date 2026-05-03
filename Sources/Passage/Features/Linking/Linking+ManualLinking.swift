@@ -29,10 +29,6 @@ extension Passage.Linking.ManualLinking {
     var storage: LinkingStateStorage {
         LinkingStateStorage(request: request, config: request.configuration)
     }
-
-    var random: any Passage.RandomGenerator {
-        linking.random
-    }
 }
 
 // MARK: - Linking Flow

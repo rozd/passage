@@ -60,7 +60,7 @@ extension Passage.Passwordless {
 
     /// Request an email magic link for passwordless authentication
     /// - Parameter email: The email address to send the magic link to
-    func requestEmailMagicLink(email: String) async throws {
+    public func requestEmailMagicLink(email: String) async throws {
         guard emailDelivery != nil else {
             throw PassageError.emailDeliveryNotConfigured
         }
@@ -113,7 +113,7 @@ extension Passage.Passwordless {
 
     /// Resend an email magic link
     /// - Parameter email: The email address to resend the magic link to
-    func resendEmailMagicLink(email: String) async throws {
+    public func resendEmailMagicLink(email: String) async throws {
         // Delegate to requestEmailMagicLink which handles invalidation and recreation
         try await requestEmailMagicLink(email: email)
     }
@@ -127,7 +127,7 @@ extension Passage.Passwordless {
     /// Verify an email magic link and authenticate the user
     /// - Parameter token: The magic link token from the URL
     /// - Returns: AuthUser containing access and refresh tokens
-    func verifyEmailMagicLink(token: String) async throws -> AuthUser {
+    public func verifyEmailMagicLink(token: String) async throws -> AuthUser {
         guard let config = self.config.emailMagicLink else {
             throw PassageError.emailMagicLinkNotConfigured
         }

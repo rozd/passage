@@ -24,20 +24,12 @@ extension Passage.Account {
         request.store
     }
 
-    var random: any Passage.RandomGenerator {
-        request.random
-    }
-
     var configuration: Passage.Configuration {
         request.configuration
     }
 
     var verification: Passage.Verification {
         request.verification
-    }
-
-    var contracts: Passage.Contracts {
-        request.contracts
     }
 }
 
