@@ -45,7 +45,7 @@ public extension Passage.Hooks {
 
 // MARK: - Default Implementation
 
-extension Passage.Hooks.Account {
+public extension Passage.Hooks.Account {
 
     func willRegister(
         with form: any RegisterForm,
@@ -107,28 +107,28 @@ public struct _AccountHooksClosures: Passage.Hooks.Account {
     
     public func willLogin(
         user: any User,
-        on request: Vapor.Request,
+        on request: Request,
     ) async throws {
         try await _willLogin?(user, request)
     }
 
     public func didLogin(
         user: any User,
-        on request: Vapor.Request,
+        on request: Request,
     ) async {
         await _didLogin?(user, request)
     }
 
     public func willLogout(
         user: any User,
-        on request: Vapor.Request,
+        on request: Request,
     ) async throws {
         try await _willLogout?(user, request)
     }
 
     public func didLogout(
         user: any User,
-        on request: Vapor.Request,
+        on request: Request,
     ) async {
         await _didLogout?(user, request)
     }
