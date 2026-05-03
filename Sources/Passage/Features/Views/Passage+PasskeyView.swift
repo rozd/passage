@@ -12,11 +12,11 @@ extension Passage.Views {
 
         let group = request.configuration.routes.group
 
-        let beginURL = request.configuration.passkey.routes.signupBeginPath.map {
+        let beginURL = request.configuration.passkey.routes.guestRegistrationBeginPath.map {
             "/" + (group + $0).string
         }
 
-        let finishURL = request.configuration.passkey.routes.signupFinishPath.map {
+        let finishURL = request.configuration.passkey.routes.guestRegistrationFinishPath.map {
             "/" + (group + $0).string
         }
 
@@ -107,8 +107,8 @@ extension Passage.Views {
         let params = try request.query.decode(PasskeyAuthenticateViewParams.self)
 
         let group = request.configuration.routes.group
-        let beginURL = "/" + (group + request.configuration.passkey.routes.authenticateBeginPath).string
-        let finishURL = "/" + (group + request.configuration.passkey.routes.authenticateFinishPath).string
+        let beginURL = "/" + (group + request.configuration.passkey.routes.authenticationBeginPath).string
+        let finishURL = "/" + (group + request.configuration.passkey.routes.authenticationFinishPath).string
 
         return try await request.view.render(
             view.template,

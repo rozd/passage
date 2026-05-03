@@ -13,12 +13,12 @@ extension Passage.Passkey {
             grouped.group(routes.group) { group in
                 // Registration ceremony for new users — discoverable, public.
                 // Opt-in: the routes register only when both sides are set.
-                if let signupBegin = routes.signupBegin,
-                   let signupFinish = routes.signupFinish {
+                if let guestRegistrationBegin = routes.guestRegistrationBegin,
+                   let guestRegistrationFinish = routes.guestRegistrationFinish {
                     group
-                        .post(signupBegin.path, use: self.beginSignup)
+                        .post(guestRegistrationBegin.path, use: self.beginSignup)
                     group
-                        .post(signupFinish.path, use: self.finishSignup)
+                        .post(guestRegistrationFinish.path, use: self.finishSignup)
                 }
 
                 // Registration ceremony – discoverable, but requires authentication to initiate and complete.
@@ -26,15 +26,15 @@ extension Passage.Passkey {
                     .grouped(PassageSessionAuthenticator())
                     .grouped(PassageBearerAuthenticator())
                 authed
-                    .post(routes.registerBegin.path, use: self.beginRegistration)
+                    .post(routes.registrationBegin.path, use: self.beginRegistration)
                 authed
-                    .post(routes.registerFinish.path, use: self.finishRegistration)
+                    .post(routes.registrationFinish.path, use: self.finishRegistration)
 
                 // Authentication ceremony — discoverable, public.
                 group
-                    .post(routes.authenticateBegin.path, use: self.beginAuthentication)
+                    .post(routes.authenticationBegin.path, use: self.beginAuthentication)
                 group
-                    .post(routes.authenticateFinish.path, use: self.finishAuthentication)
+                    .post(routes.authenticationFinish.path, use: self.finishAuthentication)
             }
         }
     }
@@ -45,7 +45,7 @@ extension Passage.Passkey {
 extension Passage.Passkey.RouteCollection {
 
     fileprivate func beginSignup(_ req: Request) async throws -> Response {
-        guard let signupBeginPath = routes.signupBeginPath else {
+        guard let signupBeginPath = routes.guestRegistrationBeginPath else {
             throw Abort(.notFound)
         }
         do {

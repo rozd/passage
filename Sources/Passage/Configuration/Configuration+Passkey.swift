@@ -1,9 +1,9 @@
 public import Foundation
 public import Vapor
 
-public extension Passage.Configuration {
+extension Passage.Configuration {
 
-    struct Passkey: Sendable {
+    public struct Passkey: Sendable {
         public let routes: Routes
         public let policy: Policy
         public let linking: Linking
@@ -22,48 +22,48 @@ public extension Passage.Configuration {
         }
 
         public struct Routes: Sendable {
-            public struct SignupBegin: Sendable {
-                public static let `default` = SignupBegin(path: "signup", "begin")
+            public struct GuestRegistrationBegin: Sendable {
+                public static let `default` = GuestRegistrationBegin(path: "guest", "registration", "begin")
                 let path: [PathComponent]
                 public init(path: PathComponent...) {
                     self.path = path
                 }
             }
 
-            public struct SignupFinish: Sendable {
-                public static let `default` = SignupFinish(path: "signup", "finish")
+            public struct GuestRegistrationFinish: Sendable {
+                public static let `default` = GuestRegistrationFinish(path: "guest", "registration", "finish")
                 let path: [PathComponent]
                 public init(path: PathComponent...) {
                     self.path = path
                 }
             }
 
-            public struct RegisterBegin: Sendable {
-                public static let `default` = RegisterBegin(path: "register", "begin")
+            public struct RegistrationBegin: Sendable {
+                public static let `default` = RegistrationBegin(path: "registration", "begin")
                 let path: [PathComponent]
                 public init(path: PathComponent...) {
                     self.path = path
                 }
             }
 
-            public struct RegisterFinish: Sendable {
-                public static let `default` = RegisterFinish(path: "register", "finish")
+            public struct RegistrationFinish: Sendable {
+                public static let `default` = RegistrationFinish(path: "registration", "finish")
                 let path: [PathComponent]
                 public init(path: PathComponent...) {
                     self.path = path
                 }
             }
 
-            public struct AuthenticateBegin: Sendable {
-                public static let `default` = AuthenticateBegin(path: "authenticate", "begin")
+            public struct AuthenticationBegin: Sendable {
+                public static let `default` = AuthenticationBegin(path: "authentication", "begin")
                 let path: [PathComponent]
                 public init(path: PathComponent...) {
                     self.path = path
                 }
             }
 
-            public struct AuthenticateFinish: Sendable {
-                public static let `default` = AuthenticateFinish(path: "authenticate", "finish")
+            public struct AuthenticationFinish: Sendable {
+                public static let `default` = AuthenticationFinish(path: "authentication", "finish")
                 let path: [PathComponent]
                 public init(path: PathComponent...) {
                     self.path = path
@@ -71,29 +71,29 @@ public extension Passage.Configuration {
             }
 
             public let group: [PathComponent]
-            public let signupBegin: SignupBegin?
-            public let signupFinish: SignupFinish?
-            public let registerBegin: RegisterBegin
-            public let registerFinish: RegisterFinish
-            public let authenticateBegin: AuthenticateBegin
-            public let authenticateFinish: AuthenticateFinish
+            public let guestRegistrationBegin: GuestRegistrationBegin?
+            public let guestRegistrationFinish: GuestRegistrationFinish?
+            public let registrationBegin: RegistrationBegin
+            public let registrationFinish: RegistrationFinish
+            public let authenticationBegin: AuthenticationBegin
+            public let authenticationFinish: AuthenticationFinish
 
             public init(
                 group: [PathComponent] = ["passkey"],
-                signupBegin: SignupBegin? = nil,
-                signupFinish: SignupFinish? = nil,
-                registerBegin: RegisterBegin = .default,
-                registerFinish: RegisterFinish = .default,
-                authenticateBegin: AuthenticateBegin = .default,
-                authenticateFinish: AuthenticateFinish = .default,
+                guestRegistrationBegin: GuestRegistrationBegin? = nil,
+                guestRegistrationFinish: GuestRegistrationFinish? = nil,
+                registrationBegin: RegistrationBegin = .default,
+                registrationFinish: RegistrationFinish = .default,
+                authenticationBegin: AuthenticationBegin = .default,
+                authenticationFinish: AuthenticationFinish = .default,
             ) {
                 self.group = group
-                self.signupBegin = signupBegin
-                self.signupFinish = signupFinish
-                self.registerBegin = registerBegin
-                self.registerFinish = registerFinish
-                self.authenticateBegin = authenticateBegin
-                self.authenticateFinish = authenticateFinish
+                self.guestRegistrationBegin = guestRegistrationBegin
+                self.guestRegistrationFinish = guestRegistrationFinish
+                self.registrationBegin = registrationBegin
+                self.registrationFinish = registrationFinish
+                self.authenticationBegin = authenticationBegin
+                self.authenticationFinish = authenticationFinish
             }
         }
 
@@ -139,33 +139,33 @@ public extension Passage.Configuration {
 // MARK: -
 
 extension Passage.Configuration.Passkey.Routes {
-    var signupBeginPath: [PathComponent]? {
-        guard let path = signupBegin?.path else {
+    var guestRegistrationBeginPath: [PathComponent]? {
+        guard let path = guestRegistrationBegin?.path else {
             return nil
         }
         return group + path
     }
 
-    var signupFinishPath: [PathComponent]? {
-        guard let path = signupFinish?.path else {
+    var guestRegistrationFinishPath: [PathComponent]? {
+        guard let path = guestRegistrationFinish?.path else {
             return nil
         }
         return group + path
     }
 
-    var registerBeginPath: [PathComponent] {
-        return group + registerBegin.path
+    var registrationBeginPath: [PathComponent] {
+        return group + registrationBegin.path
     }
 
-    var registerFinishPath: [PathComponent] {
-        return group + registerFinish.path
+    var registrationFinishPath: [PathComponent] {
+        return group + registrationFinish.path
     }
 
-    var authenticateBeginPath: [PathComponent] {
-        return group + authenticateBegin.path
+    var authenticationBeginPath: [PathComponent] {
+        return group + authenticationBegin.path
     }
 
-    var authenticateFinishPath: [PathComponent] {
-        return group + authenticateFinish.path
+    var authenticationFinishPath: [PathComponent] {
+        return group + authenticationFinish.path
     }
 }
