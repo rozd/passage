@@ -3,6 +3,7 @@ public import Vapor
 public enum AuthenticationError: Error, Equatable {
     // Registration errors
     case identifierNotSpecified
+    case identifierAlreadyRegistered
     case emailAlreadyRegistered
     case phoneAlreadyRegistered
     case usernameAlreadyRegistered
@@ -67,7 +68,7 @@ extension AuthenticationError: AbortError {
         switch self {
         case .identifierNotSpecified, .passwordsDoNotMatch:
             return .badRequest
-        case .emailAlreadyRegistered, .phoneAlreadyRegistered, .usernameAlreadyRegistered:
+        case .identifierAlreadyRegistered, .emailAlreadyRegistered, .phoneAlreadyRegistered, .usernameAlreadyRegistered:
             return .conflict
         case .invalidEmailOrPassword, .invalidPhoneOrPassword, .invalidUsernameOrPassword:
             return .unauthorized
@@ -122,6 +123,8 @@ extension AuthenticationError: AbortError {
         switch self {
         case .identifierNotSpecified:
             return "No identifier (email, phone, or username) was specified."
+        case .identifierAlreadyRegistered:
+            return "This identifier is already registered."
         case .emailAlreadyRegistered:
             return "This email is already registered."
         case .phoneAlreadyRegistered:
