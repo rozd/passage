@@ -62,7 +62,7 @@ struct `Passkey Hooks Integration Tests` {
                     willFinishGuestRegistration.append(identifier?.value)
                     if let err = willFinishGuestRegistrationError { throw err }
                 },
-                didFinishGuestRegistration: { [self] user, _, _ in
+                didFinishGuestRegistration: { [self] _, user, _ in
                     didFinishGuestRegistration.append((try? user.requiredIdAsString) ?? "")
                 },
 
@@ -77,7 +77,7 @@ struct `Passkey Hooks Integration Tests` {
                     willFinishRegistration.append(try? user?.requiredIdAsString)
                     if let err = willFinishRegistrationError { throw err }
                 },
-                didFinishRegistration: { [self] user, _, _ in
+                didFinishRegistration: { [self] _, user, _ in
                     didFinishRegistration.append((try? user.requiredIdAsString) ?? "")
                 },
 
