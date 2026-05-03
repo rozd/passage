@@ -31,7 +31,7 @@ Use with caution. The library is functional, but the API is subject to change be
 - 📋 **Web Forms** - Built-in Leaf templates for registration, login, and password reset
 - ⚡ **Async Queue Support** - Optional background job processing via Vapor Queues
 - 🔧 **Protocol-Based Services** - Pluggable storage, email, phone, and OAuth providers
-- 🪝 **Lifecycle Hooks** - Async will/did callbacks around register, login, and logout for custom policy and audit
+- 🪝 **Lifecycle Hooks** - Async will/did callbacks for custom policy and audit
 - 🎨 **Fully Customizable** - Configure routes, tokens, templates, and behavior
 
 ## Standards Compliance
@@ -132,7 +132,7 @@ Passage is designed for flexibility through:
 - **Protocol-Based Services** - Implement your own storage, email delivery, phone delivery, or OAuth providers
 - **Extensible Forms** - Default form types can be replaced with custom implementations via contracts
 - **Stylable Default Views** - Default Leaf views with different styles and themes
-- **Lifecycle Hooks** - Inject async pre/post callbacks around register, login, and logout flows; throw from `will*` hooks to gate flows on custom policy
+- **Lifecycle Hooks** - Inject async pre/post callbacks around authentication flows; throw from `will*` hooks to gate flows on custom policy
 
 ## Services to Implement
 
@@ -584,7 +584,7 @@ _No dedicated example yet — see [rozd/passage-example](https://github.com/rozd
 </details>
 
 <details>
-<summary><h3>🪝 Hooks</h3> — async lifecycle callbacks fired around register, login, and logout flows.</summary>
+<summary><h3>🪝 Hooks</h3> — async lifecycle callbacks fired around authentication flows.</summary>
 
 #### Configuration
 Hooks are an optional fourth parameter on `app.passage.configure(...)`, alongside `services`, `contracts`, and `configuration`:
