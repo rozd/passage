@@ -13,78 +13,70 @@ extension Passage.Passkey {
             grouped.group(routes.group) { group in
                 // Registration ceremony for new users — discoverable, public.
                 // Opt-in: the routes register only when both sides are set.
-                if let signupBegin = routes.signupBegin,
-                   let signupFinish = routes.signupFinish {
+                if let guestRegistrationBegin = routes.guestRegistrationBegin,
+                   let guestRegistrationFinish = routes.guestRegistrationFinish {
                     group
-                        .post(signupBegin.path, use: self.beginSignup)
+                        .post(guestRegistrationBegin.path, use: self.beginGuestRegistration)
                     group
-                        .post(signupFinish.path, use: self.finishSignup)
+                        .post(guestRegistrationFinish.path, use: self.finishRegistration)
                 }
 
                 // Registration ceremony – discoverable, but requires authentication to initiate and complete.
                 let authed = group
                     .grouped(PassageSessionAuthenticator())
                     .grouped(PassageBearerAuthenticator())
+                    .grouped(PassageGuard())
                 authed
-                    .post(routes.registerBegin.path, use: self.beginRegistration)
+                    .post(routes.registrationBegin.path, use: self.beginRegistration)
                 authed
-                    .post(routes.registerFinish.path, use: self.finishRegistration)
+                    .post(routes.registrationFinish.path, use: self.finishRegistration)
 
                 // Authentication ceremony — discoverable, public.
                 group
-                    .post(routes.authenticateBegin.path, use: self.beginAuthentication)
+                    .post(routes.authenticationBegin.path, use: self.beginAuthentication)
                 group
-                    .post(routes.authenticateFinish.path, use: self.finishAuthentication)
+                    .post(routes.authenticationFinish.path, use: self.finishAuthentication)
             }
         }
     }
 }
 
-// MARK: - Signup (public)
+// MARK: - Guest Registration
 
 extension Passage.Passkey.RouteCollection {
 
-    fileprivate func beginSignup(_ req: Request) async throws -> Response {
-        guard let signupBeginPath = routes.signupBeginPath else {
+    fileprivate func beginGuestRegistration(_ req: Request) async throws -> Response {
+        guard let beginPath = routes.guestRegistrationBeginPath else {
             throw Abort(.notFound)
         }
         do {
-            let form = try req.decodeContentAsFormOfType(req.contracts.passkeySignupForm)
-            let body = try await req.passkey.beginSignup(form: form)
+            let form = try req.decodeContentAsFormOfType(req.contracts.passkeyGuestRegistrationForm)
+            let body = try await req.passkey.beginGuestRegistration(form: form)
 
-            guard req.isFormSubmission, req.isWaitingForHTML, let view = req.configuration.views.passkeySignup else {
+            guard req.isFormSubmission, req.isWaitingForHTML, let view = req.configuration.views.passkeyGuestRegistration else {
                 return try await body.encodeResponse(for: req)
             }
 
-            return req.views.handlePasskeySignupFormSuccess(
+            return req.views.handlePasskeyGuestRegistrationFormSuccess(
                 of: view,
-                at: groupPath + signupBeginPath,
+                at: groupPath + beginPath,
             )
         } catch {
-            guard req.isFormSubmission, req.isWaitingForHTML, let view = req.configuration.views.passkeySignup else {
+            guard req.isFormSubmission, req.isWaitingForHTML, let view = req.configuration.views.passkeyGuestRegistration else {
                 throw error
             }
 
-            return req.views.handlePasskeySignupFormFailure(
+            return req.views.handlePasskeyGuestRegistrationFormFailure(
                 of: view,
-                at: groupPath + signupBeginPath,
+                at: groupPath + beginPath,
                 with: error
             )
         }
     }
 
-    fileprivate func finishSignup(_ req: Request) async throws -> Response {
-        let maxBody = req.application.routes.defaultMaxBodySize.value
-        let buffer = try await req.body.collect(upTo: maxBody)
-        let rawBody = Data(buffer: buffer)
-        let stored = try await req.passkey.finishSignup(rawBody: rawBody)
-        let response = PasskeyRegistrationResponse(credentialID: stored.credentialID)
-        return try await response.encodeResponse(status: .created, for: req)
-    }
-
 }
 
-// MARK: - Register (authenticated)
+// MARK: - Registration
 
 extension Passage.Passkey.RouteCollection {
 

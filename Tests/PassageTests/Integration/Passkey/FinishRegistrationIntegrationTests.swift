@@ -6,7 +6,7 @@ import Testing
 import Vapor
 import VaporTesting
 
-/// End-to-end coverage of `POST /auth/passkey/register/finish` — the
+/// End-to-end coverage of `POST /auth/passkey/registration/finish` — the
 /// authenticated leg that persists a passkey credential for an already
 /// signed-in user. Pairs with `BeginRegistrationIntegrationTests`.
 ///
@@ -107,7 +107,7 @@ struct `Passkey Finish Registration (authenticated) Integration Tests` {
             try await self.configure(app, holder: holder)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/register/finish",
+                .POST, "/auth/passkey/registration/finish",
                 headers: ["Content-Type": "application/json"],
                 body: .init(string: Self.minimalFinishBody)
             ) { res in
@@ -127,7 +127,7 @@ struct `Passkey Finish Registration (authenticated) Integration Tests` {
             let (user, token) = try await self.createUserAndLogin(app: app, email: "alice@example.com")
 
             try await app.testing().test(
-                .POST, "/auth/passkey/register/begin",
+                .POST, "/auth/passkey/registration/begin",
                 headers: [
                     "Content-Type": "application/json",
                     "Accept": "application/json",
@@ -139,7 +139,7 @@ struct `Passkey Finish Registration (authenticated) Integration Tests` {
             }
 
             try await app.testing().test(
-                .POST, "/auth/passkey/register/finish",
+                .POST, "/auth/passkey/registration/finish",
                 headers: [
                     "Content-Type": "application/json",
                     "Authorization": "Bearer \(token)"
@@ -170,7 +170,7 @@ struct `Passkey Finish Registration (authenticated) Integration Tests` {
             let (_, bobToken) = try await self.createUserAndLogin(app: app, email: "bob@example.com")
 
             try await app.testing().test(
-                .POST, "/auth/passkey/register/begin",
+                .POST, "/auth/passkey/registration/begin",
                 headers: [
                     "Content-Type": "application/json",
                     "Accept": "application/json",
@@ -183,7 +183,7 @@ struct `Passkey Finish Registration (authenticated) Integration Tests` {
 
             // Bob tries to complete the ceremony Alice started.
             try await app.testing().test(
-                .POST, "/auth/passkey/register/finish",
+                .POST, "/auth/passkey/registration/finish",
                 headers: [
                     "Content-Type": "application/json",
                     "Authorization": "Bearer \(bobToken)"

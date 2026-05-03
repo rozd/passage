@@ -6,7 +6,7 @@ import Vapor
 /// `PasskeyRegistrationResponse` is the tiny response body returned on
 /// `201 Created` from both `POST /passkey/signup/finish` and
 /// `POST /passkey/register/finish`. The JSON shape is load-bearing: the
-/// browser-side JavaScript in `passkey-signup-minimalism.leaf` relies on
+/// browser-side JavaScript in `passkey-guest-registration-minimalism.leaf` relies on
 /// the `credentialID` field name.
 @Suite(.tags(.unit))
 struct `PasskeyRegistrationResponse Tests` {

@@ -175,6 +175,7 @@ extension Passage.OnlyForTest {
 
     public struct InMemoryStoredPasskeyChallenge: StoredPasskeyChallenge, @unchecked Sendable {
         public var id: String?
+        public var identifier: Identifier?
         public var user: Passage.OnlyForTest.InMemoryUser?
         public var kind: PasskeyChallengeKind
         public var challengeHash: String
@@ -822,33 +823,25 @@ public extension Passage.OnlyForTest.InMemoryStore {
 
         @discardableResult
         public func createPasskeyChallenge(
-            for user: (any User)?,
             from challenge: PasskeyChallenge
         ) async throws -> any StoredPasskeyChallenge {
-            let inMemoryUser: Passage.OnlyForTest.InMemoryUser? = user.map { u in
-                Passage.OnlyForTest.InMemoryUser(
-                    id: u.id?.description ?? "",
-                    email: u.email,
-                    phone: u.phone,
-                    username: u.username,
-                    passwordHash: u.passwordHash,
-                    isAnonymous: u.isAnonymous,
-                    isEmailVerified: u.isEmailVerified,
-                    isPhoneVerified: u.isPhoneVerified
-                )
-            }
-            let hash = challenge.bytes.sha256Hex
-            let stored = Passage.OnlyForTest.InMemoryStoredPasskeyChallenge(
-                id: UUID().uuidString,
-                user: inMemoryUser,
-                kind: challenge.kind,
-                challengeHash: hash,
-                expiresAt: challenge.expiresAt,
-                consumedAt: nil,
-                createdAt: Date()
-            )
-            challenges[hash] = stored
-            return stored
+            persist(challenge: challenge, identifier: nil, user: nil)
+        }
+
+        @discardableResult
+        public func createPasskeyChallenge(
+            for user: any User,
+            from challenge: PasskeyChallenge
+        ) async throws -> any StoredPasskeyChallenge {
+            persist(challenge: challenge, identifier: nil, user: snapshot(user))
+        }
+
+        @discardableResult
+        public func createPasskeyChallenge(
+            for identifier: Identifier,
+            from challenge: PasskeyChallenge
+        ) async throws -> any StoredPasskeyChallenge {
+            persist(challenge: challenge, identifier: identifier, user: nil)
         }
 
         public func find(passkeyChallengeMatching bytes: Data) async throws -> (any StoredPasskeyChallenge)? {
@@ -861,6 +854,41 @@ public extension Passage.OnlyForTest.InMemoryStore {
 
         public func cleanupExpiredPasskeyChallenges(before date: Date) async throws {
             challenges = challenges.filter { $0.value.expiresAt >= date }
+        }
+
+        // MARK: Internal
+
+        private func persist(
+            challenge: PasskeyChallenge,
+            identifier: Identifier?,
+            user: Passage.OnlyForTest.InMemoryUser?
+        ) -> any StoredPasskeyChallenge {
+            let hash = challenge.bytes.sha256Hex
+            let stored = Passage.OnlyForTest.InMemoryStoredPasskeyChallenge(
+                id: UUID().uuidString,
+                identifier: identifier,
+                user: user,
+                kind: challenge.kind,
+                challengeHash: hash,
+                expiresAt: challenge.expiresAt,
+                consumedAt: nil,
+                createdAt: Date()
+            )
+            challenges[hash] = stored
+            return stored
+        }
+
+        private func snapshot(_ user: any User) -> Passage.OnlyForTest.InMemoryUser {
+            Passage.OnlyForTest.InMemoryUser(
+                id: user.id?.description ?? "",
+                email: user.email,
+                phone: user.phone,
+                username: user.username,
+                passwordHash: user.passwordHash,
+                isAnonymous: user.isAnonymous,
+                isEmailVerified: user.isEmailVerified,
+                isPhoneVerified: user.isPhoneVerified
+            )
         }
     }
 

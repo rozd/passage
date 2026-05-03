@@ -318,23 +318,27 @@ public extension Passage {
 
     protocol PasskeyChallengeStore: Sendable {
 
-        /// Persist a challenge that was just issued to the client.
-        /// Implementations SHA-256 the raw `challenge.bytes` before writing —
-        /// only the hash is persisted (see ``StoredPasskeyChallenge/challengeHash``).
-        /// - Parameters:
-        ///   - user: The user this challenge was issued for, or nil for a
-        ///     discoverable-authentication challenge.
-        ///   - challenge: Freshly-issued challenge DTO from the ``PasskeyService``.
         @discardableResult
         func createPasskeyChallenge(
-            for user: (any User)?,
             from challenge: PasskeyChallenge
         ) async throws -> any StoredPasskeyChallenge
 
-        /// Look up a stored challenge by the raw bytes the authenticator echoed
-        /// back in `clientDataJSON`. Implementations SHA-256 and index internally
-        /// — callers never see the hash. Used in `finishRegistration` /
-        /// `finishAuthentication` to prove freshness.
+        @discardableResult
+        func createPasskeyChallenge(
+            for user: any User,
+            from challenge: PasskeyChallenge
+        ) async throws -> any StoredPasskeyChallenge
+
+        @discardableResult
+        func createPasskeyChallenge(
+            for identifier: Identifier,
+            from challenge: PasskeyChallenge
+        ) async throws -> any StoredPasskeyChallenge
+
+        /// Look up a stored challenge by the raw bytes the authenticator
+        /// echoed back in `clientDataJSON`. Implementations SHA-256 and index
+        /// internally — callers never see the hash. Used in
+        /// `finishRegistration` / `finishAuthentication` to prove freshness.
         func find(passkeyChallengeMatching bytes: Data) async throws -> (any StoredPasskeyChallenge)?
 
         /// Mark a challenge as consumed (one-shot enforcement).

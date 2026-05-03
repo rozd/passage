@@ -5,7 +5,7 @@ import Vapor
 
 /// `PasskeyAuthenticationResponse` is the 200-OK body returned from
 /// `POST /passkey/authenticate/finish`. The JSON shape is load-bearing: the
-/// browser-side JavaScript in `passkey-authenticate-minimalism.leaf` reads the
+/// browser-side JavaScript in `passkey-authentication-minimalism.leaf` reads the
 /// `code` field and uses it to build the post-auth redirect URL (matching the
 /// OAuth exchange-code pattern).
 @Suite(.tags(.unit))

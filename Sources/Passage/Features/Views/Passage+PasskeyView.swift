@@ -1,22 +1,22 @@
 import Vapor
 
-// MARK: - Signup View Params
+// MARK: - Guest Registration View Params
 
 extension Passage.Views {
 
-    func renderPasskeySignupView() async throws -> View {
-        guard let view = config.passkeySignup else {
+    func renderPasskeyGuestRegistrationView() async throws -> View {
+        guard let view = config.passkeyGuestRegistration else {
             throw Abort(.notFound)
         }
-        let params = try request.query.decode(PasskeySignupViewParams.self)
+        let params = try request.query.decode(PasskeyGuestRegistrationViewParams.self)
 
         let group = request.configuration.routes.group
 
-        let beginURL = request.configuration.passkey.routes.signupBeginPath.map {
+        let beginURL = request.configuration.passkey.routes.guestRegistrationBeginPath.map {
             "/" + (group + $0).string
         }
 
-        let finishURL = request.configuration.passkey.routes.signupFinishPath.map {
+        let finishURL = request.configuration.passkey.routes.guestRegistrationFinishPath.map {
             "/" + (group + $0).string
         }
 
@@ -35,8 +35,8 @@ extension Passage.Views {
         )
     }
 
-    func handlePasskeySignupFormSuccess(
-        of view: Passage.Configuration.Views.PasskeySignupView,
+    func handlePasskeyGuestRegistrationFormSuccess(
+        of view: Passage.Configuration.Views.PasskeyGuestRegistrationView,
         at path: [PathComponent],
     ) -> Response {
         return redirect(
@@ -46,8 +46,8 @@ extension Passage.Views {
         )
     }
 
-    func handlePasskeySignupFormFailure(
-        of view: Passage.Configuration.Views.PasskeySignupView,
+    func handlePasskeyGuestRegistrationFormFailure(
+        of view: Passage.Configuration.Views.PasskeyGuestRegistrationView,
         at path: [PathComponent],
         with error: any Error,
     ) -> Response {
@@ -60,11 +60,11 @@ extension Passage.Views {
     }
 }
 
-// MARK: Signup View Params
+// MARK: Guest Registration View Params
 
 extension Passage.Views {
 
-    struct PasskeySignupViewParams: Content {
+    struct PasskeyGuestRegistrationViewParams: Content {
         let byEmail: Bool
         let byPhone: Bool
         let byUsername: Bool
@@ -96,19 +96,19 @@ extension Passage.Views {
 
 }
 
-// MARK: - Authenticate View Params
+// MARK: - Authentication View Params
 
 extension Passage.Views {
 
-    func renderPasskeyAuthenticateView() async throws -> View {
-        guard let view = config.passkeyAuthenticate else {
+    func renderPasskeyAuthenticationView() async throws -> View {
+        guard let view = config.passkeyAuthentication else {
             throw Abort(.notFound)
         }
-        let params = try request.query.decode(PasskeyAuthenticateViewParams.self)
+        let params = try request.query.decode(PasskeyAuthenticationViewParams.self)
 
         let group = request.configuration.routes.group
-        let beginURL = "/" + (group + request.configuration.passkey.routes.authenticateBeginPath).string
-        let finishURL = "/" + (group + request.configuration.passkey.routes.authenticateFinishPath).string
+        let beginURL = "/" + (group + request.configuration.passkey.routes.authenticationBeginPath).string
+        let finishURL = "/" + (group + request.configuration.passkey.routes.authenticationFinishPath).string
 
         return try await request.view.render(
             view.template,
@@ -125,11 +125,11 @@ extension Passage.Views {
 
 }
 
-// MARK: Authenticate View Params
+// MARK: Authentication View Params
 
 extension Passage.Views {
 
-    struct PasskeyAuthenticateViewParams: Content {
+    struct PasskeyAuthenticationViewParams: Content {
         let error: String?
         let success: String?
         let authenticateBeginURL: String?

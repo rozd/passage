@@ -332,7 +332,7 @@ try await app.passage.configure(
 )
 ```
 
-See [`Sources/Passage/Features/Passkey/README.md`](./Sources/Passage/Features/Passkey/README.md) for the three ceremony flows (signup / register / authenticate), full route + DTO reference, and flow diagrams.
+See [`Sources/Passage/Features/Passkey/README.md`](./Sources/Passage/Features/Passkey/README.md) for the three ceremony flows (guest registration / authenticated registration / authentication), full route + DTO reference, and flow diagrams.
 
 ---
 

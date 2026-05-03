@@ -490,6 +490,10 @@ Relying-party identity and allowed origin are configured on the service's underl
 Passage.Configuration(
     // ... other config ...
     passkey: .init(
+        routes: .init(
+            guestRegistrationBegin: .default,   // opt-in: enables public guest signup
+            guestRegistrationFinish: .default
+        ),
         policy: .init(
             timeout: .seconds(60),
             attestation: .none,
@@ -501,6 +505,8 @@ Passage.Configuration(
     )
 )
 ```
+
+The two `guestRegistration*` routes are opt-in — pass `.default` to enable public passkey signup, omit them to require all enrollments to go through the authenticated `/registration/*` flow. The two `registration*` routes (authenticated enrollment) are always registered behind `PassageGuard`.
 
 #### Feature guide
 See [`Sources/Passage/Features/Passkey/README.md`](./Sources/Passage/Features/Passkey/README.md) for the three ceremony flows, route reference, DTOs, and flow diagrams.
@@ -611,7 +617,9 @@ try await app.passage.configure(
 )
 ```
 
-`Passage.Hooks.Account` exposes three `will*` / `did*` pairs — one per Account flow. `will*` methods are `async throws` and abort the flow when they throw; `did*` methods are non-throwing observers that fire after the flow has succeeded. All methods have empty default implementations, so a custom `Passage.Hooks.Account` type only overrides the events it cares about. The `.hook(...)` factory shown above is convenient for ad-hoc wiring; for richer behavior conform a type to `Passage.Hooks.Account` directly.
+Hook protocols expose `will*` / `did*` pairs around each flow. `will*` methods are `async throws` and abort the flow when they throw; `did*` methods are non-throwing observers that fire after the underlying step has succeeded. All methods have empty default implementations, so a custom hook type only overrides the events it cares about. The `.hook(...)` factory shown above is convenient for ad-hoc wiring; for richer behavior conform a type to the protocol directly.
+
+**`Passage.Hooks.Account`** — Account flows (register / login / logout):
 
 | Hook                | Fires…                                                              |
 |---------------------|---------------------------------------------------------------------|
@@ -622,10 +630,29 @@ try await app.passage.configure(
 | `willLogout`        | Before the session is cleared                                       |
 | `didLogout`         | After the session is cleared, before the refresh token is revoked   |
 
-`willLogin` fires **after** the password check passes — it is the gate where you enforce post-authentication policy (account suspension, license expiry, forced MFA), not credential validation. Hooks currently cover the Account flows; the `Passage.Hooks` container is shaped to grow additional domains over time.
+`willLogin` fires **after** the password check passes — it is the gate where you enforce post-authentication policy (account suspension, license expiry, forced MFA), not credential validation.
+
+**`Passage.Hooks.Passkey`** — Passkey ceremonies (guest registration, authenticated registration, authentication). `will*` hooks for the finish path fire **after** the binding / TOCTOU / signature checks, so handlers see only ceremonies that will succeed and audit logs are not attributed to victims on hijack attempts.
+
+| Hook                              | Fires…                                                                   |
+|-----------------------------------|--------------------------------------------------------------------------|
+| `willBeginGuestRegistration`      | After identifier-already-registered check, before the WebAuthn service   |
+| `didBeginGuestRegistration`       | After the challenge is persisted (guest flow)                            |
+| `willBeginRegistration`           | Before the WebAuthn service runs (authenticated flow)                    |
+| `didBeginRegistration`            | After the challenge is persisted (authenticated flow)                    |
+| `willFinishGuestRegistration`     | After the TOCTOU identifier check, before user creation                  |
+| `willFinishRegistration`          | After the bound-user equality check passes (authenticated flow)          |
+| `didFinishGuestRegistration`      | After the credential is persisted and challenge consumed (guest flow)    |
+| `didFinishRegistration`           | After the credential is persisted and challenge consumed (authenticated) |
+| `willBeginAuthentication`         | After the discoverable-login policy check, before the WebAuthn service   |
+| `didBeginAuthentication`          | After the authentication challenge is persisted                          |
+| `willFinishAuthentication`        | After signature verification + user resolution, before sign-count update / challenge consumption / login (auth-equivalent of `Account.willLogin` — gate suspended accounts, MFA step-up, etc.) |
+| `didFinishAuthentication`         | After the session is established and the exchange code minted            |
+
+`Passage.Hooks` covers Account and Passkey today and is shaped to grow additional domains over time.
 
 #### Feature guide
-See [`Sources/Passage/Hooks/Passage+Hooks.swift`](./Sources/Passage/Hooks/Passage+Hooks.swift) for the container struct and [`Sources/Passage/Hooks/Hooks+Account.swift`](./Sources/Passage/Hooks/Hooks+Account.swift) for the `Account` protocol, default implementations, and the `.hook(...)` factory.
+See [`Sources/Passage/Hooks/Passage+Hooks.swift`](./Sources/Passage/Hooks/Passage+Hooks.swift) for the container struct, [`Sources/Passage/Hooks/Hooks+Account.swift`](./Sources/Passage/Hooks/Hooks+Account.swift) for the `Account` protocol, and [`Sources/Passage/Hooks/Hooks+Passkey.swift`](./Sources/Passage/Hooks/Hooks+Passkey.swift) for the `Passkey` protocol — each ships default implementations and a `.hook(...)` factory.
 
 #### Example
 _No dedicated example yet — see [rozd/passage-example](https://github.com/rozd/passage-example) for the canonical walkthrough._

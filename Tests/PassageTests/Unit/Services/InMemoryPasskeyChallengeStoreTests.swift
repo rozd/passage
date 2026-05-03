@@ -81,19 +81,36 @@ struct `InMemoryPasskeyChallengeStore Tests` {
     }
 
     @Test
-    func `create with nil user stores discoverable challenge`() async throws {
+    func `create without subject stores discoverable challenge`() async throws {
         let store = makeStore()
         let bytes = Data("disc-bytes".utf8)
         let expiresAt = Date().addingTimeInterval(60)
 
         _ = try await store.createPasskeyChallenge(
-            for: nil,
             from: makeDTO(bytes: bytes, kind: .authentication, expiresAt: expiresAt)
         )
 
         let found = try #require(try await store.find(passkeyChallengeMatching: bytes))
         #expect(found.user == nil)
+        #expect(found.identifier == nil)
         #expect(found.kind == .authentication)
+    }
+
+    @Test
+    func `create for identifier stores guest registration challenge`() async throws {
+        let store = makeStore()
+        let bytes = Data("guest-bytes".utf8)
+        let identifier = Identifier.email("guest@example.com")
+
+        _ = try await store.createPasskeyChallenge(
+            for: identifier,
+            from: makeDTO(bytes: bytes, kind: .registration)
+        )
+
+        let found = try #require(try await store.find(passkeyChallengeMatching: bytes))
+        #expect(found.user == nil)
+        #expect(found.identifier == identifier)
+        #expect(found.kind == .registration)
     }
 
     @Test

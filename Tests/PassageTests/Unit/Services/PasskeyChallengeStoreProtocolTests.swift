@@ -31,6 +31,7 @@ struct `PasskeyChallengeStore Protocol Tests` {
         typealias AssociatedUser = MockUser
 
         var id: UUID?
+        var identifier: Identifier?
         var user: MockUser?
         var kind: PasskeyChallengeKind
         var challengeHash: String
@@ -43,18 +44,25 @@ struct `PasskeyChallengeStore Protocol Tests` {
 
         @discardableResult
         func createPasskeyChallenge(
-            for user: (any User)?,
             from challenge: PasskeyChallenge
         ) async throws -> any StoredPasskeyChallenge {
-            MockStoredPasskeyChallenge(
-                id: UUID(),
-                user: user as? MockUser,
-                kind: challenge.kind,
-                challengeHash: challenge.bytes.sha256Hex,
-                expiresAt: challenge.expiresAt,
-                consumedAt: nil,
-                createdAt: Date()
-            )
+            stored(challenge: challenge, identifier: nil, user: nil)
+        }
+
+        @discardableResult
+        func createPasskeyChallenge(
+            for user: any User,
+            from challenge: PasskeyChallenge
+        ) async throws -> any StoredPasskeyChallenge {
+            stored(challenge: challenge, identifier: nil, user: user as? MockUser)
+        }
+
+        @discardableResult
+        func createPasskeyChallenge(
+            for identifier: Identifier,
+            from challenge: PasskeyChallenge
+        ) async throws -> any StoredPasskeyChallenge {
+            stored(challenge: challenge, identifier: identifier, user: nil)
         }
 
         func find(passkeyChallengeMatching bytes: Data) async throws -> (any StoredPasskeyChallenge)? {
@@ -67,6 +75,23 @@ struct `PasskeyChallengeStore Protocol Tests` {
 
         func cleanupExpiredPasskeyChallenges(before date: Date) async throws {
             // method signature test
+        }
+
+        private func stored(
+            challenge: PasskeyChallenge,
+            identifier: Identifier?,
+            user: MockUser?
+        ) -> MockStoredPasskeyChallenge {
+            MockStoredPasskeyChallenge(
+                id: UUID(),
+                identifier: identifier,
+                user: user,
+                kind: challenge.kind,
+                challengeHash: challenge.bytes.sha256Hex,
+                expiresAt: challenge.expiresAt,
+                consumedAt: nil,
+                createdAt: Date()
+            )
         }
     }
 
@@ -99,6 +124,7 @@ struct `PasskeyChallengeStore Protocol Tests` {
     ) -> MockStoredPasskeyChallenge {
         MockStoredPasskeyChallenge(
             id: UUID(),
+            identifier: nil,
             user: createMockUser(),
             kind: .registration,
             challengeHash: "hash",
@@ -141,13 +167,14 @@ struct `PasskeyChallengeStore Protocol Tests` {
     }
 
     @Test
-    func `createPasskeyChallenge accepts nil user for discoverable flow`() async throws {
+    func `createPasskeyChallenge accepts no subject for discoverable flow`() async throws {
         let store = MockPasskeyChallengeStore()
         let dto = makeChallengeDTO(kind: .authentication, expiresAt: Date().addingTimeInterval(60))
 
-        let challenge = try await store.createPasskeyChallenge(for: nil, from: dto)
+        let challenge = try await store.createPasskeyChallenge(from: dto)
 
         #expect(challenge.user == nil)
+        #expect(challenge.identifier == nil)
         #expect(challenge.kind == .authentication)
     }
 
@@ -166,7 +193,7 @@ struct `PasskeyChallengeStore Protocol Tests` {
     func `createPasskeyChallenge is discardable`() async throws {
         let store = MockPasskeyChallengeStore()
 
-        try await store.createPasskeyChallenge(for: nil, from: makeChallengeDTO())
+        try await store.createPasskeyChallenge(from: makeChallengeDTO())
 
         #expect(Bool(true))
     }

@@ -5,11 +5,11 @@ import Foundation
 @Suite(.tags(.unit, .passkey))
 struct `Passkey View Params Tests` {
 
-    // MARK: - PasskeySignupViewParams
+    // MARK: - PasskeyGuestRegistrationViewParams
 
     @Test
-    func `PasskeySignupViewParams copyWith overrides individual fields`() {
-        let original = Passage.Views.PasskeySignupViewParams(
+    func `PasskeyGuestRegistrationViewParams copyWith overrides individual fields`() {
+        let original = Passage.Views.PasskeyGuestRegistrationViewParams(
             byEmail: false,
             byPhone: false,
             byUsername: false,
@@ -39,8 +39,8 @@ struct `Passkey View Params Tests` {
     }
 
     @Test
-    func `PasskeySignupViewParams copyWith preserves unspecified fields`() {
-        let original = Passage.Views.PasskeySignupViewParams(
+    func `PasskeyGuestRegistrationViewParams copyWith preserves unspecified fields`() {
+        let original = Passage.Views.PasskeyGuestRegistrationViewParams(
             byEmail: true,
             byPhone: false,
             byUsername: true,
@@ -62,8 +62,8 @@ struct `Passkey View Params Tests` {
     }
 
     @Test
-    func `PasskeySignupViewParams copyWith with only error set preserves other fields`() {
-        let original = Passage.Views.PasskeySignupViewParams(
+    func `PasskeyGuestRegistrationViewParams copyWith with only error set preserves other fields`() {
+        let original = Passage.Views.PasskeyGuestRegistrationViewParams(
             byEmail: true,
             byPhone: false,
             byUsername: false,
@@ -85,8 +85,8 @@ struct `Passkey View Params Tests` {
     }
 
     @Test
-    func `PasskeySignupViewParams copyWith with only success set preserves other fields`() {
-        let original = Passage.Views.PasskeySignupViewParams(
+    func `PasskeyGuestRegistrationViewParams copyWith with only success set preserves other fields`() {
+        let original = Passage.Views.PasskeyGuestRegistrationViewParams(
             byEmail: false,
             byPhone: false,
             byUsername: true,
@@ -104,11 +104,11 @@ struct `Passkey View Params Tests` {
         #expect(updated.signupBeginURL == "/begin")
     }
 
-    // MARK: - PasskeyAuthenticateViewParams
+    // MARK: - PasskeyAuthenticationViewParams
 
     @Test
-    func `PasskeyAuthenticateViewParams copyWith overrides all fields`() {
-        let original = Passage.Views.PasskeyAuthenticateViewParams(
+    func `PasskeyAuthenticationViewParams copyWith overrides all fields`() {
+        let original = Passage.Views.PasskeyAuthenticationViewParams(
             error: nil,
             success: nil,
             authenticateBeginURL: nil,
@@ -132,8 +132,8 @@ struct `Passkey View Params Tests` {
     }
 
     @Test
-    func `PasskeyAuthenticateViewParams copyWith preserves unspecified fields`() {
-        let original = Passage.Views.PasskeyAuthenticateViewParams(
+    func `PasskeyAuthenticationViewParams copyWith preserves unspecified fields`() {
+        let original = Passage.Views.PasskeyAuthenticationViewParams(
             error: "existing error",
             success: nil,
             authenticateBeginURL: "/auth/passkey/authenticate/begin",
@@ -151,8 +151,8 @@ struct `Passkey View Params Tests` {
     }
 
     @Test
-    func `PasskeyAuthenticateViewParams copyWith with only error set preserves other fields`() {
-        let original = Passage.Views.PasskeyAuthenticateViewParams(
+    func `PasskeyAuthenticationViewParams copyWith with only error set preserves other fields`() {
+        let original = Passage.Views.PasskeyAuthenticationViewParams(
             error: nil,
             success: nil,
             authenticateBeginURL: "/begin",
@@ -170,8 +170,8 @@ struct `Passkey View Params Tests` {
     }
 
     @Test
-    func `PasskeyAuthenticateViewParams copyWith with redirectOnSuccess overrides correctly`() {
-        let original = Passage.Views.PasskeyAuthenticateViewParams(
+    func `PasskeyAuthenticationViewParams copyWith with redirectOnSuccess overrides correctly`() {
+        let original = Passage.Views.PasskeyAuthenticationViewParams(
             error: nil,
             success: nil,
             authenticateBeginURL: "/begin",

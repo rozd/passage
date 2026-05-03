@@ -77,14 +77,14 @@ extension Passage.Views {
 
             if let routes = passkey?.routes {
                 grouped.group(routes.group) { group in
-                    if config.passkeySignup != nil, let route = routes.signupBegin {
+                    if config.passkeyGuestRegistration != nil, let route = routes.guestRegistrationBegin {
                         group.get(route.path) { req in
-                            try await req.views.renderPasskeySignupView()
+                            try await req.views.renderPasskeyGuestRegistrationView()
                         }
                     }
-                    if config.passkeyAuthenticate != nil {
-                        group.get(routes.authenticateBegin.path) { req in
-                            try await req.views.renderPasskeyAuthenticateView()
+                    if config.passkeyAuthentication != nil {
+                        group.get(routes.authenticationBegin.path) { req in
+                            try await req.views.renderPasskeyAuthenticationView()
                         }
                     }
                 }

@@ -32,10 +32,10 @@ extension Passage.Passkey {
 
 extension Passage.Passkey {
 
-    // MARK: Signup — public, form-driven
+    // MARK: Guest Registration — unauthenticated user starting registration with an identifier
 
-    func beginSignup(
-        form: any PasskeySignupForm
+    func beginGuestRegistration(
+        form: any PasskeyGuestRegistrationForm
     ) async throws -> any AsyncResponseEncodable & Sendable {
         guard let service else {
             throw PassageError.passkeyServiceNotAvailable
@@ -45,11 +45,15 @@ extension Passage.Passkey {
         }
 
         let identifier = try form.asIdentifier()
-        let existing = try await request.store.users.find(byIdentifier: identifier)
+        guard try await request.store.users.find(byIdentifier: identifier) == nil else {
+            throw AuthenticationError.identifierAlreadyRegistered
+        }
 
-        let userEntity: PublicKeyCredentialUserEntity = existing.map {
-            .init(for: $0, displayName: form.displayName)
-        } ?? .init(for: identifier, displayName: form.displayName)
+        let userEntity = PublicKeyCredentialUserEntity(for: identifier, displayName: form.displayName)
+
+        try await request.hooks.passkey?.willBeginGuestRegistration(
+            with: form, as: userEntity, on: request
+        )
 
         let result = try await service.beginRegistration(
             with: userEntity,
@@ -57,46 +61,19 @@ extension Passage.Passkey {
             challengeTTL: config.challengeTTL,
         )
 
-        let user: any User
-        if let existing {
-            user = existing
-        } else {
-            user = try await request.store.users.create(identifier: identifier, with: nil)
-        }
+        try await challenges.createPasskeyChallenge(for: identifier, from: result.challenge)
 
-        try await challenges.createPasskeyChallenge(for: user, from: result.challenge)
+        await request.hooks.passkey?.didBeginGuestRegistration(
+            with: result, on: request
+        )
+
         return result.body
-    }
-
-    func finishSignup(
-        rawBody: Data
-    ) async throws -> any StoredPasskeyCredential {
-        return try await finishRegistrationCore(rawBody: rawBody, authenticatedUser: nil)
     }
 
     // MARK: Register — authenticated user adding a passkey
 
     func beginRegistration(
         request body: PasskeyRegisterRequest?
-    ) async throws -> any AsyncResponseEncodable & Sendable {
-        let user = try request.passage.user
-        let displayName = body?.displayName ?? user.username ?? user.email ?? user.phone ?? "Passkey"
-        let userEntity = PublicKeyCredentialUserEntity(for: user, displayName: displayName)
-        return try await beginRegistrationCore(for: user, userEntity: userEntity)
-    }
-
-    func finishRegistration(
-        rawBody: Data
-    ) async throws -> any StoredPasskeyCredential {
-        let authUser = try request.passage.user
-        return try await finishRegistrationCore(rawBody: rawBody, authenticatedUser: authUser)
-    }
-
-    // MARK: Shared core
-
-    private func beginRegistrationCore(
-        for user: any User,
-        userEntity: PublicKeyCredentialUserEntity,
     ) async throws -> any AsyncResponseEncodable & Sendable {
         guard let service else {
             throw PassageError.passkeyServiceNotAvailable
@@ -105,6 +82,17 @@ extension Passage.Passkey {
             throw PassageError.passkeyNotConfigured
         }
 
+        let user = try request.passage.user
+
+        let userEntity = PublicKeyCredentialUserEntity(
+            for: user,
+            displayName: body?.displayName ?? user.username ?? user.email ?? user.phone ?? "Passkey",
+        )
+
+        try await request.hooks.passkey?.willBeginRegistration(
+            for: user, as: userEntity, on: request
+        )
+
         let result = try await service.beginRegistration(
             with: userEntity,
             policy: config.policy,
@@ -113,12 +101,17 @@ extension Passage.Passkey {
 
         try await challenges.createPasskeyChallenge(for: user, from: result.challenge)
 
+        await request.hooks.passkey?.didBeginRegistration(
+            with: result, for: user, on: request
+        )
+
         return result.body
     }
 
-    private func finishRegistrationCore(
-        rawBody: Data,
-        authenticatedUser: (any User)?,
+    // MARK: Finish Registration — shared by both flows
+
+    func finishRegistration(
+        rawBody: Data
     ) async throws -> any StoredPasskeyCredential {
         guard let service else {
             throw PassageError.passkeyServiceNotAvailable
@@ -138,7 +131,7 @@ extension Passage.Passkey {
                     let stored = try await challenges.find(passkeyChallengeMatching: bytes),
                     stored.kind == .registration,
                     stored.isValid,
-                    stored.user != nil
+                    stored.user != nil || stored.identifier != nil
                 else {
                     return nil
                 }
@@ -149,18 +142,39 @@ extension Passage.Passkey {
             },
         )
 
-        guard let user = result.matchedChallenge.user else {
-            throw AuthenticationError.invalidPasskeyChallenge
-        }
-
-        // Defense-in-depth: if the finish happened on the authenticated path,
-        // the session user must match the user the challenge was issued for.
-        if let authenticatedUser, !authenticatedUser.equals(to: user) {
+        let user: any User
+        if let bound = result.matchedChallenge.user {
+            guard try request.passage.user.equals(to: bound) else {
+                throw AuthenticationError.invalidPasskeyChallenge
+            }
+            try await request.hooks.passkey?.willFinishRegistration(
+                for: bound, on: request
+            )
+            user = bound
+        } else if let identifier = result.matchedChallenge.identifier {
+            guard try await request.store.users.find(byIdentifier: identifier) == nil else {
+                throw AuthenticationError.invalidPasskeyChallenge
+            }
+            try await request.hooks.passkey?.willFinishGuestRegistration(
+                with: identifier, on: request
+            )
+            user = try await request.store.users.create(identifier: identifier, with: nil)
+        } else {
             throw AuthenticationError.invalidPasskeyChallenge
         }
 
         let stored = try await credentials.createPasskeyCredential(for: user, from: result.credential)
         try await challenges.consume(passkeyChallenge: result.matchedChallenge)
+
+        if result.matchedChallenge.user == nil {
+            await request.hooks.passkey?.didFinishGuestRegistration(
+                with: stored, for: user, on: request
+            )
+        } else {
+            await request.hooks.passkey?.didFinishRegistration(
+                with: stored, for: user, on: request
+            )
+        }
 
         return stored
     }
@@ -182,13 +196,19 @@ extension Passage.Passkey {
             throw AuthenticationError.discoverableLoginDisabled
         }
 
+        try await request.hooks.passkey?.willBeginAuthentication(on: request)
+
         let result = try await service.beginAuthentication(
             allowCredentials: nil,
             policy: config.policy,
             challengeTTL: config.challengeTTL,
         )
 
-        try await challenges.createPasskeyChallenge(for: nil, from: result.challenge)
+        try await challenges.createPasskeyChallenge(from: result.challenge)
+
+        await request.hooks.passkey?.didBeginAuthentication(
+            with: result, on: request
+        )
 
         return result.body
     }
@@ -224,6 +244,11 @@ extension Passage.Passkey {
             },
         )
 
+        let user = result.matchedCredential.user
+        try await request.hooks.passkey?.willFinishAuthentication(
+            with: result.matchedCredential, for: user, on: request
+        )
+
         try await credentials.updatePasskeyCredentialAfterAuthentication(
             forCredentialID: result.matchedCredential.credentialID,
             newSignCount: result.newSignCount,
@@ -231,9 +256,13 @@ extension Passage.Passkey {
         )
         try await challenges.consume(passkeyChallenge: result.matchedChallenge)
 
-        let user = result.matchedCredential.user
         request.passage.login(user)
         let code = try await request.tokens.createExchangeCode(for: user)
+
+        await request.hooks.passkey?.didFinishAuthentication(
+            with: result.matchedCredential, for: user, code: code, on: request
+        )
+
         return (user, code)
     }
 

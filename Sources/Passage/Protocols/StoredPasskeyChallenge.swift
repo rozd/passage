@@ -12,8 +12,7 @@ public protocol StoredPasskeyChallenge: Sendable {
     associatedtype AssociatedUser: User
 
     var id: Id? { get }
-    /// The user this challenge was issued to — nil for discoverable-authentication
-    /// challenges where the user is unknown at issuance time.
+    var identifier: Identifier? { get }
     var user: AssociatedUser? { get }
     var kind: PasskeyChallengeKind { get }
     /// SHA-256 hex of the raw challenge bytes. Plain-text never stored.

@@ -67,80 +67,80 @@ struct `Passkey Configuration Tests` {
     // MARK: - Routes
 
     @Test
-    func `Routes defaults: signup is opt-in (nil); register and authenticate keep [begin]/[finish]`() {
+    func `Routes defaults: guestRegistration is opt-in (nil); registration and authentication keep [begin]/[finish]`() {
         let routes = Passage.Configuration.Passkey.Routes()
         #expect(routes.group.map { $0.description } == ["passkey"])
-        #expect(routes.signupBegin == nil)
-        #expect(routes.signupFinish == nil)
-        #expect(routes.registerBegin.path.map { $0.description } == ["register", "begin"])
-        #expect(routes.registerFinish.path.map { $0.description } == ["register", "finish"])
-        #expect(routes.authenticateBegin.path.map { $0.description } == ["authenticate", "begin"])
-        #expect(routes.authenticateFinish.path.map { $0.description } == ["authenticate", "finish"])
+        #expect(routes.guestRegistrationBegin == nil)
+        #expect(routes.guestRegistrationFinish == nil)
+        #expect(routes.registrationBegin.path.map { $0.description } == ["registration", "begin"])
+        #expect(routes.registrationFinish.path.map { $0.description } == ["registration", "finish"])
+        #expect(routes.authenticationBegin.path.map { $0.description } == ["authentication", "begin"])
+        #expect(routes.authenticationFinish.path.map { $0.description } == ["authentication", "finish"])
     }
 
     @Test
-    func `Composed signup paths are nil when signup is disabled (default)`() {
+    func `Composed guestRegistration paths are nil when guestRegistration is disabled (default)`() {
         let routes = Passage.Configuration.Passkey.Routes()
-        #expect(routes.signupBeginPath == nil)
-        #expect(routes.signupFinishPath == nil)
+        #expect(routes.guestRegistrationBeginPath == nil)
+        #expect(routes.guestRegistrationFinishPath == nil)
     }
 
     @Test
-    func `Composed signup paths are nil when only one side is set`() {
-        let onlyBegin = Passage.Configuration.Passkey.Routes(signupBegin: .default)
-        #expect(onlyBegin.signupBeginPath?.map { $0.description } == ["passkey", "signup", "begin"])
-        #expect(onlyBegin.signupFinishPath == nil)
+    func `Composed guestRegistration paths are nil when only one side is set`() {
+        let onlyBegin = Passage.Configuration.Passkey.Routes(guestRegistrationBegin: .default)
+        #expect(onlyBegin.guestRegistrationBeginPath?.map { $0.description } == ["passkey", "guest", "registration", "begin"])
+        #expect(onlyBegin.guestRegistrationFinishPath == nil)
 
-        let onlyFinish = Passage.Configuration.Passkey.Routes(signupFinish: .default)
-        #expect(onlyFinish.signupBeginPath == nil)
-        #expect(onlyFinish.signupFinishPath?.map { $0.description } == ["passkey", "signup", "finish"])
+        let onlyFinish = Passage.Configuration.Passkey.Routes(guestRegistrationFinish: .default)
+        #expect(onlyFinish.guestRegistrationBeginPath == nil)
+        #expect(onlyFinish.guestRegistrationFinishPath?.map { $0.description } == ["passkey", "guest", "registration", "finish"])
     }
 
     @Test
-    func `Routes opt-in: signup enabled via .default uses [signup]/[begin] and [signup]/[finish]`() {
+    func `Routes opt-in: guestRegistration enabled via .default uses [guestRegistration]/[begin] and [guestRegistration]/[finish]`() {
         let routes = Passage.Configuration.Passkey.Routes(
-            signupBegin: .default,
-            signupFinish: .default
+            guestRegistrationBegin: .default,
+            guestRegistrationFinish: .default
         )
-        #expect(routes.signupBegin?.path.map { $0.description } == ["signup", "begin"])
-        #expect(routes.signupFinish?.path.map { $0.description } == ["signup", "finish"])
-        #expect(routes.signupBeginPath?.map { $0.description } == ["passkey", "signup", "begin"])
-        #expect(routes.signupFinishPath?.map { $0.description } == ["passkey", "signup", "finish"])
+        #expect(routes.guestRegistrationBegin?.path.map { $0.description } == ["guest", "registration", "begin"])
+        #expect(routes.guestRegistrationFinish?.path.map { $0.description } == ["guest", "registration", "finish"])
+        #expect(routes.guestRegistrationBeginPath?.map { $0.description } == ["passkey", "guest", "registration", "begin"])
+        #expect(routes.guestRegistrationFinishPath?.map { $0.description } == ["passkey", "guest", "registration", "finish"])
     }
 
     @Test
     func `Routes custom group and paths`() {
         let routes = Passage.Configuration.Passkey.Routes(
             group: ["pk"],
-            signupBegin: .init(path: "start"),
-            signupFinish: .init(path: "done"),
-            registerBegin: .init(path: "add-start"),
-            registerFinish: .init(path: "add-done")
+            guestRegistrationBegin: .init(path: "start"),
+            guestRegistrationFinish: .init(path: "done"),
+            registrationBegin: .init(path: "add-start"),
+            registrationFinish: .init(path: "add-done")
         )
         #expect(routes.group.map { $0.description } == ["pk"])
-        #expect(routes.signupBegin?.path.map { $0.description } == ["start"])
-        #expect(routes.signupFinish?.path.map { $0.description } == ["done"])
-        #expect(routes.registerBegin.path.map { $0.description } == ["add-start"])
-        #expect(routes.registerFinish.path.map { $0.description } == ["add-done"])
+        #expect(routes.guestRegistrationBegin?.path.map { $0.description } == ["start"])
+        #expect(routes.guestRegistrationFinish?.path.map { $0.description } == ["done"])
+        #expect(routes.registrationBegin.path.map { $0.description } == ["add-start"])
+        #expect(routes.registrationFinish.path.map { $0.description } == ["add-done"])
     }
 
     @Test
-    func `Composed paths include group prefix for signup, register, and authenticate`() {
+    func `Composed paths include group prefix for guestRegistration, registration, and authentication`() {
         let routes = Passage.Configuration.Passkey.Routes(
             group: ["pk"],
-            signupBegin: .init(path: "s-begin"),
-            signupFinish: .init(path: "s-finish"),
-            registerBegin: .init(path: "r-begin"),
-            registerFinish: .init(path: "r-finish"),
-            authenticateBegin: .init(path: "a-begin"),
-            authenticateFinish: .init(path: "a-finish")
+            guestRegistrationBegin: .init(path: "s-begin"),
+            guestRegistrationFinish: .init(path: "s-finish"),
+            registrationBegin: .init(path: "r-begin"),
+            registrationFinish: .init(path: "r-finish"),
+            authenticationBegin: .init(path: "a-begin"),
+            authenticationFinish: .init(path: "a-finish")
         )
-        #expect(routes.signupBeginPath?.map { $0.description } == ["pk", "s-begin"])
-        #expect(routes.signupFinishPath?.map { $0.description } == ["pk", "s-finish"])
-        #expect(routes.registerBeginPath.map { $0.description } == ["pk", "r-begin"])
-        #expect(routes.registerFinishPath.map { $0.description } == ["pk", "r-finish"])
-        #expect(routes.authenticateBeginPath.map { $0.description } == ["pk", "a-begin"])
-        #expect(routes.authenticateFinishPath.map { $0.description } == ["pk", "a-finish"])
+        #expect(routes.guestRegistrationBeginPath?.map { $0.description } == ["pk", "s-begin"])
+        #expect(routes.guestRegistrationFinishPath?.map { $0.description } == ["pk", "s-finish"])
+        #expect(routes.registrationBeginPath.map { $0.description } == ["pk", "r-begin"])
+        #expect(routes.registrationFinishPath.map { $0.description } == ["pk", "r-finish"])
+        #expect(routes.authenticationBeginPath.map { $0.description } == ["pk", "a-begin"])
+        #expect(routes.authenticationFinishPath.map { $0.description } == ["pk", "a-finish"])
     }
 
     // MARK: - Linking

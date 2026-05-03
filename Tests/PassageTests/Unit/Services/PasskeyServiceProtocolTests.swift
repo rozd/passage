@@ -288,6 +288,7 @@ private struct StubStoredChallenge: StoredPasskeyChallenge {
     typealias AssociatedUser = StubUser
 
     var id: UUID?
+    var identifier: Identifier?
     var user: StubUser?
     var kind: PasskeyChallengeKind
     var challengeHash: String = ""

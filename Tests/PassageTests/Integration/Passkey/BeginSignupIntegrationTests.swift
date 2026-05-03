@@ -7,21 +7,21 @@ import Testing
 import Vapor
 import VaporTesting
 
-/// End-to-end coverage of `POST /auth/passkey/signup/begin` plus the
+/// End-to-end coverage of `POST /auth/passkey/guest/registration/begin` plus the
 /// `GET` view that serves its HTML entry point. These tests pin down:
 ///
-/// 1. The JSON contract the browser JS in `passkey-signup-minimalism.leaf`
+/// 1. The JSON contract the browser JS in `passkey-guest-registration-minimalism.leaf`
 ///    relies on (base64url binary fields, nested `rp`/`user`, etc.).
 /// 2. The dual-mode response pattern (`Accept: application/json` returns
 ///    options; HTML form submit with `Accept: text/html` and a configured
 ///    passkey view redirects back to that view).
-/// 3. That the handler references `views.passkeySignup` (not `views.login`).
+/// 3. That the handler references `views.passkeyGuestRegistration` (not `views.login`).
 /// 4. That the orchestration forwards the identifier + displayName into the
 ///    `PublicKeyCredentialUserEntity` handed to the service.
 /// 5. That the view context carries `signupBeginURL` / `signupFinishURL`
 ///    so the inline JS knows where to POST.
 @Suite(.tags(.integration, .passkey))
-struct `Passkey Begin Signup Integration Tests` {
+struct `Passkey Begin GuestRegistration Integration Tests` {
 
     // MARK: - Configuration Helpers
 
@@ -35,7 +35,7 @@ struct `Passkey Begin Signup Integration Tests` {
     /// challenge TTL. Override `passkeyService` to test failure paths or to
     /// assert what the service received.
     ///
-    /// Signup is opt-in on `Passkey.Routes`; this suite exercises that flow,
+    /// GuestRegistration is opt-in on `Passkey.Routes`; this suite exercises that flow,
     /// so the default `passkeyRoutes` enables it via `.default` on both sides.
     @Sendable private func configure(
         _ app: Application,
@@ -43,8 +43,8 @@ struct `Passkey Begin Signup Integration Tests` {
         views: Passage.Configuration.Views = .init(),
         routes: Passage.Configuration.Routes = .init(),
         passkeyRoutes: Passage.Configuration.Passkey.Routes = .init(
-            signupBegin: .default,
-            signupFinish: .default
+            guestRegistrationBegin: .default,
+            guestRegistrationFinish: .default
         ),
         includePasskeyConfig: Bool = true
     ) async throws {
@@ -104,7 +104,7 @@ struct `Passkey Begin Signup Integration Tests` {
             try await self.configure(app, passkeyService: holder.service)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/signup/begin",
+                .POST, "/auth/passkey/guest/registration/begin",
                 headers: [
                     "Content-Type": "application/x-www-form-urlencoded",
                     "Accept": "application/json"
@@ -151,7 +151,7 @@ struct `Passkey Begin Signup Integration Tests` {
             try await self.configure(app, passkeyService: holder.service)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/signup/begin",
+                .POST, "/auth/passkey/guest/registration/begin",
                 headers: [
                     "Content-Type": "application/x-www-form-urlencoded",
                     "Accept": "application/json"
@@ -220,8 +220,8 @@ struct `Passkey Begin Signup Integration Tests` {
                 ),
                 passkey: .init(
                     routes: .init(
-                        signupBegin: .default,
-                        signupFinish: .default
+                        guestRegistrationBegin: .default,
+                        guestRegistrationFinish: .default
                     ),
                     policy: policy
                 )
@@ -230,7 +230,7 @@ struct `Passkey Begin Signup Integration Tests` {
             try await app.passage.configure(services: services, configuration: configuration)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/signup/begin",
+                .POST, "/auth/passkey/guest/registration/begin",
                 headers: [
                     "Content-Type": "application/x-www-form-urlencoded",
                     "Accept": "application/json"
@@ -262,7 +262,7 @@ struct `Passkey Begin Signup Integration Tests` {
             try await self.configure(app, passkeyService: holder.service)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/signup/begin",
+                .POST, "/auth/passkey/guest/registration/begin",
                 headers: [
                     "Content-Type": "application/x-www-form-urlencoded",
                     "Accept": "application/json"
@@ -288,7 +288,7 @@ struct `Passkey Begin Signup Integration Tests` {
             try await self.configure(app)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/signup/begin",
+                .POST, "/auth/passkey/guest/registration/begin",
                 headers: [
                     "Content-Type": "application/x-www-form-urlencoded",
                     "Accept": "application/json"
@@ -301,12 +301,44 @@ struct `Passkey Begin Signup Integration Tests` {
     }
 
     @Test
+    func `POST begin returns 409 when the identifier is already registered`() async throws {
+        let holder = Holder()
+        try await withApp(configure: { app in
+            holder.service = MockPasskeyService()
+            try await self.configure(app, passkeyService: holder.service)
+            // Pre-register the identifier so the begin must reject. Guest
+            // signup is for new accounts only — returning users go through
+            // the authenticated `/registration/begin` flow.
+            let store = app.passage.storage.services.store
+            _ = try await store.users.create(
+                identifier: .email("alice@example.com"),
+                with: nil
+            )
+        }) { app in
+            try await app.testing().test(
+                .POST, "/auth/passkey/guest/registration/begin",
+                headers: [
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Accept": "application/json"
+                ],
+                body: .init(string: "email=alice@example.com&displayName=Alice")
+            ) { res in
+                #expect(res.status == .conflict)
+            }
+
+            // The service must NOT be invoked for an already-registered
+            // identifier — the rejection happens before challenge issuance.
+            #expect(holder.service?.calls.isEmpty == true)
+        }
+    }
+
+    @Test
     func `POST begin returns 400 when required displayName is missing`() async throws {
         try await withApp(configure: { app in
             try await self.configure(app)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/signup/begin",
+                .POST, "/auth/passkey/guest/registration/begin",
                 headers: [
                     "Content-Type": "application/x-www-form-urlencoded",
                     "Accept": "application/json"
@@ -326,7 +358,7 @@ struct `Passkey Begin Signup Integration Tests` {
             try await self.configure(app, passkeyService: nil)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/signup/begin",
+                .POST, "/auth/passkey/guest/registration/begin",
                 headers: [
                     "Content-Type": "application/x-www-form-urlencoded",
                     "Accept": "application/json"
@@ -350,7 +382,7 @@ struct `Passkey Begin Signup Integration Tests` {
             try await self.configure(app, passkeyService: service)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/signup/begin",
+                .POST, "/auth/passkey/guest/registration/begin",
                 headers: [
                     "Content-Type": "application/x-www-form-urlencoded",
                     "Accept": "application/json"
@@ -370,7 +402,7 @@ struct `Passkey Begin Signup Integration Tests` {
             try await self.configure(app, includePasskeyConfig: false)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/signup/begin",
+                .POST, "/auth/passkey/guest/registration/begin",
                 headers: [
                     "Content-Type": "application/x-www-form-urlencoded",
                     "Accept": "application/json"
@@ -384,11 +416,11 @@ struct `Passkey Begin Signup Integration Tests` {
 
     @Test
     func `Begin route honors custom registerBegin path from configuration`() async throws {
-        // Signup registers only when both sides are set; pair the custom begin
+        // GuestRegistration registers only when both sides are set; pair the custom begin
         // with the default finish to exercise the override on begin alone.
         let customRoutes = Passage.Configuration.Passkey.Routes(
-            signupBegin: .init(path: "start"),
-            signupFinish: .default
+            guestRegistrationBegin: .init(path: "start"),
+            guestRegistrationFinish: .default
         )
 
         try await withApp(configure: { app in
@@ -396,7 +428,7 @@ struct `Passkey Begin Signup Integration Tests` {
         }) { app in
             // Default path should now 404…
             try await app.testing().test(
-                .POST, "/auth/passkey/signup/begin",
+                .POST, "/auth/passkey/guest/registration/begin",
                 headers: [
                     "Content-Type": "application/x-www-form-urlencoded",
                     "Accept": "application/json"
@@ -423,17 +455,17 @@ struct `Passkey Begin Signup Integration Tests` {
     // MARK: - Dual-mode HTML fallback
 
     @Test
-    func `HTML form submission with passkeySignup view configured redirects to the passkey view`() async throws {
+    func `HTML form submission with passkeyGuestRegistration view configured redirects to the passkey view`() async throws {
         let theme = Passage.Views.Theme(colors: .defaultLight)
         let viewsConfig = Passage.Configuration.Views(
-            passkeySignup: .init(style: .minimalism, theme: theme, identifier: .email)
+            passkeyGuestRegistration: .init(style: .minimalism, theme: theme, identifier: .email)
         )
 
         try await withApp(configure: { app in
             try await self.configure(app, views: viewsConfig)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/signup/begin",
+                .POST, "/auth/passkey/guest/registration/begin",
                 headers: [
                     "Content-Type": "application/x-www-form-urlencoded",
                     "Accept": "text/html"
@@ -446,7 +478,7 @@ struct `Passkey Begin Signup Integration Tests` {
                 let location = try #require(res.headers.first(name: .location))
                 // This is the key bug-fix: redirect goes to the passkey view,
                 // NOT to /auth/login (the old `views.login` bug).
-                #expect(location.contains("/auth/passkey/signup/begin"))
+                #expect(location.contains("/auth/passkey/guest/registration/begin"))
                 #expect(!location.hasPrefix("/auth/login"))
                 #expect(location.contains("success="))
             }
@@ -462,7 +494,7 @@ struct `Passkey Begin Signup Integration Tests` {
 
         let theme = Passage.Views.Theme(colors: .defaultLight)
         let viewsConfig = Passage.Configuration.Views(
-            passkeySignup: .init(style: .minimalism, theme: theme, identifier: .email)
+            passkeyGuestRegistration: .init(style: .minimalism, theme: theme, identifier: .email)
         )
 
         try await withApp(configure: { app in
@@ -470,7 +502,7 @@ struct `Passkey Begin Signup Integration Tests` {
             try await self.configure(app, passkeyService: service, views: viewsConfig)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/signup/begin",
+                .POST, "/auth/passkey/guest/registration/begin",
                 headers: [
                     "Content-Type": "application/x-www-form-urlencoded",
                     "Accept": "text/html"
@@ -480,7 +512,7 @@ struct `Passkey Begin Signup Integration Tests` {
                 #expect(res.status == .seeOther || res.status == .found)
 
                 let location = try #require(res.headers.first(name: .location))
-                #expect(location.contains("/auth/passkey/signup/begin"))
+                #expect(location.contains("/auth/passkey/guest/registration/begin"))
                 #expect(!location.hasPrefix("/auth/login"))
                 #expect(location.contains("error="))
             }
@@ -490,11 +522,11 @@ struct `Passkey Begin Signup Integration Tests` {
     @Test
     func `HTML Accept without a configured passkey view still returns JSON`() async throws {
         try await withApp(configure: { app in
-            // No views.passkeySignup — guard falls through to JSON.
+            // No views.passkeyGuestRegistration — guard falls through to JSON.
             try await self.configure(app)
         }) { app in
             try await app.testing().test(
-                .POST, "/auth/passkey/signup/begin",
+                .POST, "/auth/passkey/guest/registration/begin",
                 headers: [
                     "Content-Type": "application/x-www-form-urlencoded",
                     "Accept": "text/html"
@@ -513,11 +545,11 @@ struct `Passkey Begin Signup Integration Tests` {
     // MARK: - View (GET) — begin endpoint as HTML entry point
 
     @Test
-    func `GET begin view returns 404 when passkeySignup view is not configured`() async throws {
+    func `GET begin view returns 404 when passkeyGuestRegistration view is not configured`() async throws {
         try await withApp(configure: { app in
             try await self.configure(app)
         }) { app in
-            try await app.testing().test(.GET, "/auth/passkey/signup/begin") { res in
+            try await app.testing().test(.GET, "/auth/passkey/guest/registration/begin") { res in
                 #expect(res.status == .notFound)
             }
         }
@@ -526,7 +558,7 @@ struct `Passkey Begin Signup Integration Tests` {
     @Test
     func `GET begin view renders passkey-register template with identifier flags`() async throws {
         let viewsConfig = Passage.Configuration.Views(
-            passkeySignup: .init(
+            passkeyGuestRegistration: .init(
                 style: .minimalism,
                 theme: Passage.Views.Theme(colors: .defaultLight),
                 identifier: .email
@@ -539,11 +571,11 @@ struct `Passkey Begin Signup Integration Tests` {
 
             try await self.configure(app, views: viewsConfig)
 
-            try await app.testing().test(.GET, "/auth/passkey/signup/begin") { res in
+            try await app.testing().test(.GET, "/auth/passkey/guest/registration/begin") { res in
                 #expect(res.status == .ok)
-                #expect(renderer.templatePath == "passkey-signup-minimalism")
+                #expect(renderer.templatePath == "passkey-guest-registration-minimalism")
 
-                let ctx = renderer.capturedContext as? Passage.Views.Context<Passage.Views.PasskeySignupViewParams>
+                let ctx = renderer.capturedContext as? Passage.Views.Context<Passage.Views.PasskeyGuestRegistrationViewParams>
                 let params = try #require(ctx?.params)
                 #expect(params.byEmail == true)
                 #expect(params.byPhone == false)
@@ -555,7 +587,7 @@ struct `Passkey Begin Signup Integration Tests` {
     @Test
     func `GET begin view passes signupBeginURL and signupFinishURL to the template`() async throws {
         let viewsConfig = Passage.Configuration.Views(
-            passkeySignup: .init(
+            passkeyGuestRegistration: .init(
                 style: .minimalism,
                 theme: Passage.Views.Theme(colors: .defaultLight),
                 identifier: .email
@@ -568,15 +600,15 @@ struct `Passkey Begin Signup Integration Tests` {
 
             try await self.configure(app, views: viewsConfig)
 
-            try await app.testing().test(.GET, "/auth/passkey/signup/begin") { res in
+            try await app.testing().test(.GET, "/auth/passkey/guest/registration/begin") { res in
                 #expect(res.status == .ok)
 
-                let ctx = renderer.capturedContext as? Passage.Views.Context<Passage.Views.PasskeySignupViewParams>
+                let ctx = renderer.capturedContext as? Passage.Views.Context<Passage.Views.PasskeyGuestRegistrationViewParams>
                 let params = try #require(ctx?.params)
 
                 // The leaf template reads these to drive its `fetch` calls.
-                #expect(params.signupBeginURL == "/auth/passkey/signup/begin")
-                #expect(params.signupFinishURL == "/auth/passkey/signup/finish")
+                #expect(params.signupBeginURL == "/auth/passkey/guest/registration/begin")
+                #expect(params.signupFinishURL == "/auth/passkey/guest/registration/finish")
             }
         }
     }
@@ -585,12 +617,12 @@ struct `Passkey Begin Signup Integration Tests` {
     func `View-side URLs track custom passkey route overrides`() async throws {
         let passkeyRoutes = Passage.Configuration.Passkey.Routes(
             group: ["pk"],
-            signupBegin: .init(path: "start"),
-            signupFinish: .init(path: "done")
+            guestRegistrationBegin: .init(path: "start"),
+            guestRegistrationFinish: .init(path: "done")
         )
 
         let viewsConfig = Passage.Configuration.Views(
-            passkeySignup: .init(
+            passkeyGuestRegistration: .init(
                 style: .minimalism,
                 theme: Passage.Views.Theme(colors: .defaultLight),
                 identifier: .email
@@ -606,7 +638,7 @@ struct `Passkey Begin Signup Integration Tests` {
             try await app.testing().test(.GET, "/auth/pk/start") { res in
                 #expect(res.status == .ok)
 
-                let ctx = renderer.capturedContext as? Passage.Views.Context<Passage.Views.PasskeySignupViewParams>
+                let ctx = renderer.capturedContext as? Passage.Views.Context<Passage.Views.PasskeyGuestRegistrationViewParams>
                 let params = try #require(ctx?.params)
 
                 #expect(params.signupBeginURL == "/auth/pk/start")

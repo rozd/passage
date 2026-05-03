@@ -225,7 +225,7 @@ extension Passage {
 
 extension Passage {
 
-    struct DefaultPasskeySignupForm: PasskeySignupForm {
+    struct DefaultPasskeyGuestRegistrationForm: PasskeyGuestRegistrationForm {
         static func validations(_ validations: inout Validations) {
             validations.add("email", as: String?.self, is: .email || .nil, required: false)
         }
