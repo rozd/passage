@@ -93,7 +93,7 @@ public extension Passage.Hooks.Passkey {
     func didBeginGuestRegistration(
         with result: PasskeyBeginResult,
         on request: Request,
-    ) async throws {}
+    ) async {}
 
     func willFinishGuestRegistration(
         with identifier: Identifier?,
@@ -116,7 +116,7 @@ public extension Passage.Hooks.Passkey {
         with result: PasskeyBeginResult,
         for user: any User,
         on request: Request
-    ) async throws {}
+    ) async {}
 
     func willFinishRegistration(
         for user: (any User)?,

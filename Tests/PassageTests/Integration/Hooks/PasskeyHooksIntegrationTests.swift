@@ -41,6 +41,10 @@ struct `Passkey Hooks Integration Tests` {
         var didFinishAuthentication: [(credentialID: String, userId: String, codeIsEmpty: Bool)] = []
 
         // Throws-on-will controls
+        var willBeginGuestRegistrationError: (any Error)?
+        var willFinishGuestRegistrationError: (any Error)?
+        var willBeginRegistrationError: (any Error)?
+        var willFinishRegistrationError: (any Error)?
         var willBeginAuthenticationError: (any Error)?
         var willFinishAuthenticationError: (any Error)?
 
@@ -49,12 +53,14 @@ struct `Passkey Hooks Integration Tests` {
                 willBeginGuestRegistration: { [self] form, _, _ in
                     let id = try form.asIdentifier()
                     willBeginGuestRegistration.append(id.value)
+                    if let err = willBeginGuestRegistrationError { throw err }
                 },
                 didBeginGuestRegistration: { [self] _, _ in
                     didBeginGuestRegistration += 1
                 },
                 willFinishGuestRegistration: { [self] identifier, _ in
                     willFinishGuestRegistration.append(identifier?.value)
+                    if let err = willFinishGuestRegistrationError { throw err }
                 },
                 didFinishGuestRegistration: { [self] user, _, _ in
                     didFinishGuestRegistration.append((try? user.requiredIdAsString) ?? "")
@@ -62,12 +68,14 @@ struct `Passkey Hooks Integration Tests` {
 
                 willBeginRegistration: { [self] user, _, _ in
                     willBeginRegistration.append((try? user.requiredIdAsString) ?? "")
+                    if let err = willBeginRegistrationError { throw err }
                 },
                 didBeginRegistration: { [self] _, user, _ in
                     didBeginRegistration.append((try? user.requiredIdAsString) ?? "")
                 },
                 willFinishRegistration: { [self] user, _ in
                     willFinishRegistration.append(try? user?.requiredIdAsString)
+                    if let err = willFinishRegistrationError { throw err }
                 },
                 didFinishRegistration: { [self] user, _, _ in
                     didFinishRegistration.append((try? user.requiredIdAsString) ?? "")
@@ -325,7 +333,7 @@ struct `Passkey Hooks Integration Tests` {
         #expect(credential.signCount == 0)
     }
 
-    // MARK: - Registration: hook fire ordering across both flows
+    // MARK: - Guest Registration: fire ordering across both phases
 
     @Test
     func `guest registration fires willBegin and didBegin (and finish hooks) in order`() async throws {
@@ -359,5 +367,229 @@ struct `Passkey Hooks Integration Tests` {
         #expect(spy.didBeginGuestRegistration == 1)
         #expect(spy.willFinishGuestRegistration == ["charlie@example.com"])
         #expect(spy.didFinishGuestRegistration.count == 1)
+    }
+
+    // MARK: - Guest Registration: aborts
+
+    @Test
+    func `willBeginGuestRegistration aborts the flow when it throws`() async throws {
+        let spy = HookSpy()
+        spy.willBeginGuestRegistrationError = PolicyError(reason: "signups disabled")
+
+        let holder = Holder()
+        try await withApp(configure: { app in
+            try await self.configure(app, holder: holder, spy: spy, seedAuthChallenge: false)
+        }) { app in
+            try await app.testing().test(
+                .POST, "/auth/passkey/guest/registration/begin",
+                headers: [
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Accept": "application/json"
+                ],
+                body: .init(string: "email=charlie@example.com&displayName=Charlie")
+            ) { res in
+                #expect(res.status == .forbidden)
+            }
+        }
+
+        #expect(spy.willBeginGuestRegistration == ["charlie@example.com"])
+        #expect(spy.didBeginGuestRegistration == 0)
+
+        // No challenge should have been persisted.
+        let challenges = try #require(holder.store?.passkeyChallenges)
+        let stored = try await challenges.find(passkeyChallengeMatching: Self.sharedChallengeBytes)
+        #expect(stored == nil)
+    }
+
+    @Test
+    func `willFinishGuestRegistration aborts before user creation and credential persistence`() async throws {
+        let spy = HookSpy()
+        spy.willFinishGuestRegistrationError = PolicyError(reason: "verification required")
+
+        let holder = Holder()
+        try await withApp(configure: { app in
+            try await self.configure(app, holder: holder, spy: spy, seedAuthChallenge: false, seedGuestChallenge: true)
+        }) { app in
+            try await app.testing().test(
+                .POST, "/auth/passkey/guest/registration/finish",
+                headers: ["Content-Type": "application/json"],
+                body: .init(string: Self.minimalRegisterFinishBody)
+            ) { res in
+                #expect(res.status == .forbidden)
+            }
+        }
+
+        #expect(spy.willFinishGuestRegistration == ["bob@example.com"])
+        #expect(spy.didFinishGuestRegistration.isEmpty)
+
+        // No user should have been created from the challenge identifier.
+        let store = try #require(holder.store)
+        let materialised = try await store.users.find(byIdentifier: .email("bob@example.com"))
+        #expect(materialised == nil)
+
+        // Challenge stays unconsumed.
+        let challenges = try #require(holder.store?.passkeyChallenges)
+        let challenge = try #require(try await challenges.find(passkeyChallengeMatching: Self.sharedChallengeBytes))
+        #expect(challenge.isConsumed == false)
+
+        // No credential persisted.
+        let credentials = try #require(holder.store?.passkeyCredentials)
+        let credential = try await credentials.find(byCredentialID: Self.sharedCredentialID)
+        #expect(credential == nil)
+    }
+
+    // MARK: - Authenticated Registration: fixtures
+
+    @Sendable private func createUserAndLogin(
+        app: Application,
+        email: String,
+        password: String = "password123"
+    ) async throws -> (user: any User, token: String) {
+        let store = app.passage.storage.services.store
+        let passwordHash = try await app.password.async.hash(password)
+        let user = try await store.users.create(
+            identifier: .email(email),
+            with: .password(passwordHash)
+        )
+        try await store.users.markEmailVerified(for: user)
+
+        var accessToken = ""
+        try await app.testing().test(.POST, "auth/login", beforeRequest: { req in
+            try req.content.encode(["email": email, "password": password])
+        }, afterResponse: { res async throws in
+            #expect(res.status == .ok)
+            let authUser = try res.content.decode(AuthUser.self)
+            accessToken = authUser.accessToken
+        })
+        return (user, accessToken)
+    }
+
+    // MARK: - Authenticated Registration: fire ordering
+
+    @Test
+    func `authenticated registration fires all four hooks in order`() async throws {
+        let spy = HookSpy()
+        let holder = Holder()
+        try await withApp(configure: { app in
+            try await self.configure(app, holder: holder, spy: spy, seedAuthChallenge: false)
+        }) { app in
+            let (user, token) = try await self.createUserAndLogin(app: app, email: "alice@example.com")
+            let userId = try user.requiredIdAsString
+
+            try await app.testing().test(
+                .POST, "/auth/passkey/registration/begin",
+                headers: [
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    "Authorization": "Bearer \(token)"
+                ],
+                body: .init(string: "{}")
+            ) { res in
+                #expect(res.status == .ok)
+            }
+
+            try await app.testing().test(
+                .POST, "/auth/passkey/registration/finish",
+                headers: [
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer \(token)"
+                ],
+                body: .init(string: Self.minimalRegisterFinishBody)
+            ) { res in
+                #expect(res.status == .created)
+            }
+
+            #expect(spy.willBeginRegistration == [userId])
+            #expect(spy.didBeginRegistration == [userId])
+            #expect(spy.willFinishRegistration == [userId])
+            #expect(spy.didFinishRegistration == [userId])
+        }
+    }
+
+    // MARK: - Authenticated Registration: aborts
+
+    @Test
+    func `willBeginRegistration aborts the flow when it throws`() async throws {
+        let spy = HookSpy()
+        spy.willBeginRegistrationError = PolicyError(reason: "passkey enrollment disabled")
+
+        let holder = Holder()
+        try await withApp(configure: { app in
+            try await self.configure(app, holder: holder, spy: spy, seedAuthChallenge: false)
+        }) { app in
+            let (user, token) = try await self.createUserAndLogin(app: app, email: "alice@example.com")
+            let userId = try user.requiredIdAsString
+
+            try await app.testing().test(
+                .POST, "/auth/passkey/registration/begin",
+                headers: [
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    "Authorization": "Bearer \(token)"
+                ],
+                body: .init(string: "{}")
+            ) { res in
+                #expect(res.status == .forbidden)
+            }
+
+            #expect(spy.willBeginRegistration == [userId])
+            #expect(spy.didBeginRegistration.isEmpty)
+
+            // No challenge persisted.
+            let challenges = try #require(holder.store?.passkeyChallenges)
+            let stored = try await challenges.find(passkeyChallengeMatching: Self.sharedChallengeBytes)
+            #expect(stored == nil)
+        }
+    }
+
+    @Test
+    func `willFinishRegistration aborts before credential persistence and challenge consumption`() async throws {
+        let spy = HookSpy()
+        let holder = Holder()
+        try await withApp(configure: { app in
+            try await self.configure(app, holder: holder, spy: spy, seedAuthChallenge: false)
+        }) { app in
+            let (user, token) = try await self.createUserAndLogin(app: app, email: "alice@example.com")
+            let userId = try user.requiredIdAsString
+
+            // Run begin to seed the challenge bound to the authenticated user.
+            try await app.testing().test(
+                .POST, "/auth/passkey/registration/begin",
+                headers: [
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    "Authorization": "Bearer \(token)"
+                ],
+                body: .init(string: "{}")
+            ) { res in
+                #expect(res.status == .ok)
+            }
+
+            // Now arm the spy to abort the finish.
+            spy.willFinishRegistrationError = PolicyError(reason: "MFA step-up required")
+
+            try await app.testing().test(
+                .POST, "/auth/passkey/registration/finish",
+                headers: [
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer \(token)"
+                ],
+                body: .init(string: Self.minimalRegisterFinishBody)
+            ) { res in
+                #expect(res.status == .forbidden)
+            }
+
+            #expect(spy.willFinishRegistration == [userId])
+            #expect(spy.didFinishRegistration.isEmpty)
+
+            // Challenge stays unconsumed; no credential persisted.
+            let challenges = try #require(holder.store?.passkeyChallenges)
+            let challenge = try #require(try await challenges.find(passkeyChallengeMatching: Self.sharedChallengeBytes))
+            #expect(challenge.isConsumed == false)
+
+            let credentials = try #require(holder.store?.passkeyCredentials)
+            let credential = try await credentials.find(byCredentialID: Self.sharedCredentialID)
+            #expect(credential == nil)
+        }
     }
 }
