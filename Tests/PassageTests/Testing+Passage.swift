@@ -16,6 +16,7 @@ extension Tag {
     @Tag static var passwordless: Self
     @Tag static var exchangeCode: Self
     @Tag static var passkey: Self
+    @Tag static var hooks: Self
 }
 
 // MARK: - NIST SP 800-63B AAL1 tags

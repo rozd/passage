@@ -14,6 +14,9 @@ jobs:
     with:
       with_tsan: false
       with_api_check: false
+      # Skip AAL1 conformance suites (Tests/PassageTests/AAL1, see docs/AAL1/).
+      # Their suite IDs all start with "AAL1 "; this lookahead keeps everything else.
+      test_filter: '^(?!.*AAL1).+$'
     secrets: inherit
 
   submit-dependencies:

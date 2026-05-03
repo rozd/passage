@@ -48,6 +48,8 @@ extension Passage.Account {
     func register(form: any RegisterForm) async throws {
         let policy = request.configuration.passwordPolicy
 
+        try await request.hooks.account?.willRegister(with: form, on: request)
+
         let password = form.password
         try policy.validate(password: password)
 
@@ -55,9 +57,9 @@ extension Passage.Account {
 
         let identifier = try form.asIdentifier()
 
-        // Send verification code after registration
-        // Find the newly created user and send verification based on identifier type
         let user = try await store.users.create(identifier: identifier, with: .password(hash))
+
+        await request.hooks.account?.didRegister(user: user, on: request)
 
         // Fire-and-forget: don't fail registration if verification send fails
         try? await verification.sendVerificationCode(
@@ -83,8 +85,8 @@ extension Passage.Account {
         )
 
         if case let .throttled(delay) = await request.throttle.check(
-           bucket: idBucket, against: rules.perIdentifier, at: now
-       ) {
+            bucket: idBucket, against: rules.perIdentifier, at: now
+        ) {
             throw AuthenticationError.tooManyLoginAttempts(retryAfter: delay)
         }
 
@@ -109,7 +111,11 @@ extension Passage.Account {
 
         await request.throttle.reset(bucket: idBucket)
 
+        try await request.hooks.account?.willLogin(user: user, on: request)
+
         request.passage.login(user)
+
+        await request.hooks.account?.didLogin(user: user, on: request)
 
         return try await request.tokens.issue(for: user)
     }
@@ -124,7 +130,13 @@ extension Passage.Account {
         guard let user = try? request.passage.user else {
             return
         }
+
+        try await request.hooks.account?.willLogout(user: user, on: request)
+
         request.passage.logout()
+
+        await request.hooks.account?.didLogout(user: user, on: request)
+
         try await request.tokens.revoke(for: user)
     }
 
