@@ -18,7 +18,7 @@ jobs:
       is-main: ${{ steps.check-branch.outputs.is-main }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Setup Xcode
@@ -26,7 +26,7 @@ jobs:
         with:
           xcode-version: latest-stable
       - name: Cache Swift packages
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             .build/checkouts
@@ -100,7 +100,7 @@ jobs:
       previous-tag: ${{ steps.calculate.outputs.previous-tag }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Calculate next version
@@ -146,7 +146,7 @@ jobs:
     if: needs.build-test-archive.outputs.is-main == 'true'
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Create and push tag
