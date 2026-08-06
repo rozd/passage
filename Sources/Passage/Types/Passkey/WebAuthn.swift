@@ -47,7 +47,7 @@ extension PublicKeyCredentialUserEntity {
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(name, forKey: .name)
-        try container.encode(id.base64URLEncodedString, forKey: .id)
+        try container.encode(id.base64URLEncodedString(), forKey: .id)
         try container.encode(displayName, forKey: .displayName)
     }
 
@@ -177,27 +177,6 @@ public enum AttestationConveyancePreference: RawRepresentable, Codable, Sendable
         case .enterprise        : return "enterprise"
         case .unknown(let value): return value
         }
-    }
-}
-
-// MARK: - base64url (WebAuthn binary field format)
-
-extension Data {
-    /// Standard base64 with `+`→`-`, `/`→`_`, and trailing `=` stripped.
-    /// Required for binary fields in the WebAuthn JSON serialization format.
-    var base64URLEncodedString: String {
-        base64EncodedString()
-            .replacingOccurrences(of: "+", with: "-")
-            .replacingOccurrences(of: "/", with: "_")
-            .replacingOccurrences(of: "=", with: "")
-    }
-
-    init?(base64URLEncoded string: String) {
-        var normalized = string
-            .replacingOccurrences(of: "-", with: "+")
-            .replacingOccurrences(of: "_", with: "/")
-        while normalized.count % 4 != 0 { normalized.append("=") }
-        self.init(base64Encoded: normalized)
     }
 }
 
