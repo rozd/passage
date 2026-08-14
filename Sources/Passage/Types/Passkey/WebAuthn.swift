@@ -180,27 +180,6 @@ public enum AttestationConveyancePreference: RawRepresentable, Codable, Sendable
     }
 }
 
-// MARK: - base64url (WebAuthn binary field format)
-
-extension Data {
-    /// Standard base64 with `+`→`-`, `/`→`_`, and trailing `=` stripped.
-    /// Required for binary fields in the WebAuthn JSON serialization format.
-    var base64URLEncodedString: String {
-        base64EncodedString()
-            .replacingOccurrences(of: "+", with: "-")
-            .replacingOccurrences(of: "/", with: "_")
-            .replacingOccurrences(of: "=", with: "")
-    }
-
-    init?(base64URLEncoded string: String) {
-        var normalized = string
-            .replacingOccurrences(of: "-", with: "+")
-            .replacingOccurrences(of: "_", with: "/")
-        while normalized.count % 4 != 0 { normalized.append("=") }
-        self.init(base64Encoded: normalized)
-    }
-}
-
 // MARK: - Authentication input (service ← core hint)
 
 /// Descriptor of a previously-registered passkey, used to hint the browser's
