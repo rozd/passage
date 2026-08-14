@@ -47,7 +47,7 @@ extension PublicKeyCredentialUserEntity {
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(name, forKey: .name)
-        try container.encode(id.base64URLEncodedString(), forKey: .id)
+        try container.encode(id.base64URLEncodedString, forKey: .id)
         try container.encode(displayName, forKey: .displayName)
     }
 

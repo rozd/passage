@@ -20,7 +20,7 @@ public extension Passage {
 struct DefaultRandomGenerator: Passage.RandomGenerator {
 
     func generateRandomString(count: Int) -> String {
-        Data([UInt8].random(count: count)).base64URLEncodedString()
+        Data([UInt8].random(count: count)).base64URLEncodedString
     }
     func generateOpaqueToken() -> String {
         generateRandomString(count: 32)
