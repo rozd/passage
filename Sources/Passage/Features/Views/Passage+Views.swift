@@ -26,7 +26,7 @@ extension Passage.Views {
             source: "passage",
             using: NIOLeafFiles(
                 fileio: app.fileio,
-                limits: .default,
+                limits: [.toSandbox, .requireExtensions],
                 sandboxDirectory: "\(resourcePath)/Views",
                 viewDirectory: "\(resourcePath)/Views"
             )
