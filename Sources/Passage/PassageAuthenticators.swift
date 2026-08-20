@@ -38,7 +38,7 @@ public struct PassageSessionAuthenticator: AsyncAuthenticator {
             return try await next.respond(to: request)
         }
 
-        if let aID = request.session.authenticated(request.store.users.userType) {
+        if request.hasSession, let aID = request.session.authenticated(request.store.users.userType) {
             // try to find user with id from session
             let user = try await request.account.user(
                 withId: aID.description

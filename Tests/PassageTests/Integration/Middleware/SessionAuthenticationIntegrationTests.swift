@@ -257,6 +257,10 @@ struct `Sessions Authentication Integration Tests` {
                 #expect(res.status == .ok)
                 let body = String(buffer: res.body)
                 #expect(body == "not-authenticated")
+
+                // Check that no session cookie was set
+                let hasSessionCookie = res.headers[.setCookie].contains { $0.contains("vapor-session") }
+                #expect(!hasSessionCookie)
             })
         }
     }
