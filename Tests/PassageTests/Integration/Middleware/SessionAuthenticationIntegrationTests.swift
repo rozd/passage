@@ -196,12 +196,10 @@ struct `Sessions Authentication Integration Tests` {
             }, afterResponse: { res async throws in
                 #expect(res.status == .ok)
 
-                // Check that no session cookie was set (or it's empty)
-                let setCookieHeader = res.headers[.setCookie]
-                let hasSessionCookie = setCookieHeader.contains { $0.contains("vapor-session") }
+                // Check that no session cookie was set
+                let hasSessionCookie = res.headers[.setCookie].contains { $0.contains("vapor-session") }
                 // When sessions are disabled, there should be no session cookie
-                // Note: Vapor might still set an empty session, so we check for the presence
-                #expect(!hasSessionCookie || setCookieHeader.isEmpty)
+                #expect(!hasSessionCookie)
             })
         }
     }
@@ -259,6 +257,10 @@ struct `Sessions Authentication Integration Tests` {
                 #expect(res.status == .ok)
                 let body = String(buffer: res.body)
                 #expect(body == "not-authenticated")
+
+                // Check that no session cookie was set
+                let hasSessionCookie = res.headers[.setCookie].contains { $0.contains("vapor-session") }
+                #expect(!hasSessionCookie)
             })
         }
     }
