@@ -35,6 +35,7 @@ struct `Store Protocols Tests` {
         var expiresAt: Date
         var revokedAt: Date?
         var replacedBy: UUID?
+        var sessionId: UUID
     }
 
     struct MockEmailVerificationCode: EmailVerificationCode {
@@ -148,7 +149,8 @@ struct `Store Protocols Tests` {
         func createRefreshToken(
             for user: any User,
             tokenHash hash: String,
-            expiresAt: Date
+            expiresAt: Date,
+            sessionId: UUID
         ) async throws -> any RefreshToken {
             MockRefreshToken(
                 id: UUID(),
@@ -156,7 +158,8 @@ struct `Store Protocols Tests` {
                 tokenHash: hash,
                 expiresAt: expiresAt,
                 revokedAt: nil,
-                replacedBy: nil
+                replacedBy: nil,
+                sessionId: sessionId
             )
         }
 
@@ -164,6 +167,7 @@ struct `Store Protocols Tests` {
             for user: any User,
             tokenHash hash: String,
             expiresAt: Date,
+            sessionId: UUID,
             replacing tokenToReplace: (any RefreshToken)?
         ) async throws -> any RefreshToken {
             MockRefreshToken(
@@ -172,7 +176,8 @@ struct `Store Protocols Tests` {
                 tokenHash: hash,
                 expiresAt: expiresAt,
                 revokedAt: nil,
-                replacedBy: tokenToReplace?.id as? UUID
+                replacedBy: tokenToReplace?.id as? UUID,
+                sessionId: sessionId
             )
         }
 
@@ -180,8 +185,8 @@ struct `Store Protocols Tests` {
             nil
         }
 
-        func revokeRefreshToken(for user: any User) async throws {
-            // Method signature test
+        func revokeRefreshTokens(for user: any User) async throws -> [UUID] {
+            []
         }
 
         func revokeRefreshToken(withHash hash: String) async throws {
@@ -189,6 +194,10 @@ struct `Store Protocols Tests` {
         }
 
         func revoke(refreshTokenFamilyStartingFrom token: any RefreshToken) async throws {
+            // Method signature test
+        }
+
+        func revokeRefreshTokens(sessionId: UUID) async throws {
             // Method signature test
         }
     }
@@ -454,6 +463,9 @@ struct `Store Protocols Tests` {
         var restorationCodes: any Passage.RestorationCodeStore { MockRestorationCodeStore() }
         var magicLinkTokens: any Passage.MagicLinkTokenStore { MockMagicLinkTokenStore() }
         var exchangeTokens: any Passage.ExchangeTokenStore { MockExchangeTokenStore() }
+        func transaction<T: Sendable>(_ body: @Sendable (any Passage.Store) async throws -> T) async throws -> T {
+            try await body(self)
+        }
     }
 
     @Test

@@ -36,6 +36,7 @@ struct `RefreshToken Protocol Tests` {
         var expiresAt: Date
         var revokedAt: Date?
         var replacedBy: UUID?
+        var sessionId: UUID
     }
 
     // MARK: - isExpired Tests
@@ -57,7 +58,8 @@ struct `RefreshToken Protocol Tests` {
             tokenHash: "hash",
             expiresAt: Date().addingTimeInterval(-3600), // expired 1 hour ago
             revokedAt: nil,
-            replacedBy: nil
+            replacedBy: nil,
+            sessionId: UUID()
         )
 
         #expect(token.isExpired == true)
@@ -80,7 +82,8 @@ struct `RefreshToken Protocol Tests` {
             tokenHash: "hash",
             expiresAt: Date().addingTimeInterval(3600), // expires in 1 hour
             revokedAt: nil,
-            replacedBy: nil
+            replacedBy: nil,
+            sessionId: UUID()
         )
 
         #expect(token.isExpired == false)
@@ -105,7 +108,8 @@ struct `RefreshToken Protocol Tests` {
             tokenHash: "hash",
             expiresAt: Date().addingTimeInterval(3600),
             revokedAt: Date(),
-            replacedBy: nil
+            replacedBy: nil,
+            sessionId: UUID()
         )
 
         #expect(token.isRevoked == true)
@@ -128,7 +132,8 @@ struct `RefreshToken Protocol Tests` {
             tokenHash: "hash",
             expiresAt: Date().addingTimeInterval(3600),
             revokedAt: nil,
-            replacedBy: nil
+            replacedBy: nil,
+            sessionId: UUID()
         )
 
         #expect(token.isRevoked == false)
@@ -153,7 +158,8 @@ struct `RefreshToken Protocol Tests` {
             tokenHash: "hash",
             expiresAt: Date().addingTimeInterval(3600),
             revokedAt: nil,
-            replacedBy: nil
+            replacedBy: nil,
+            sessionId: UUID()
         )
 
         #expect(token.isValid == true)
@@ -176,7 +182,8 @@ struct `RefreshToken Protocol Tests` {
             tokenHash: "hash",
             expiresAt: Date().addingTimeInterval(-3600),
             revokedAt: nil,
-            replacedBy: nil
+            replacedBy: nil,
+            sessionId: UUID()
         )
 
         #expect(token.isValid == false)
@@ -199,7 +206,8 @@ struct `RefreshToken Protocol Tests` {
             tokenHash: "hash",
             expiresAt: Date().addingTimeInterval(3600),
             revokedAt: Date(),
-            replacedBy: nil
+            replacedBy: nil,
+            sessionId: UUID()
         )
 
         #expect(token.isValid == false)
@@ -222,7 +230,8 @@ struct `RefreshToken Protocol Tests` {
             tokenHash: "hash",
             expiresAt: Date().addingTimeInterval(-3600),
             revokedAt: Date(),
-            replacedBy: nil
+            replacedBy: nil,
+            sessionId: UUID()
         )
 
         #expect(token.isValid == false)
@@ -247,7 +256,8 @@ struct `RefreshToken Protocol Tests` {
             tokenHash: "hash",
             expiresAt: Date(),
             revokedAt: nil,
-            replacedBy: nil
+            replacedBy: nil,
+            sessionId: UUID()
         )
         #expect(token is MockRefreshToken)
     }
@@ -269,7 +279,8 @@ struct `RefreshToken Protocol Tests` {
             tokenHash: "hash",
             expiresAt: Date(),
             revokedAt: nil,
-            replacedBy: nil
+            replacedBy: nil,
+            sessionId: UUID()
         )
         #expect(token is MockRefreshToken)
     }
@@ -294,7 +305,8 @@ struct `RefreshToken Protocol Tests` {
             tokenHash: "hash",
             expiresAt: Date().addingTimeInterval(3600),
             revokedAt: nil,
-            replacedBy: newTokenId
+            replacedBy: newTokenId,
+            sessionId: UUID()
         )
 
         #expect(token.replacedBy == newTokenId)
@@ -317,7 +329,8 @@ struct `RefreshToken Protocol Tests` {
             tokenHash: "hash",
             expiresAt: Date().addingTimeInterval(3600),
             revokedAt: nil,
-            replacedBy: nil
+            replacedBy: nil,
+            sessionId: UUID()
         )
 
         #expect(token.replacedBy == nil)
@@ -343,7 +356,8 @@ struct `RefreshToken Protocol Tests` {
             tokenHash: hash,
             expiresAt: Date(),
             revokedAt: nil,
-            replacedBy: nil
+            replacedBy: nil,
+            sessionId: UUID()
         )
 
         #expect(token.tokenHash == hash)
@@ -368,7 +382,8 @@ struct `RefreshToken Protocol Tests` {
             tokenHash: "hash",
             expiresAt: Date(),
             revokedAt: nil,
-            replacedBy: nil
+            replacedBy: nil,
+            sessionId: UUID()
         )
 
         #expect(token.user.id == userId)

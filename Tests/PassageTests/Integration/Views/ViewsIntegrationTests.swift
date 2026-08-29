@@ -27,8 +27,13 @@ struct `Views Integration Tests` {
         _ app: Application,
         viewsConfig: Passage.Configuration.Views,
         captureRenderer: CapturingViewRenderer? = nil,
-        captured: CapturedMessages? = nil
+        captured: CapturedMessages? = nil,
+        sessionsEnabled: Bool = false
     ) async throws {
+        if sessionsEnabled {
+            app.middleware.use(app.sessions.middleware)
+        }
+
         // Use capturing renderer if provided (for view rendering tests)
         // Otherwise use default (for 404 tests)
         if let renderer = captureRenderer {
@@ -78,6 +83,7 @@ struct `Views Integration Tests` {
                 accessToken: .init(timeToLive: 3600),
                 refreshToken: .init(timeToLive: 86400)
             ),
+            sessions: .init(enabled: sessionsEnabled),
             jwt: .init(jwks: .init(json: emptyJwks)),
             passwordless: .init(
                 emailMagicLink: .email(useQueues: true)
@@ -225,9 +231,8 @@ struct `Views Integration Tests` {
         let viewsConfig = Passage.Configuration.Views(login: loginView)
 
         try await withApp { app in
-            try await configure(app, viewsConfig: viewsConfig)
+            try await configure(app, viewsConfig: viewsConfig, sessionsEnabled: true)
 
-            // Create a verified user first
             let email = "test@example.com"
             let password = "SecurePassword123!"
             let passwordHash = try await app.password.async.hash(password)
@@ -237,10 +242,8 @@ struct `Views Integration Tests` {
             let store = app.passage.storage.services.store
             let user = try await store.users.create(identifier: identifier, with: credential)
 
-            // Mark email as verified
             try await store.users.markEmailVerified(for: user)
 
-            // Submit login form with correct credentials
             try await app.testing().test(.POST, "/auth/login", headers: [
                 "Content-Type": "application/x-www-form-urlencoded",
                 "Accept": "text/html"
@@ -257,6 +260,9 @@ struct `Views Integration Tests` {
                 #expect(location?.contains("success=") == true)
                 // Success message contains "successfully logged in"
                 #expect(location?.contains("successfully") == true || location?.contains("logged+in") == true)
+
+                let hasSessionCookie = res.headers[.setCookie].contains { $0.contains("vapor-session") }
+                #expect(hasSessionCookie)
             })
         }
     }
@@ -307,9 +313,8 @@ struct `Views Integration Tests` {
         let viewsConfig = Passage.Configuration.Views(login: loginView)
 
         try await withApp { app in
-            try await configure(app, viewsConfig: viewsConfig)
+            try await configure(app, viewsConfig: viewsConfig, sessionsEnabled: true)
 
-            // Create a verified user first
             let email = "test@example.com"
             let password = "SecurePassword123!"
             let passwordHash = try await app.password.async.hash(password)
@@ -319,15 +324,12 @@ struct `Views Integration Tests` {
             let store = app.passage.storage.services.store
             let user = try await store.users.create(identifier: identifier, with: credential)
 
-            // Mark email as verified
             try await store.users.markEmailVerified(for: user)
 
-            // Submit login form with correct credentials
             try await app.testing().test(.POST, "/auth/login", headers: [
                 "Content-Type": "application/x-www-form-urlencoded",
                 "Accept": "text/html"
             ], body: .init(string: "email=\(email)&password=\(password)&confirmPassword=\(password)"), afterResponse: { res in
-                // Should redirect
                 #expect(res.status == .seeOther || res.status == .found)
 
                 // Should redirect to custom success location
@@ -359,12 +361,49 @@ struct `Views Integration Tests` {
                 "Content-Type": "application/x-www-form-urlencoded",
                 "Accept": "text/html"
             ], body: .init(string: "email=nonexistent@example.com&password=wrongpassword"), afterResponse: { res in
-                // Should redirect
                 #expect(res.status == .seeOther || res.status == .found)
 
                 // Should redirect to custom failure location
                 let location = res.headers.first(name: .location)
                 #expect(location == "/error")
+            })
+        }
+    }
+
+    @Test
+    func `Login form submission with sessions disabled redirects with sessionsDisabled error`() async throws {
+        let loginView = Passage.Configuration.Views.LoginView(
+            style: .minimalism,
+            theme: Passage.Views.Theme(colors: .defaultLight),
+            identifier: .email
+        )
+        let viewsConfig = Passage.Configuration.Views(login: loginView)
+
+        try await withApp { app in
+            try await configure(app, viewsConfig: viewsConfig, sessionsEnabled: false)
+
+            let email = "test@example.com"
+            let password = "SecurePassword123!"
+            let passwordHash = try await app.password.async.hash(password)
+
+            let identifier = Identifier.email(email)
+            let credential = Credential.password(passwordHash)
+            let store = app.passage.storage.services.store
+            let user = try await store.users.create(identifier: identifier, with: credential)
+
+            try await store.users.markEmailVerified(for: user)
+
+            try await app.testing().test(.POST, "/auth/login", headers: [
+                "Content-Type": "application/x-www-form-urlencoded",
+                "Accept": "text/html"
+            ], body: .init(string: "email=\(email)&password=\(password)&confirmPassword=\(password)"), afterResponse: { res in
+                #expect(res.status == .seeOther || res.status == .found)
+
+                let location = res.headers.first(name: .location)
+                #expect(location != nil)
+                #expect(location?.contains("/auth/login") == true)
+                #expect(location?.contains("error=") == true)
+                #expect(location?.contains("Sessions") == true || location?.contains("disabled") == true)
             })
         }
     }
@@ -456,7 +495,6 @@ struct `Views Integration Tests` {
                 "Content-Type": "application/x-www-form-urlencoded",
                 "Accept": "text/html"
             ], body: .init(string: "email=\(email)&password=\(password)&confirmPassword=\(password)"), afterResponse: { res in
-                // Should redirect
                 #expect(res.status == .seeOther || res.status == .found)
 
                 // Should have Location header
@@ -497,7 +535,6 @@ struct `Views Integration Tests` {
                 "Content-Type": "application/x-www-form-urlencoded",
                 "Accept": "text/html"
             ], body: .init(string: "email=\(email)&password=\(password)&confirmPassword=\(password)"), afterResponse: { res in
-                // Should redirect
                 #expect(res.status == .seeOther || res.status == .found)
 
                 // Should have Location header
@@ -536,7 +573,6 @@ struct `Views Integration Tests` {
                 "Content-Type": "application/x-www-form-urlencoded",
                 "Accept": "text/html"
             ], body: .init(string: "email=\(email)&password=\(password)&confirmPassword=\(password)"), afterResponse: { res in
-                // Should redirect
                 #expect(res.status == .seeOther || res.status == .found)
 
                 // Should redirect to custom success location
@@ -577,7 +613,6 @@ struct `Views Integration Tests` {
                 "Content-Type": "application/x-www-form-urlencoded",
                 "Accept": "text/html"
             ], body: .init(string: "email=\(email)&password=\(password)&confirmPassword=\(password)"), afterResponse: { res in
-                // Should redirect
                 #expect(res.status == .seeOther || res.status == .found)
 
                 // Should redirect to custom failure location
@@ -686,7 +721,6 @@ struct `Views Integration Tests` {
                 "Content-Type": "application/x-www-form-urlencoded",
                 "Accept": "text/html"
             ], body: .init(string: "email=\(email)"), afterResponse: { res in
-                // Should redirect
                 #expect(res.status == .seeOther || res.status == .found)
 
                 // Should have Location header
@@ -716,7 +750,6 @@ struct `Views Integration Tests` {
                 "Content-Type": "application/x-www-form-urlencoded",
                 "Accept": "text/html"
             ], body: .init(string: "email=invalid-email"), afterResponse: { res in
-                // Should redirect
                 #expect(res.status == .seeOther || res.status == .found)
 
                 // Should have Location header with error
@@ -839,7 +872,6 @@ struct `Views Integration Tests` {
                 "Content-Type": "application/x-www-form-urlencoded",
                 "Accept": "text/html"
             ], body: .init(string: "email=\(email)&code=\(resetCode)&newPassword=\(newPassword)"), afterResponse: { res in
-                // Should redirect
                 #expect(res.status == .seeOther || res.status == .found)
 
                 // Should have Location header
@@ -878,7 +910,6 @@ struct `Views Integration Tests` {
                 "Content-Type": "application/x-www-form-urlencoded",
                 "Accept": "text/html"
             ], body: .init(string: "email=\(email)&code=INVALID&newPassword=NewPassword456!"), afterResponse: { res in
-                // Should redirect
                 #expect(res.status == .seeOther || res.status == .found)
 
                 // Should have Location header with error
@@ -932,7 +963,6 @@ struct `Views Integration Tests` {
                 "Content-Type": "application/x-www-form-urlencoded",
                 "Accept": "text/html"
             ], body: .init(string: "email=\(email)&code=\(resetCode)&newPassword=\(newPassword)"), afterResponse: { res in
-                // Should redirect
                 #expect(res.status == .seeOther || res.status == .found)
 
                 // Should redirect to custom success location
@@ -972,7 +1002,6 @@ struct `Views Integration Tests` {
                 "Content-Type": "application/x-www-form-urlencoded",
                 "Accept": "text/html"
             ], body: .init(string: "email=\(email)&code=INVALID&newPassword=NewPassword456!"), afterResponse: { res in
-                // Should redirect
                 #expect(res.status == .seeOther || res.status == .found)
 
                 // Should redirect to custom failure location
@@ -1366,7 +1395,7 @@ struct `Views Integration Tests` {
 
         try await withApp { app in
             let renderer = CapturingViewRenderer(eventLoop: app.eventLoopGroup.any())
-            try await configure(app, viewsConfig: viewsConfig, captureRenderer: renderer, captured: captured)
+            try await configure(app, viewsConfig: viewsConfig, captureRenderer: renderer, captured: captured, sessionsEnabled: true)
 
             let email = "verify@example.com"
 

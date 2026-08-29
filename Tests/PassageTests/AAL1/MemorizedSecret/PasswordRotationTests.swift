@@ -97,7 +97,7 @@ struct `AAL1 no arbitrary password rotation` {
             let user = try #require(try await store.users.find(byIdentifier: .username("compromised-user")))
             let newHash = try Bcrypt.hash("post-compromise-secret")
             try await store.users.setPassword(for: user, passwordHash: newHash)
-            try await store.tokens.revokeRefreshToken(for: user)
+            try await store.tokens.revokeRefreshTokens(for: user)
 
             // Old password SHALL no longer authenticate.
             try await app.testing().test(.POST, "auth/login", beforeRequest: { req in

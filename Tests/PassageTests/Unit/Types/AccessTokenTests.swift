@@ -19,7 +19,8 @@ struct `Access Token Tests` {
             expiresAt: expiresAt,
             issuer: "https://example.com",
             audience: "api.example.com",
-            scope: "read write"
+            scope: "read write",
+            sessionId: UUID()
         )
 
         #expect(token.subject.value == "user123")
@@ -39,7 +40,8 @@ struct `Access Token Tests` {
             expiresAt: expiresAt,
             issuer: nil,
             audience: nil,
-            scope: nil
+            scope: nil,
+            sessionId: UUID()
         )
 
         #expect(token.subject.value == "user123")
@@ -58,7 +60,8 @@ struct `Access Token Tests` {
             expiresAt: expiresAt,
             issuer: nil,
             audience: nil,
-            scope: nil
+            scope: nil,
+            sessionId: UUID()
         )
 
         let afterCreation = Date()
@@ -80,7 +83,8 @@ struct `Access Token Tests` {
             expiresAt: Date(timeIntervalSinceNow: 3600),
             issuer: nil,
             audience: nil,
-            scope: nil
+            scope: nil,
+            sessionId: UUID()
         )
 
         #expect(token.subject.value == userId)
@@ -95,7 +99,8 @@ struct `Access Token Tests` {
             expiresAt: expirationDate,
             issuer: nil,
             audience: nil,
-            scope: nil
+            scope: nil,
+            sessionId: UUID()
         )
 
         #expect(token.expiration.value.timeIntervalSince1970 == expirationDate.timeIntervalSince1970)
@@ -111,7 +116,8 @@ struct `Access Token Tests` {
             expiresAt: Date(timeIntervalSinceNow: 3600),
             issuer: nil,
             audience: nil,
-            scope: nil
+            scope: nil,
+            sessionId: UUID()
         )
 
         #expect(token.issuedAt.value.timeIntervalSince1970 == issuedAtDate.timeIntervalSince1970)
@@ -128,7 +134,8 @@ struct `Access Token Tests` {
             expiresAt: Date(timeIntervalSinceNow: 3600),
             issuer: issuer,
             audience: nil,
-            scope: nil
+            scope: nil,
+            sessionId: UUID()
         )
 
         #expect(token.issuer?.value == issuer)
@@ -145,7 +152,8 @@ struct `Access Token Tests` {
             expiresAt: Date(timeIntervalSinceNow: 3600),
             issuer: nil,
             audience: audience,
-            scope: nil
+            scope: nil,
+            sessionId: UUID()
         )
 
         #expect(token.audience?.value.first == audience)
@@ -162,7 +170,8 @@ struct `Access Token Tests` {
             expiresAt: Date(timeIntervalSinceNow: 3600),
             issuer: nil,
             audience: nil,
-            scope: scope
+            scope: scope,
+            sessionId: UUID()
         )
 
         #expect(token.scope == scope)
@@ -177,7 +186,8 @@ struct `Access Token Tests` {
             expiresAt: Date(timeIntervalSinceNow: 3600),
             issuer: "issuer1",
             audience: "audience1",
-            scope: "read"
+            scope: "read",
+            sessionId: UUID()
         )
 
         let token2 = AccessToken(
@@ -185,7 +195,8 @@ struct `Access Token Tests` {
             expiresAt: Date(timeIntervalSinceNow: 7200),
             issuer: "issuer2",
             audience: "audience2",
-            scope: "write"
+            scope: "write",
+            sessionId: UUID()
         )
 
         #expect(token1.subject.value != token2.subject.value)
@@ -193,4 +204,24 @@ struct `Access Token Tests` {
         #expect(token1.audience?.value.first != token2.audience?.value.first)
         #expect(token1.scope != token2.scope)
     }
+
+    // MARK: - Session ID Tests
+
+    @Test
+    func `Access token initialization with sessionId`() {
+        let sessionId = UUID()
+        let expiresAt = Date(timeIntervalSinceNow: 3600)
+
+        let token = AccessToken(
+            userId: "user123",
+            expiresAt: expiresAt,
+            issuer: nil,
+            audience: nil,
+            scope: nil,
+            sessionId: sessionId
+        )
+
+        #expect(token.sessionId == sessionId)
+    }
+
 }

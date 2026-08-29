@@ -262,6 +262,171 @@ struct `Account Hooks Closures Tests` {
         }
     }
 
+    // MARK: - Credential Issuance Hooks
+
+    @Test
+    func `Empty closures factory does not throw on willIssueCredential`() async throws {
+        let hook = _AccountHooksClosures.hook()
+        let app = try await makeApplication()
+        defer { Task { try await app.asyncShutdown() } }
+        let request = Request(application: app, on: app.eventLoopGroup.next())
+
+        let store = Passage.OnlyForTest.InMemoryStore()
+        let issuance = CredentialIssuance(
+            kind: .bearer,
+            origin: .login,
+            user: Self.makeUser(),
+            sessionId: UUID(),
+            store: store
+        )
+
+        try await hook.willIssueCredential(issuance, on: request)
+    }
+
+    @Test
+    func `Empty closures factory completes silently on didIssueCredential`() async throws {
+        let hook = _AccountHooksClosures.hook()
+        let app = try await makeApplication()
+        defer { Task { try await app.asyncShutdown() } }
+        let request = Request(application: app, on: app.eventLoopGroup.next())
+
+        let store = Passage.OnlyForTest.InMemoryStore()
+        let issuance = CredentialIssuance(
+            kind: .bearer,
+            origin: .login,
+            user: Self.makeUser(),
+            sessionId: UUID(),
+            store: store
+        )
+
+        await hook.didIssueCredential(issuance, on: request)
+    }
+
+    @Test
+    func `Empty closures factory returns false for isSessionRevoked`() async throws {
+        let hook = _AccountHooksClosures.hook()
+        let app = try await makeApplication()
+        defer { Task { try await app.asyncShutdown() } }
+        let request = Request(application: app, on: app.eventLoopGroup.next())
+
+        let result = await hook.isSessionRevoked(UUID(), on: request)
+        #expect(result == false)
+    }
+
+    @Test
+    func `willIssueCredential closure receives issuance`() async throws {
+        final class IssuanceCapture: @unchecked Sendable {
+            var issuance: CredentialIssuance?
+        }
+        let capture = IssuanceCapture()
+
+        let hook = _AccountHooksClosures.hook(
+            willIssueCredential: { issuance, _ in
+                capture.issuance = issuance
+            }
+        )
+        let app = try await makeApplication()
+        defer { Task { try await app.asyncShutdown() } }
+        let request = Request(application: app, on: app.eventLoopGroup.next())
+
+        let store = Passage.OnlyForTest.InMemoryStore()
+        let sessionId = UUID()
+        let issuance = CredentialIssuance(
+            kind: .bearer,
+            origin: .login,
+            user: Self.makeUser(id: "issuance-user"),
+            sessionId: sessionId,
+            store: store
+        )
+
+        try await hook.willIssueCredential(issuance, on: request)
+
+        #expect(capture.issuance?.sessionId == sessionId)
+        #expect((try? capture.issuance?.user.requiredIdAsString) == "issuance-user")
+    }
+
+    @Test
+    func `didIssueCredential closure receives issuance`() async throws {
+        final class IssuanceCapture: @unchecked Sendable {
+            var issuance: CredentialIssuance?
+        }
+        let capture = IssuanceCapture()
+
+        let hook = _AccountHooksClosures.hook(
+            didIssueCredential: { issuance, _ in
+                capture.issuance = issuance
+            }
+        )
+        let app = try await makeApplication()
+        defer { Task { try await app.asyncShutdown() } }
+        let request = Request(application: app, on: app.eventLoopGroup.next())
+
+        let store = Passage.OnlyForTest.InMemoryStore()
+        let sessionId = UUID()
+        let issuance = CredentialIssuance(
+            kind: .bearer,
+            origin: .login,
+            user: Self.makeUser(id: "did-issuance-user"),
+            sessionId: sessionId,
+            store: store
+        )
+
+        await hook.didIssueCredential(issuance, on: request)
+
+        #expect(capture.issuance?.sessionId == sessionId)
+    }
+
+    @Test
+    func `isSessionRevoked closure returns true when set to true`() async throws {
+        let hook = _AccountHooksClosures.hook(
+            isSessionRevoked: { _, _ in true }
+        )
+        let app = try await makeApplication()
+        defer { Task { try await app.asyncShutdown() } }
+        let request = Request(application: app, on: app.eventLoopGroup.next())
+
+        let sessionId = UUID()
+        let result = await hook.isSessionRevoked(sessionId, on: request)
+        #expect(result == true)
+    }
+
+    @Test
+    func `isSessionRevoked closure returns false when set to false`() async throws {
+        let hook = _AccountHooksClosures.hook(
+            isSessionRevoked: { _, _ in false }
+        )
+        let app = try await makeApplication()
+        defer { Task { try await app.asyncShutdown() } }
+        let request = Request(application: app, on: app.eventLoopGroup.next())
+
+        let sessionId = UUID()
+        let result = await hook.isSessionRevoked(sessionId, on: request)
+        #expect(result == false)
+    }
+
+    @Test
+    func `willIssueCredential propagates errors thrown by closure`() async throws {
+        let hook = _AccountHooksClosures.hook(
+            willIssueCredential: { _, _ in throw TestError(tag: "issuance") }
+        )
+        let app = try await makeApplication()
+        defer { Task { try await app.asyncShutdown() } }
+        let request = Request(application: app, on: app.eventLoopGroup.next())
+
+        let store = Passage.OnlyForTest.InMemoryStore()
+        let issuance = CredentialIssuance(
+            kind: .bearer,
+            origin: .login,
+            user: Self.makeUser(),
+            sessionId: UUID(),
+            store: store
+        )
+
+        await #expect(throws: TestError.self) {
+            try await hook.willIssueCredential(issuance, on: request)
+        }
+    }
+
     // MARK: - Conformance & Type Identity
 
     @Test

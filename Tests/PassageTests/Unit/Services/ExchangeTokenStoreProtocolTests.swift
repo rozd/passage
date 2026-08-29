@@ -214,6 +214,9 @@ struct `ExchangeTokenStore Protocol Tests` {
             var restorationCodes: any Passage.RestorationCodeStore { fatalError() }
             var magicLinkTokens: any Passage.MagicLinkTokenStore { fatalError() }
             var exchangeTokens: any Passage.ExchangeTokenStore { MockExchangeTokenStore() }
+            func transaction<T: Sendable>(_ body: @Sendable (any Passage.Store) async throws -> T) async throws -> T {
+                try await body(self)
+            }
         }
 
         let store: any Passage.Store = TestStore()

@@ -56,16 +56,31 @@ struct `Services Tests` {
     }
 
     struct MockTokenStore: Passage.TokenStore {
-        func createRefreshToken(for user: any User, tokenHash hash: String, expiresAt: Date) async throws -> any RefreshToken {
+
+        func createRefreshToken(
+            for user: any User,
+            tokenHash hash: String,
+            expiresAt: Date,
+            sessionId: UUID
+        ) async throws -> any RefreshToken {
             fatalError()
         }
-        func createRefreshToken(for user: any User, tokenHash hash: String, expiresAt: Date, replacing tokenToReplace: (any RefreshToken)?) async throws -> any RefreshToken {
+
+        func createRefreshToken(
+            for user: any User,
+            tokenHash hash: String,
+            expiresAt: Date,
+            sessionId: UUID,
+            replacing tokenToReplace: (any RefreshToken)?
+        ) async throws -> any RefreshToken {
             fatalError()
         }
+
         func find(refreshTokenHash hash: String) async throws -> (any RefreshToken)? { nil }
-        func revokeRefreshToken(for user: any User) async throws {}
+        func revokeRefreshTokens(for user: any User) async throws -> [UUID] { [] }
         func revokeRefreshToken(withHash hash: String) async throws {}
         func revoke(refreshTokenFamilyStartingFrom token: any RefreshToken) async throws {}
+        func revokeRefreshTokens(sessionId: UUID) async throws {}
     }
 
     struct MockVerificationCodeStore: Passage.VerificationCodeStore {
@@ -111,6 +126,9 @@ struct `Services Tests` {
         var restorationCodes: any Passage.RestorationCodeStore { MockRestorationCodeStore() }
         var magicLinkTokens: any Passage.MagicLinkTokenStore { MockMagicLinkTokenStore() }
         var exchangeTokens: any Passage.ExchangeTokenStore { MockExchangeTokenStore() }
+        func transaction<T: Sendable>(_ body: @Sendable (any Passage.Store) async throws -> T) async throws -> T {
+            try await body(self)
+        }
     }
 
     struct MockEmailDelivery: Passage.EmailDelivery {

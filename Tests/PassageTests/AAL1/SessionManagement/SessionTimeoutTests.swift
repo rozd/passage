@@ -33,7 +33,8 @@ struct `AAL1 session-secret timeout` {
         _ = try await store.tokens.createRefreshToken(
             for: user,
             tokenHash: hash,
-            expiresAt: Date().addingTimeInterval(-1) // already expired
+            expiresAt: Date().addingTimeInterval(-1), // already expired
+            sessionId: UUID()
         )
 
         let stored = try await store.tokens.find(refreshTokenHash: hash)

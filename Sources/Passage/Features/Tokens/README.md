@@ -7,10 +7,11 @@ JWT access token issuance, opaque refresh token management, and token exchange f
 The Tokens feature manages authentication tokens throughout their lifecycle. It handles issuing JWT access tokens for API authentication, rotating refresh tokens for session continuity, and one-time exchange codes for OAuth redirect flows. Token rotation with family revocation provides security against token theft.
 
 **Key capabilities:**
-- JWT access tokens with standard claims (sub, exp, iat, iss, aud)
+- JWT access tokens with standard claims (sub, exp, iat, iss, aud) plus a stable session id (`sid`)
 - Opaque refresh tokens with automatic rotation
 - One-time exchange codes for OAuth callbacks
-- Family-based token revocation on reuse detection
+- Family-based token revocation on reuse detection, addressable by session id
+- Credential-issuance hooks that run inside the store transaction
 
 ## Configuration
 
@@ -51,6 +52,7 @@ Short-lived JWT for API authentication. Validated on each request via `PassageBe
 | `iat` | Issued at timestamp |
 | `iss` | Token issuer (optional) |
 | `aud` | Intended audience (optional) |
+| `sid` | Session id (UUID string); the same value across every refresh of one sign-in. Read it with `request.passage.sessionId` |
 | `scope` | Authorization scope (optional) |
 
 ### Refresh Token (Opaque)
@@ -62,6 +64,7 @@ Long-lived opaque token stored **hashed** in database. Used to obtain new access
 - Linked to user via `userId`
 - Tracks rotation chain via `replacedById`
 - Supports revocation via `revokedAt`
+- Carries `sessionId`, the `sid` of the access tokens minted alongside it; every row in one rotation chain shares it
 
 ### Exchange Token
 
@@ -76,10 +79,16 @@ One-time code for OAuth redirect flows. Allows secure token handoff after browse
 
 ### Issue (Login/OAuth)
 
-1. Generate JWT access token with user claims
-2. Generate random opaque refresh token
-3. Hash refresh token and store in database
-4. Return `AuthUser` with both tokens
+Reached through `request.passage.login(_:origin:via: .bearer)`, which the built-in routes call for JSON clients, and through `refresh` and `exchange`. Browser logins (`via: .browser`) set a cookie session instead and never enter this path.
+
+1. Take the `sessionId` handed in by the caller and sign the JWT access token with user claims and `sid`
+2. Generate random opaque refresh token and hash it
+3. Open a store transaction (`Passage.Store.transaction`):
+   1. With `revokeExisting: true` (the default) revoke the user's existing refresh tokens and collect their session ids
+   2. Store the refresh-token row with `sessionId`
+   3. Call `Passage.Hooks.Account.willIssueCredential` — a throw rolls everything back and the route answers the error
+4. Commit, then call `didIssueCredential`
+5. Return `AuthUser` with both tokens
 
 ### Refresh
 
@@ -87,15 +96,19 @@ One-time code for OAuth redirect flows. Allows secure token handoff after browse
 2. Look up in database by hash
 3. Validate: not expired, not revoked, not replaced
 4. If invalid → **revoke entire token family** (security)
-5. Generate new access + refresh tokens
-6. Mark old token as replaced by new one
-7. Return new `AuthUser`
+5. Reuse the row's `sessionId` and sign a new access token with the same `sid`
+6. Inside the store transaction: store the new refresh token with that `sessionId`, mark the old token as replaced, call `willIssueCredential` with `origin: .refresh`
+7. Commit, call `didIssueCredential`, return new `AuthUser`
 
 ### Revoke (Logout/Password Change)
 
 1. Find all refresh tokens for user
 2. Mark as revoked
 3. User must re-authenticate
+
+### Revoke one session
+
+`try await request.passage.revoke(sessionId:)` calls `TokenStore.revokeRefreshTokens(sessionId:)`, which revokes every refresh token carrying that `sid`; the next refresh with any of them fails with `invalidRefreshToken`. Access tokens already in flight stay valid until `exp` unless the host implements `Passage.Hooks.Account.isSessionRevoked`, which `PassageBearerAuthenticator` consults for every JWT that carries a `sid`.
 
 ## Token Rotation & Family Revocation
 
@@ -194,6 +207,7 @@ sequenceDiagram
 |-------|---------|
 | `refreshTokenNotFound` | Token hash not found in database |
 | `invalidRefreshToken` | Token expired, revoked, or already replaced |
+| `sessionRevoked` | Bearer JWT carries a `sid` that the host's `isSessionRevoked` reported as revoked |
 
 ### Token Storage
 

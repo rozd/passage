@@ -74,7 +74,8 @@ struct `AAL1 periodic reauthentication` {
         _ = try await store.tokens.createRefreshToken(
             for: user,
             tokenHash: random.hashOpaqueToken(token: firstSecret),
-            expiresAt: firstExpiresAt
+            expiresAt: firstExpiresAt,
+            sessionId: UUID()
         )
 
         // Simulate the subscriber re-presenting their auth factor before
@@ -82,13 +83,14 @@ struct `AAL1 periodic reauthentication` {
         // revokes the prior family and mints a fresh session secret whose
         // `expiresAt` is `now + TTL`. We model a fresh Bcrypt-backed
         // successful login here by calling the same storage primitives.
-        try await store.tokens.revokeRefreshToken(for: user)
+        try await store.tokens.revokeRefreshTokens(for: user)
         let freshSecret = random.generateOpaqueToken()
         let freshExpiresAt = Date().addingTimeInterval(600) // post-reauth TTL
         let freshToken = try await store.tokens.createRefreshToken(
             for: user,
             tokenHash: random.hashOpaqueToken(token: freshSecret),
-            expiresAt: freshExpiresAt
+            expiresAt: freshExpiresAt,
+            sessionId: UUID()
         )
 
         #expect(freshToken.expiresAt > firstExpiresAt,

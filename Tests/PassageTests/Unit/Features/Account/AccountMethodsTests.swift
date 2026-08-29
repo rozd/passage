@@ -81,7 +81,8 @@ struct `Account Methods Unit Tests` {
     @Sendable private func createRefreshToken(
         app: Application,
         user: any User,
-        expiresAt: Date? = nil
+        expiresAt: Date? = nil,
+        sessionId: UUID = UUID()
     ) async throws -> String {
         let store = app.passage.storage.services.store
         let random = app.passage.storage.services.random
@@ -93,7 +94,8 @@ struct `Account Methods Unit Tests` {
         try await store.tokens.createRefreshToken(
             for: user,
             tokenHash: tokenHash,
-            expiresAt: expiration
+            expiresAt: expiration,
+            sessionId: UUID()
         )
 
         return opaqueToken
@@ -331,7 +333,8 @@ struct `Account Methods Unit Tests` {
             expiresAt: Date().addingTimeInterval(3600),
             issuer: "test-issuer",
             audience: nil,
-            scope: nil
+            scope: nil,
+            sessionId: UUID()
         )
 
         let found = try await account.user(for: accessToken)
@@ -352,7 +355,8 @@ struct `Account Methods Unit Tests` {
             expiresAt: Date().addingTimeInterval(3600),
             issuer: "test-issuer",
             audience: nil,
-            scope: nil
+            scope: nil,
+            sessionId: UUID()
         )
 
         await #expect(throws: AuthenticationError.self) {

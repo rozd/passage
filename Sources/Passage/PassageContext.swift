@@ -1,3 +1,4 @@
+public import Foundation
 import Vapor
 
 public struct PassageContext: Sendable {
@@ -18,10 +19,40 @@ public struct PassageContext: Sendable {
 
 extension PassageContext {
 
-    func login(_ user: any User) {
-        request.auth.login(user)
-        if request.configuration.sessions.enabled {
+    public func login(
+        _ user: any User,
+        origin: CredentialIssuance.Origin,
+        via transport: Passage.Transport,
+        sessionId: UUID = UUID(),
+        revokeExisting: Bool = true
+    ) async throws -> AuthUser? {
+        switch transport {
+        case .browser:
+            guard request.configuration.sessions.enabled else {
+                throw PassageError.sessionsDisabled
+            }
+
+            let issuance = CredentialIssuance(
+                kind: .browser,
+                origin: origin,
+                user: user,
+                sessionId: sessionId,
+                store: request.store
+            )
+
+            try await request.hooks.account?.willIssueCredential(issuance, on: request)
+
+            request.auth.login(user)
             request.session.authenticate(user)
+            request.session.sessionId = issuance.sessionId
+
+            await request.hooks.account?.didIssueCredential(issuance, on: request)
+
+            return nil
+
+        case .bearer:
+            request.auth.login(user)
+            return try await request.tokens.issue(for: user, sessionId: sessionId, revokeExisting: revokeExisting, origin: origin)
         }
     }
 
@@ -29,7 +60,37 @@ extension PassageContext {
         request.auth.logout(request.store.users.userType)
         if request.configuration.sessions.enabled {
             request.session.unauthenticate(request.store.users.userType)
+            request.session.sessionId = nil
         }
+    }
+}
+
+// MARK: - Session Revocation
+
+public extension PassageContext {
+
+    func revoke(sessionId: UUID) async throws {
+        try await request.tokens.revoke(sessionId: sessionId)
+    }
+
+}
+
+// MARK: - Session Id Storage
+
+extension PassageContext {
+
+    struct BearerSessionIdKey: StorageKey {
+        typealias Value = UUID
+    }
+
+    public var sessionId: UUID? {
+        if let sessionId = request.storage[BearerSessionIdKey.self] {
+            return sessionId
+        }
+        guard request.configuration.sessions.enabled, request.hasSession else {
+            return nil
+        }
+        return request.session.sessionId
     }
 }
 
@@ -45,4 +106,3 @@ public extension PassageContext {
         request.passwordless
     }
 }
-

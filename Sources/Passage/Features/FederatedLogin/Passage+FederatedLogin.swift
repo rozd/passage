@@ -92,8 +92,10 @@ extension Passage.FederatedLogin {
 
     /// Complete login by issuing tokens and redirecting
     private func completeLogin(for user: any User) async throws -> Response {
-        // Session authentication (for SSR)
-        request.passage.login(user)
+        // Session authentication (for SSR) if enabled
+        if request.configuration.sessions.enabled {
+            _ = try await request.passage.login(user, origin: .federatedLogin, via: .browser)
+        }
 
         // Build redirect URL with generated exchange code for API clients
         let redirectURL = buildRedirectURL(

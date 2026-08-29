@@ -42,37 +42,16 @@ extension Passage.Tokens {
 
     func issue(
         for user: any User,
-        revokeExisting: Bool = true
+        sessionId: UUID,
+        revokeExisting: Bool = true,
+        origin: CredentialIssuance.Origin
     ) async throws -> AuthUser {
-        if revokeExisting {
-            try await revoke(for: user)
-        }
-
-        let accessToken = AccessToken(
-            userId: try user.requiredIdAsString,
-            expiresAt: .now.addingTimeInterval(configuration.accessToken.timeToLive),
-            issuer: configuration.issuer,
-            audience: nil,
-            scope: nil
-        )
-
-        let opaqueToken = random.generateOpaqueToken()
-        try await store.tokens.createRefreshToken(
+        try await mint(
             for: user,
-            tokenHash: random.hashOpaqueToken(token: opaqueToken),
-            expiresAt: .now.addingTimeInterval(configuration.refreshToken.timeToLive)
-        )
-
-        return AuthUser(
-            accessToken: try await request.jwt.sign(accessToken),
-            refreshToken: opaqueToken,
-            tokenType: "Bearer",
-            expiresIn: configuration.accessToken.timeToLive,
-            user: .init(
-                id: try user.requiredIdAsString,
-                email: user.email,
-                phone: user.phone
-            )
+            sessionId: sessionId,
+            origin: origin,
+            revokeExisting: revokeExisting,
+            replacing: nil
         )
     }
 
@@ -94,26 +73,83 @@ extension Passage.Tokens {
             throw AuthenticationError.invalidRefreshToken
         }
 
-        let user = refreshToken.user
-
-        let opaqueToken = random.generateOpaqueToken()
-        try await store.tokens.createRefreshToken(
-            for: user,
-            tokenHash: random.hashOpaqueToken(token: opaqueToken),
-            expiresAt: .now.addingTimeInterval(configuration.refreshToken.timeToLive),
+        return try await mint(
+            for: refreshToken.user,
+            sessionId: refreshToken.sessionId,
+            origin: .refresh,
+            revokeExisting: false,
             replacing: refreshToken
         )
+    }
+
+}
+
+// MARK: - Mint
+
+extension Passage.Tokens {
+
+    private func mint(
+        for user: any User,
+        sessionId: UUID,
+        origin: CredentialIssuance.Origin,
+        revokeExisting: Bool,
+        replacing tokenToReplace: (any RefreshToken)?
+    ) async throws -> AuthUser {
+        let now = Date.now
+        let accessTokenExpiresAt = now.addingTimeInterval(configuration.accessToken.timeToLive)
+        let refreshTokenExpiresAt = now.addingTimeInterval(configuration.refreshToken.timeToLive)
 
         let accessToken = AccessToken(
             userId: try user.requiredIdAsString,
-            expiresAt: .now.addingTimeInterval(configuration.accessToken.timeToLive),
+            issuedAt: now,
+            expiresAt: accessTokenExpiresAt,
             issuer: configuration.issuer,
             audience: nil,
-            scope: nil
+            scope: nil,
+            sessionId: sessionId
         )
+        let signedAccessToken = try await request.jwt.sign(accessToken)
+
+        let opaqueToken = random.generateOpaqueToken()
+        let opaqueTokenHash = random.hashOpaqueToken(token: opaqueToken)
+
+        let request = self.request
+        let hooks = request.hooks.account
+
+        let issuance = try await store.transaction { store in
+            let revokedSessionIds = revokeExisting
+                ? try await store.tokens.revokeRefreshTokens(for: user)
+                : []
+
+            try await store.tokens.createRefreshToken(
+                for: user,
+                tokenHash: opaqueTokenHash,
+                expiresAt: refreshTokenExpiresAt,
+                sessionId: sessionId,
+                replacing: tokenToReplace
+            )
+
+            let issuance = CredentialIssuance(
+                kind: .bearer,
+                origin: origin,
+                user: user,
+                sessionId: sessionId,
+                accessToken: signedAccessToken,
+                accessTokenExpiresAt: accessTokenExpiresAt,
+                refreshTokenExpiresAt: refreshTokenExpiresAt,
+                revokedSessionIds: revokedSessionIds,
+                store: store
+            )
+
+            try await hooks?.willIssueCredential(issuance, on: request)
+
+            return issuance
+        }
+
+        await hooks?.didIssueCredential(issuance, on: request)
 
         return AuthUser(
-            accessToken: try await request.jwt.sign(accessToken),
+            accessToken: signedAccessToken,
             refreshToken: opaqueToken,
             tokenType: "Bearer",
             expiresIn: configuration.accessToken.timeToLive,
@@ -132,7 +168,11 @@ extension Passage.Tokens {
 extension Passage.Tokens {
 
     func revoke(for user: any User) async throws {
-        try await store.tokens.revokeRefreshToken(for: user)
+        try await store.tokens.revokeRefreshTokens(for: user)
+    }
+
+    func revoke(sessionId: UUID) async throws {
+        try await store.tokens.revokeRefreshTokens(sessionId: sessionId)
     }
 
 }
@@ -197,10 +237,7 @@ extension Passage.Tokens {
         // Get user from token
         let user = exchangeToken.user
 
-        // Authenticate user in session (if sessions enabled)
-        request.passage.login(user)
-
         // Issue full JWT tokens
-        return try await issue(for: user)
+        return try await issue(for: user, sessionId: UUID(), origin: .exchange)
     }
 }

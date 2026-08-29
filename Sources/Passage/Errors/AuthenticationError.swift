@@ -21,6 +21,7 @@ public enum AuthenticationError: Error, Equatable {
     case invalidRefreshToken
     case refreshTokenExpired
     case refreshTokenNotFound
+    case sessionRevoked
 
     // User errors
     case userNotFound
@@ -76,7 +77,7 @@ extension AuthenticationError: AbortError {
             return .forbidden
         case .passwordIsNotSet:
             return .internalServerError
-        case .invalidRefreshToken, .refreshTokenExpired:
+        case .invalidRefreshToken, .refreshTokenExpired, .sessionRevoked:
             return .unauthorized
         case .refreshTokenNotFound, .userNotFound:
             return .notFound
@@ -149,6 +150,8 @@ extension AuthenticationError: AbortError {
             return "The refresh token is invalid."
         case .refreshTokenExpired:
             return "The refresh token has expired."
+        case .sessionRevoked:
+            return "The session has been revoked."
         case .refreshTokenNotFound:
             return "Refresh token not found."
         case .userNotFound:

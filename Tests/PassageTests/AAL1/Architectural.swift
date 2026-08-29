@@ -109,7 +109,8 @@ struct `AAL1 architectural attestations` {
         _ = try await store.tokens.createRefreshToken(
             for: alice,
             tokenHash: random.hashOpaqueToken(token: aliceSecret),
-            expiresAt: Date().addingTimeInterval(3600)
+            expiresAt: Date().addingTimeInterval(3600),
+            sessionId: UUID()
         )
 
         let resolved = try await store.tokens.find(
@@ -143,17 +144,19 @@ struct `AAL1 architectural attestations` {
         _ = try await store.tokens.createRefreshToken(
             for: user,
             tokenHash: random.hashOpaqueToken(token: firstSecret),
-            expiresAt: Date().addingTimeInterval(3600)
+            expiresAt: Date().addingTimeInterval(3600),
+            sessionId: UUID()
         )
 
         // Second auth event — models the real `issue(for: user,
         // revokeExisting: true)` path in Passage.Tokens.issue.
-        try await store.tokens.revokeRefreshToken(for: user)
+        try await store.tokens.revokeRefreshTokens(for: user)
         let secondSecret = random.generateOpaqueToken()
         _ = try await store.tokens.createRefreshToken(
             for: user,
             tokenHash: random.hashOpaqueToken(token: secondSecret),
-            expiresAt: Date().addingTimeInterval(3600)
+            expiresAt: Date().addingTimeInterval(3600),
+            sessionId: UUID()
         )
 
         // The first session's secret no longer opens a valid session —
@@ -218,7 +221,8 @@ struct `AAL1 architectural attestations` {
         let token = try await store.tokens.createRefreshToken(
             for: user,
             tokenHash: random.hashOpaqueToken(token: secret),
-            expiresAt: Date().addingTimeInterval(3600)
+            expiresAt: Date().addingTimeInterval(3600),
+            sessionId: UUID()
         )
 
         // The session record knows only about the subscriber and its own

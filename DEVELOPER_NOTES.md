@@ -33,15 +33,31 @@ public protocol Store: Sendable {
     var exchangeTokens: any ExchangeTokenStore { get }
     var passkeyCredentials: (any PasskeyCredentialStore)? { get }  // default nil
     var passkeyChallenges: (any PasskeyChallengeStore)? { get }    // default nil
+
+    func transaction<T: Sendable>(
+        _ body: @Sendable (any Store) async throws -> T
+    ) async throws -> T
 }
 ```
+
+### Transactions
+
+`transaction(_:)` is how Passage makes credential issuance atomic: `Passage.Tokens.issue` / `refresh` revoke prior tokens, write the new refresh-token row, and call `Passage.Hooks.Account.willIssueCredential` inside one call to `transaction`, and only commit if the hook returns. Wrap `body` in your database's transaction and hand it a store bound to that transaction; if `body` throws, roll back so the hook's failure leaves no refresh-token row behind.
+
+A transactional store must:
+
+- open a database transaction and hand `body` a store whose every sub-store is bound to it (in `PassageFluent.DatabaseStore` this is `database.transaction { tx in body(self.bound(to: tx)) }`);
+- commit when `body` returns and roll back when it throws, rethrowing the error;
+- tolerate nested calls — sub-store methods such as `createRefreshToken(..., replacing:)` may open their own transaction on the bound database, which must join the outer one rather than start a new one (Fluent's SQL drivers do this).
+
+The store handed to `body` is the one the hook receives as `CredentialIssuance.store`, so a host can cast it back to your concrete type to reach the underlying connection.
 
 ### Sub-stores
 
 | Sub-store | Responsibility |
 |---|---|
 | `UserStore` | User CRUD, identifier lookup, password rotation, account linking (`addIdentifier`), passwordless-only creators (`createWithEmail`, `createWithPhone`). |
-| `TokenStore` | Refresh-token rows with rotation chain (`createRefreshToken(..., replacing:)`), family revocation (`revoke(refreshTokenFamilyStartingFrom:)`). |
+| `TokenStore` | Refresh-token rows with rotation chain (`createRefreshToken(..., sessionId:replacing:)`), family revocation (`revoke(refreshTokenFamilyStartingFrom:)`), session-scoped revocation (`revokeRefreshTokens(sessionId:)`), and user-wide revocation that reports which sessions it retired (`revokeRefreshTokens(for:) -> [UUID]`). |
 | `VerificationCodeStore` | Email + phone verification codes (create/find/invalidate/increment-failed). |
 | `RestorationCodeStore` | Email + phone password-reset codes (same shape as verification). |
 | `MagicLinkTokenStore` | Passwordless email magic-link tokens with optional `sessionTokenHash` for same-browser enforcement. |
@@ -54,6 +70,7 @@ public protocol Store: Sendable {
 - **Hash, don't store plaintext.** Every token and code is persisted as a SHA-256 hash. Refresh tokens, verification codes, reset codes, magic-link tokens, exchange tokens, and passkey challenges all follow this rule. The caller hashes before handing bytes to most sub-stores; `PasskeyChallengeStore` is the one exception — it receives raw `PasskeyChallenge.bytes` and hashes internally (e.g. via a `Data.sha256Hex` helper) so that plain challenge bytes never reach the database layer.
 - **One-shot consumption.** `ExchangeToken`s and `StoredPasskeyChallenge`s must set a `consumedAt` timestamp on use and reject subsequent reads. Cleanup methods (`cleanupExpiredTokens(before:)`, `cleanupExpiredPasskeyChallenges(before:)`) let you run periodic sweeps.
 - **Refresh-token family revocation.** Token rotation links the old token's `replacedBy` field to the new row. On reuse (i.e. a rotated-away hash is presented again), follow the chain and revoke the entire family via `revoke(refreshTokenFamilyStartingFrom:)`.
+- **Session ids name the family.** `RefreshToken.sessionId` is the `sid` claim of the access tokens minted with that row; every row in a rotation chain shares it. Persist the value passed to `createRefreshToken(for:tokenHash:expiresAt:sessionId:replacing:)` — the parameter is required (non-optional `UUID`). `revokeRefreshTokens(for:)` must return the distinct session ids of the rows it flipped. `revokeRefreshTokens(sessionId:)` revokes all refresh tokens for a given session.
 - **Eager loading.** When `UserStore.find(byIdentifier:)` is called, load the identifier's user along with its other identifiers if you need account-linking semantics — otherwise downstream features (federated login, linking, passkeys) will issue extra queries per request.
 
 ### Reference implementations

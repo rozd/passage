@@ -124,10 +124,7 @@ extension Passage.Passwordless {
 
 extension Passage.Passwordless {
 
-    /// Verify an email magic link and authenticate the user
-    /// - Parameter token: The magic link token from the URL
-    /// - Returns: AuthUser containing access and refresh tokens
-    public func verifyEmailMagicLink(token: String) async throws -> AuthUser {
+    public func verifyEmailMagicLink(token: String) async throws -> any User {
         guard let config = self.config.emailMagicLink else {
             throw PassageError.emailMagicLinkNotConfigured
         }
@@ -177,9 +174,7 @@ extension Passage.Passwordless {
             request.session.data[magicLinkSessionTokenKey] = nil
         }
 
-        request.passage.login(user)
-
-        return try await request.tokens.issue(for: user, revokeExisting: self.config.revokeExistingTokens)
+        return user
     }
 
     /// Verify that the magic link is being verified from the same browser

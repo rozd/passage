@@ -117,8 +117,6 @@ extension Passage.Linking.ManualLinking {
 
         clearLinkingState()
 
-        request.passage.login(user)
-        
         return user
     }
 

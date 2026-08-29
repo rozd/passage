@@ -17,17 +17,14 @@ struct `Sessions Authentication Integration Tests` {
 
     /// Configures a test Vapor application with Passage and session support enabled
     @Sendable private func configureWithSession(_ app: Application) async throws {
-        // Enable sessions middleware
         app.middleware.use(app.sessions.middleware)
 
-        // Add HMAC key for JWT signing
         await app.jwt.keys.add(
             hmac: HMACKey(from: "test-secret-key-for-jwt-signing"),
             digestAlgorithm: .sha256,
             kid: JWKIdentifier(string: "test-key")
         )
 
-        // Configure Passage with test services and session enabled
         let store = Passage.OnlyForTest.InMemoryStore()
         let emailDelivery = Passage.OnlyForTest.MockEmailDelivery()
         let phoneDelivery = Passage.OnlyForTest.MockPhoneDelivery()
@@ -43,6 +40,13 @@ struct `Sessions Authentication Integration Tests` {
         let emptyJwks = """
         {"keys":[]}
         """
+
+        let loginView = Passage.Configuration.Views.LoginView(
+            style: .minimalism,
+            theme: Passage.Views.Theme(colors: .defaultLight),
+            identifier: .email
+        )
+        let viewsConfig = Passage.Configuration.Views(login: loginView)
 
         let configuration = try Passage.Configuration(
             origin: URL(string: "http://localhost:8080")!,
@@ -63,7 +67,8 @@ struct `Sessions Authentication Integration Tests` {
                 email: .init(codeLength: 6, codeExpiration: 600, maxAttempts: 5),
                 phone: .init(codeLength: 6, codeExpiration: 600, maxAttempts: 5),
                 useQueues: false
-            )
+            ),
+            views: viewsConfig
         )
 
         try await app.passage.configure(
@@ -71,7 +76,6 @@ struct `Sessions Authentication Integration Tests` {
             configuration: configuration
         )
 
-        // Register test route with both session and bearer authenticators
         let authenticated = app
             .grouped(PassageSessionAuthenticator())
             .grouped(PassageBearerAuthenticator())
@@ -83,7 +87,89 @@ struct `Sessions Authentication Integration Tests` {
             return "not-authenticated"
         }
 
-        // Route protected by PassageGuard
+        let guarded = authenticated.grouped(PassageGuard())
+        guarded.get("test-protected") { req -> String in
+            let user = try req.passage.user
+            return "protected:\(try user.requiredIdAsString)"
+        }
+    }
+
+    @Sendable private func configureWithSessionAndRevokedHook(_ app: Application) async throws {
+        app.middleware.use(app.sessions.middleware)
+
+        await app.jwt.keys.add(
+            hmac: HMACKey(from: "test-secret-key-for-jwt-signing"),
+            digestAlgorithm: .sha256,
+            kid: JWKIdentifier(string: "test-key")
+        )
+
+        let store = Passage.OnlyForTest.InMemoryStore()
+        let emailDelivery = Passage.OnlyForTest.MockEmailDelivery()
+        let phoneDelivery = Passage.OnlyForTest.MockPhoneDelivery()
+
+        let services = Passage.Services(
+            store: store,
+            random: DefaultRandomGenerator(),
+            emailDelivery: emailDelivery,
+            phoneDelivery: phoneDelivery,
+            federatedLogin: nil
+        )
+
+        let emptyJwks = """
+        {"keys":[]}
+        """
+
+        let loginView = Passage.Configuration.Views.LoginView(
+            style: .minimalism,
+            theme: Passage.Views.Theme(colors: .defaultLight),
+            identifier: .email
+        )
+        let viewsConfig = Passage.Configuration.Views(login: loginView)
+
+        let configuration = try Passage.Configuration(
+            origin: URL(string: "http://localhost:8080")!,
+            routes: .init(),
+            tokens: .init(
+                issuer: "test-issuer",
+                accessToken: .init(timeToLive: 3600),
+                refreshToken: .init(timeToLive: 86400)
+            ),
+            sessions: .init(enabled: true),
+            jwt: .init(jwks: .init(json: emptyJwks)),
+            verification: .init(
+                email: .init(codeLength: 6, codeExpiration: 600, maxAttempts: 5),
+                phone: .init(codeLength: 6, codeExpiration: 600, maxAttempts: 5),
+                useQueues: false
+            ),
+            restoration: .init(
+                email: .init(codeLength: 6, codeExpiration: 600, maxAttempts: 5),
+                phone: .init(codeLength: 6, codeExpiration: 600, maxAttempts: 5),
+                useQueues: false
+            ),
+            views: viewsConfig
+        )
+
+        let hooks = Passage.Hooks(
+            account: .hook(isSessionRevoked: { _, _ in true })
+        )
+
+        try await app.passage.configure(
+            services: services,
+            configuration: configuration,
+            hooks: hooks
+        )
+
+        let authenticated = app
+            .grouped(PassageSessionAuthenticator())
+            .grouped(PassageBearerAuthenticator())
+
+        authenticated.get("test-session-auth") { req -> String in
+            if let user = req.auth.get(Passage.OnlyForTest.InMemoryUser.self) {
+                return "authenticated:\(user.id ?? "no-id")"
+            }
+            return "not-authenticated"
+        }
+
         let guarded = authenticated.grouped(PassageGuard())
         guarded.get("test-protected") { req -> String in
             let user = try req.passage.user
@@ -93,7 +179,6 @@ struct `Sessions Authentication Integration Tests` {
 
     /// Configures a test Vapor application with Passage and session support disabled
     @Sendable private func configureWithoutSession(_ app: Application) async throws {
-        // Add HMAC key for JWT signing
         await app.jwt.keys.add(
             hmac: HMACKey(from: "test-secret-key-for-jwt-signing"),
             digestAlgorithm: .sha256,
@@ -164,17 +249,15 @@ struct `Sessions Authentication Integration Tests` {
     // MARK: - Login with Sessions Tests
 
     @Test
-    func `Login with session enabled sets session cookie`() async throws {
+    func `Form login with session enabled sets session cookie`() async throws {
         try await withApp(configure: configureWithSession) { app in
             try await createTestUser(app: app)
 
             try await app.testing().test(.POST, "auth/login", beforeRequest: { req in
-                try req.content.encode([
-                    "email": "user@example.com",
-                    "password": "password123"
-                ])
+                req.headers.replaceOrAdd(name: .accept, value: "text/html")
+                try req.content.encode(["email": "user@example.com", "password": "password123"], as: .urlEncodedForm)
             }, afterResponse: { res async throws in
-                #expect(res.status == .ok)
+                #expect(res.status == .seeOther || res.status == .found)
 
                 // Check that a session cookie was set
                 let setCookieHeader = res.headers[.setCookie]
@@ -196,9 +279,30 @@ struct `Sessions Authentication Integration Tests` {
             }, afterResponse: { res async throws in
                 #expect(res.status == .ok)
 
-                // Check that no session cookie was set
                 let hasSessionCookie = res.headers[.setCookie].contains { $0.contains("vapor-session") }
                 // When sessions are disabled, there should be no session cookie
+                #expect(!hasSessionCookie)
+            })
+        }
+    }
+
+    @Test
+    func `JSON login with sessions enabled returns tokens and no session cookie`() async throws {
+        try await withApp(configure: configureWithSession) { app in
+            try await createTestUser(app: app)
+
+            try await app.testing().test(.POST, "auth/login", beforeRequest: { req in
+                try req.content.encode([
+                    "email": "user@example.com",
+                    "password": "password123"
+                ])
+            }, afterResponse: { res async throws in
+                #expect(res.status == .ok)
+
+                let authUser = try res.content.decode(AuthUser.self)
+                #expect(authUser.accessToken.isEmpty == false)
+
+                let hasSessionCookie = res.headers[.setCookie].contains { $0.contains("vapor-session") }
                 #expect(!hasSessionCookie)
             })
         }
@@ -213,16 +317,12 @@ struct `Sessions Authentication Integration Tests` {
 
             var sessionCookie: String?
 
-            // First, login to get a session
             try await app.testing().test(.POST, "auth/login", beforeRequest: { req in
-                try req.content.encode([
-                    "email": "user@example.com",
-                    "password": "password123"
-                ])
+                req.headers.replaceOrAdd(name: .accept, value: "text/html")
+                try req.content.encode(["email": "user@example.com", "password": "password123"], as: .urlEncodedForm)
             }, afterResponse: { res async throws in
-                #expect(res.status == .ok)
+                #expect(res.status == .seeOther || res.status == .found)
 
-                // Extract session cookie
                 if let cookieHeader = res.headers[.setCookie].first(where: { $0.contains("vapor-session") }) {
                     // Parse the cookie value
                     let parts = cookieHeader.split(separator: ";")
@@ -258,9 +358,41 @@ struct `Sessions Authentication Integration Tests` {
                 let body = String(buffer: res.body)
                 #expect(body == "not-authenticated")
 
-                // Check that no session cookie was set
                 let hasSessionCookie = res.headers[.setCookie].contains { $0.contains("vapor-session") }
                 #expect(!hasSessionCookie)
+            })
+        }
+    }
+
+    @Test
+    func `Revoked cookie session is not authenticated`() async throws {
+        try await withApp(configure: configureWithSessionAndRevokedHook) { app in
+            try await createTestUser(app: app)
+
+            var sessionCookie: String?
+
+            try await app.testing().test(.POST, "auth/login", beforeRequest: { req in
+                req.headers.replaceOrAdd(name: .accept, value: "text/html")
+                try req.content.encode(["email": "user@example.com", "password": "password123"], as: .urlEncodedForm)
+            }, afterResponse: { res async throws in
+                #expect(res.status == .seeOther || res.status == .found)
+
+                if let cookieHeader = res.headers[.setCookie].first(where: { $0.contains("vapor-session") }) {
+                    let parts = cookieHeader.split(separator: ";")
+                    if let cookiePart = parts.first {
+                        sessionCookie = String(cookiePart)
+                    }
+                }
+            })
+
+            #expect(sessionCookie != nil)
+
+            try await app.testing().test(.GET, "test-protected", beforeRequest: { req in
+                if let cookie = sessionCookie {
+                    req.headers.add(name: .cookie, value: cookie)
+                }
+            }, afterResponse: { res async in
+                #expect(res.status == .unauthorized)
             })
         }
     }
@@ -273,19 +405,12 @@ struct `Sessions Authentication Integration Tests` {
             try await createTestUser(app: app)
 
             var sessionCookie: String?
-            var accessToken: String?
 
-            // Login to get session and tokens
             try await app.testing().test(.POST, "auth/login", beforeRequest: { req in
-                try req.content.encode([
-                    "email": "user@example.com",
-                    "password": "password123"
-                ])
+                req.headers.replaceOrAdd(name: .accept, value: "text/html")
+                try req.content.encode(["email": "user@example.com", "password": "password123"], as: .urlEncodedForm)
             }, afterResponse: { res async throws in
-                #expect(res.status == .ok)
-
-                let authUser = try res.content.decode(AuthUser.self)
-                accessToken = authUser.accessToken
+                #expect(res.status == .seeOther || res.status == .found)
 
                 if let cookieHeader = res.headers[.setCookie].first(where: { $0.contains("vapor-session") }) {
                     let parts = cookieHeader.split(separator: ";")
@@ -296,15 +421,10 @@ struct `Sessions Authentication Integration Tests` {
             })
 
             #expect(sessionCookie != nil)
-            #expect(accessToken != nil)
 
-            // Logout with both session cookie and bearer token
             try await app.testing().test(.POST, "auth/logout", beforeRequest: { req in
                 if let cookie = sessionCookie {
                     req.headers.add(name: .cookie, value: cookie)
-                }
-                if let token = accessToken {
-                    req.headers.bearerAuthorization = BearerAuthorization(token: token)
                 }
                 try req.content.encode([String: String]())
             }, afterResponse: { res async in
@@ -333,14 +453,11 @@ struct `Sessions Authentication Integration Tests` {
 
             var sessionCookie: String?
 
-            // Login to get session
             try await app.testing().test(.POST, "auth/login", beforeRequest: { req in
-                try req.content.encode([
-                    "email": "user@example.com",
-                    "password": "password123"
-                ])
+                req.headers.replaceOrAdd(name: .accept, value: "text/html")
+                try req.content.encode(["email": "user@example.com", "password": "password123"], as: .urlEncodedForm)
             }, afterResponse: { res async throws in
-                #expect(res.status == .ok)
+                #expect(res.status == .seeOther || res.status == .found)
 
                 if let cookieHeader = res.headers[.setCookie].first(where: { $0.contains("vapor-session") }) {
                     let parts = cookieHeader.split(separator: ";")
@@ -378,14 +495,11 @@ struct `Sessions Authentication Integration Tests` {
             var sessionCookie: String?
             var user2AccessToken: String?
 
-            // Login as user1 to get session
             try await app.testing().test(.POST, "auth/login", beforeRequest: { req in
-                try req.content.encode([
-                    "email": "user1@example.com",
-                    "password": "password123"
-                ])
+                req.headers.replaceOrAdd(name: .accept, value: "text/html")
+                try req.content.encode(["email": "user1@example.com", "password": "password123"], as: .urlEncodedForm)
             }, afterResponse: { res async throws in
-                #expect(res.status == .ok)
+                #expect(res.status == .seeOther || res.status == .found)
 
                 if let cookieHeader = res.headers[.setCookie].first(where: { $0.contains("vapor-session") }) {
                     let parts = cookieHeader.split(separator: ";")
@@ -395,7 +509,6 @@ struct `Sessions Authentication Integration Tests` {
                 }
             })
 
-            // Login as user2 to get access token
             try await app.testing().test(.POST, "auth/login", beforeRequest: { req in
                 try req.content.encode([
                     "email": "user2@example.com",
@@ -437,14 +550,11 @@ struct `Sessions Authentication Integration Tests` {
 
             var sessionCookie: String?
 
-            // Login to get session
             try await app.testing().test(.POST, "auth/login", beforeRequest: { req in
-                try req.content.encode([
-                    "email": "user@example.com",
-                    "password": "password123"
-                ])
+                req.headers.replaceOrAdd(name: .accept, value: "text/html")
+                try req.content.encode(["email": "user@example.com", "password": "password123"], as: .urlEncodedForm)
             }, afterResponse: { res async throws in
-                #expect(res.status == .ok)
+                #expect(res.status == .seeOther || res.status == .found)
 
                 if let cookieHeader = res.headers[.setCookie].first(where: { $0.contains("vapor-session") }) {
                     let parts = cookieHeader.split(separator: ";")

@@ -24,6 +24,21 @@ public extension Passage {
                 self.passkeyCredentials = InMemoryPasskeyCredentialStore()
                 self.passkeyChallenges = InMemoryPasskeyChallengeStore()
             }
+
+            public func transaction<T: Sendable>(
+                _ body: @Sendable (any Passage.Store) async throws -> T
+            ) async throws -> T {
+                guard let tokens = tokens as? InMemoryTokenStore else {
+                    return try await body(self)
+                }
+                let snapshot = tokens.snapshot()
+                do {
+                    return try await body(self)
+                } catch {
+                    tokens.restore(snapshot)
+                    throw error
+                }
+            }
         }
 
     }
