@@ -6,14 +6,11 @@ public import Vapor
 public extension Passage.Configuration {
 
     struct Passwordless: Sendable {
-        let revokeExistingTokens: Bool
         let emailMagicLink: MagicLink?
 
         public init(
-            revokeExistingTokens: Bool = true,
             emailMagicLink: MagicLink? = .email()
         ) {
-            self.revokeExistingTokens = revokeExistingTokens
             self.emailMagicLink = emailMagicLink
         }
     }

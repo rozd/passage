@@ -378,4 +378,190 @@ struct `InMemoryTokenStore Tests` {
         #expect(capture.storeTokensMatch)
     }
 
+    @Test
+    func `revokeRefreshTokens(for:keepingNewestSessions:) keeps N most recently active sessions`() async throws {
+        let inMemoryStore = Passage.OnlyForTest.InMemoryStore()
+        let store = inMemoryStore.tokens
+        let user = makeUser()
+
+        let sessionA = UUID()
+        let sessionB = UUID()
+
+        let date1 = Date.now
+        try await store.createRefreshToken(
+            for: user,
+            tokenHash: "hashA1",
+            expiresAt: date1.addingTimeInterval(3600),
+            sessionId: sessionA
+        )
+
+        let date2 = date1.addingTimeInterval(1)
+        try await store.createRefreshToken(
+            for: user,
+            tokenHash: "hashB1",
+            expiresAt: date2.addingTimeInterval(3600),
+            sessionId: sessionB
+        )
+
+        let revokedSessionIds = try await store.revokeRefreshTokens(
+            for: user,
+            keepingNewestSessions: 1
+        )
+
+        #expect(revokedSessionIds == [sessionA])
+
+        let tokenA = try await store.find(refreshTokenHash: "hashA1")
+        let tokenB = try await store.find(refreshTokenHash: "hashB1")
+
+        #expect(tokenA?.revokedAt != nil)
+        #expect(tokenB?.revokedAt == nil)
+    }
+
+    @Test
+    func `revokeRefreshTokens(for:keepingNewestSessions:) orders sessions by newest row`() async throws {
+        let inMemoryStore = Passage.OnlyForTest.InMemoryStore()
+        let store = inMemoryStore.tokens
+        let user = makeUser()
+
+        let sessionA = UUID()
+        let sessionB = UUID()
+
+        let date1 = Date.now
+        try await store.createRefreshToken(
+            for: user,
+            tokenHash: "hashA1",
+            expiresAt: date1.addingTimeInterval(3600),
+            sessionId: sessionA
+        )
+
+        let date2 = date1.addingTimeInterval(1)
+        try await store.createRefreshToken(
+            for: user,
+            tokenHash: "hashB1",
+            expiresAt: date2.addingTimeInterval(3600),
+            sessionId: sessionB
+        )
+
+        let date3 = date2.addingTimeInterval(1)
+        try await store.createRefreshToken(
+            for: user,
+            tokenHash: "hashA2",
+            expiresAt: date3.addingTimeInterval(3600),
+            sessionId: sessionA
+        )
+
+        let revokedSessionIds = try await store.revokeRefreshTokens(
+            for: user,
+            keepingNewestSessions: 1
+        )
+
+        #expect(revokedSessionIds == [sessionB])
+
+        let tokenA2 = try await store.find(refreshTokenHash: "hashA2")
+        let tokenB1 = try await store.find(refreshTokenHash: "hashB1")
+
+        #expect(tokenA2?.revokedAt == nil)
+        #expect(tokenB1?.revokedAt != nil)
+    }
+
+    @Test
+    func `revokeRefreshTokens(for:keepingNewestSessions: 0) revokes all`() async throws {
+        let inMemoryStore = Passage.OnlyForTest.InMemoryStore()
+        let store = inMemoryStore.tokens
+        let user = makeUser()
+
+        let sessionA = UUID()
+        try await store.createRefreshToken(
+            for: user,
+            tokenHash: "hashA1",
+            expiresAt: Date.now.addingTimeInterval(3600),
+            sessionId: sessionA
+        )
+
+        let revokedSessionIds = try await store.revokeRefreshTokens(
+            for: user,
+            keepingNewestSessions: 0
+        )
+
+        #expect(revokedSessionIds == [sessionA])
+
+        let token = try await store.find(refreshTokenHash: "hashA1")
+        #expect(token?.revokedAt != nil)
+    }
+
+    @Test
+    func `revokeRefreshTokens(for:keepingNewestSessions:) ignores already-revoked rows`() async throws {
+        let inMemoryStore = Passage.OnlyForTest.InMemoryStore()
+        let store = inMemoryStore.tokens
+        let user = makeUser()
+
+        let sessionA = UUID()
+        let sessionB = UUID()
+
+        try await store.createRefreshToken(
+            for: user,
+            tokenHash: "hashA1",
+            expiresAt: Date.now.addingTimeInterval(3600),
+            sessionId: sessionA
+        )
+
+        try await store.createRefreshToken(
+            for: user,
+            tokenHash: "hashB1",
+            expiresAt: Date.now.addingTimeInterval(3600),
+            sessionId: sessionB
+        )
+
+        try await store.revokeRefreshToken(withHash: "hashA1")
+
+        let revokedSessionIds = try await store.revokeRefreshTokens(
+            for: user,
+            keepingNewestSessions: 1
+        )
+
+        #expect(!revokedSessionIds.contains(sessionA))
+    }
+
+    @Test
+    func `revokeRefreshTokens(for:keepingNewestSessions:) returns distinct session ids`() async throws {
+        let inMemoryStore = Passage.OnlyForTest.InMemoryStore()
+        let store = inMemoryStore.tokens
+        let user = makeUser()
+
+        let sessionA = UUID()
+
+        let date1 = Date.now
+        try await store.createRefreshToken(
+            for: user,
+            tokenHash: "hashA1",
+            expiresAt: date1.addingTimeInterval(3600),
+            sessionId: sessionA
+        )
+
+        let date2 = date1.addingTimeInterval(1)
+        try await store.createRefreshToken(
+            for: user,
+            tokenHash: "hashA2",
+            expiresAt: date2.addingTimeInterval(3600),
+            sessionId: sessionA
+        )
+
+        let sessionB = UUID()
+        let date3 = date2.addingTimeInterval(1)
+        try await store.createRefreshToken(
+            for: user,
+            tokenHash: "hashB1",
+            expiresAt: date3.addingTimeInterval(3600),
+            sessionId: sessionB
+        )
+
+        let revokedSessionIds = try await store.revokeRefreshTokens(
+            for: user,
+            keepingNewestSessions: 1
+        )
+
+        #expect(revokedSessionIds.count == 1)
+        #expect(revokedSessionIds.contains(sessionA))
+    }
+
 }

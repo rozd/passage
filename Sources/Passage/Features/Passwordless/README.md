@@ -17,8 +17,13 @@ The Passwordless feature implements magic link authentication - users receive a 
 ```swift
 Passage.Configuration(
     // ... other config ...
+    tokens: .init(
+        refreshToken: .init(
+            timeToLive: 7 * 24 * 3600,
+            concurrency: .unlimited                     // Session concurrency policy
+        )
+    ),
     passwordless: .init(
-        revokeExistingTokens: true,                    // Revoke old tokens on new login
         emailMagicLink: .email(
             routes: .email,                            // Default route paths
             useQueues: true,                           // Send emails async via Vapor Queues
@@ -35,13 +40,14 @@ Passage.Configuration(
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `revokeExistingTokens` | `Bool` | `true` | Revoke existing refresh tokens when issuing new ones |
 | `emailMagicLink` | `MagicLink?` | `.email()` | Email magic link config (nil to disable) |
 | `emailMagicLink.useQueues` | `Bool` | `true` | Send emails via Vapor Queues (async) |
 | `emailMagicLink.linkExpiration` | `TimeInterval` | `900` (15 min) | Magic link validity duration |
 | `emailMagicLink.maxAttempts` | `Int` | `5` | Max failed verification attempts before invalidation |
 | `emailMagicLink.autoCreateUser` | `Bool` | `true` | Create new user if email not found |
 | `emailMagicLink.requireSameBrowser` | `Bool` | `false` | Require verification from same browser session |
+
+**Session concurrency:** Magic-link logins respect the `tokens.refreshToken.concurrency` policy configured in tokens (see [Tokens](../Tokens/README.md#concurrency-policy)).
 
 ## Magic Link Flow
 

@@ -128,11 +128,12 @@ struct `AAL1 architectural attestations` {
         // authentication that produced it. Passage does not re-level a
         // session after the fact — there is no public API that escalates a
         // live session's AAL. The only way to raise the AAL is to
-        // authenticate again, and `issue(for:)` revokes the prior family on
-        // each auth event (see `Passage+Tokens.swift::issue` with
-        // `revokeExisting = true`). This test pins the invariant: a new
-        // auth event replaces the prior session rather than augmenting it,
-        // so §7.1-e can never be violated by in-place upgrades.
+        // authenticate again. Each new authentication event creates its own
+        // session with a distinct session id, and concurrency policies
+        // (unlimited, single, or limit) are independent of AAL: even under
+        // unlimited concurrency, no session escalates. This test pins the
+        // invariant: a new auth event creates its own session rather than
+        // escalating an existing one, so §7.1-e can never be violated.
         let random = DefaultRandomGenerator()
         let store = Passage.OnlyForTest.InMemoryStore()
         let user = try await store.users.create(
@@ -140,33 +141,41 @@ struct `AAL1 architectural attestations` {
             with: .password("$2b$12$hash")
         )
 
+        let firstSessionId = UUID()
         let firstSecret = random.generateOpaqueToken()
         _ = try await store.tokens.createRefreshToken(
             for: user,
             tokenHash: random.hashOpaqueToken(token: firstSecret),
             expiresAt: Date().addingTimeInterval(3600),
-            sessionId: UUID()
+            sessionId: firstSessionId
         )
 
-        // Second auth event — models the real `issue(for: user,
-        // revokeExisting: true)` path in Passage.Tokens.issue.
-        try await store.tokens.revokeRefreshTokens(for: user)
+        // Second auth event — creates a new session with a distinct id.
+        let secondSessionId = UUID()
         let secondSecret = random.generateOpaqueToken()
         _ = try await store.tokens.createRefreshToken(
             for: user,
             tokenHash: random.hashOpaqueToken(token: secondSecret),
             expiresAt: Date().addingTimeInterval(3600),
-            sessionId: UUID()
+            sessionId: secondSessionId
         )
 
-        // The first session's secret no longer opens a valid session —
-        // escalation would require it to survive alongside the new one,
-        // which §7.1-e forbids.
-        let stale = try await store.tokens.find(
+        // Both sessions exist (independent of concurrency policy). Each
+        // carries its own session id and represents a distinct auth event.
+        // Neither escalates; they coexist until concurrency policy
+        // enforcement revokes older ones (if configured).
+        let first = try await store.tokens.find(
             refreshTokenHash: random.hashOpaqueToken(token: firstSecret)
         )
-        #expect(stale == nil || stale?.isValid == false,
-                "§7.1-e: a prior session cannot survive (let alone be escalated) past a new auth event")
+        let second = try await store.tokens.find(
+            refreshTokenHash: random.hashOpaqueToken(token: secondSecret)
+        )
+        #expect(first != nil && first?.isValid == true,
+                "§7.1-e: first session is valid after a second auth event")
+        #expect(second != nil && second?.isValid == true,
+                "§7.1-e: second session is valid")
+        #expect(firstSessionId != secondSessionId,
+                "§7.1-e: each auth event creates a distinct session")
     }
 
     @Test(.tags(.aal1, .sessionManagement, .unit, .shallNot))

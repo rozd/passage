@@ -58,8 +58,23 @@ public extension Passage.Configuration.Tokens {
 
     struct RefreshToken: Sendable {
         let timeToLive: TimeInterval
-        public init(timeToLive: TimeInterval) {
+        let concurrency: Concurrency
+
+        public init(
+            timeToLive: TimeInterval,
+            concurrency: Concurrency = .unlimited
+        ) {
+            if case .limit(let n) = concurrency {
+                precondition(n >= 1, "limit(n) must have n >= 1")
+            }
             self.timeToLive = timeToLive
+            self.concurrency = concurrency
+        }
+
+        public enum Concurrency: Sendable, Equatable {
+            case unlimited
+            case single
+            case limit(Int)
         }
     }
 

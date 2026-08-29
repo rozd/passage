@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Versions are git tags; the release workflow reads the latest tag.
 
+## [Unreleased]
+
+### Added
+
+- `Passage.Configuration.Tokens.RefreshToken.Concurrency` enum to control how many concurrent refresh-token sessions a user may hold: `.unlimited` (any number, default), `.single` (one per user), `.limit(n)` (up to `n` most recently active).
+- `Passage.TokenStore.revokeRefreshTokens(for:keepingNewestSessions:) -> [UUID]` — enforces concurrency policy by revoking all but the `n` most recently active sessions; a session's recency is decided by the creation time of its newest live token.
+
+### Changed
+
+- Token issuance now enforces the configured concurrency policy automatically. The `revokeExisting` parameter is removed from `issue(for:sessionId:origin:)`.
+- Default token behavior is now `.unlimited` concurrent sessions (users may hold any number of sessions), changing from the previous "revoke all on each login" behavior. Configure `.single` or `.limit(n)` to restore multi-device limitations.
+- `refresh` never triggers session eviction, even under `.single` or `.limit(n)`. Only new authentications (login, OAuth exchange) can trigger revocation.
+
+### Breaking
+
+- `issue(for:sessionId:revokeExisting:origin:)` becomes `issue(for:sessionId:origin:)`. Concurrency is controlled via `tokens.refreshToken.concurrency` configuration instead.
+- `PassageContext.login(_:origin:via:sessionId:revokeExisting:)` becomes `login(_:origin:via:sessionId:)`.
+- `Passage.Configuration.Passwordless.revokeExistingTokens` removed; session concurrency is now configured on `tokens.refreshToken.concurrency`.
+- Required implementor changes:
+  - **passage-fluent** — `TokenStore.revokeRefreshTokens(for:keepingNewestSessions:)` must be implemented by ordering refresh-token rows within each session by `created_at` (most recent first) and revoking all but the first `count` sessions.
+  - **custom stores** — implement the new method by persisting a creation timestamp on each refresh-token row and ordering sessions by their newest row's creation time.
+  - **passage-imperial**, **passage-mailgun** — unaffected.
+
 ## [0.6.0] - 2026-08-28
 
 ### Added

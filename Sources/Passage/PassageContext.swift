@@ -24,7 +24,6 @@ extension PassageContext {
         origin: CredentialIssuance.Origin,
         via transport: Passage.Transport,
         sessionId: UUID = UUID(),
-        revokeExisting: Bool = true
     ) async throws -> AuthUser? {
         switch transport {
         case .browser:
@@ -58,7 +57,7 @@ extension PassageContext {
 
         case .bearer:
             request.auth.login(user)
-            return try await request.tokens.issue(for: user, sessionId: sessionId, revokeExisting: revokeExisting, origin: origin)
+            return try await request.tokens.issue(for: user, sessionId: sessionId, origin: origin)
         }
     }
 

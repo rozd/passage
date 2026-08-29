@@ -43,6 +43,7 @@ extension Passage.OnlyForTest {
         var revokedAt: Date?
         var replacedBy: String?
         var sessionId: UUID
+        var createdAt: Date
     }
 
     struct InMemoryEmailVerificationCode: EmailVerificationCode, @unchecked Sendable {
@@ -405,7 +406,8 @@ public extension Passage.OnlyForTest.InMemoryStore {
                 expiresAt: expiresAt,
                 revokedAt: nil,
                 replacedBy: nil,
-                sessionId: sessionId
+                sessionId: sessionId,
+                createdAt: Date()
             )
 
             tokens[hash] = token
@@ -452,6 +454,46 @@ public extension Passage.OnlyForTest.InMemoryStore {
                 let sessionId = token.sessionId
                 if !revoked.contains(sessionId) {
                     revoked.append(sessionId)
+                }
+            }
+            return revoked
+        }
+
+        @discardableResult
+        public func revokeRefreshTokens(
+            for user: any User,
+            keepingNewestSessions count: Int
+        ) async throws -> [UUID] {
+            guard let userId = user.id?.description else { return [] }
+
+            if count == 0 {
+                return try await revokeRefreshTokens(for: user)
+            }
+
+            let userTokens = tokens.filter { $0.value.userId == userId }
+            var sessionNewestDate: [UUID: Date] = [:]
+
+            for (_, token) in userTokens where token.revokedAt == nil {
+                let newestDate = sessionNewestDate[token.sessionId] ?? Date.distantPast
+                if token.createdAt > newestDate {
+                    sessionNewestDate[token.sessionId] = token.createdAt
+                }
+            }
+
+            let sortedSessions = sessionNewestDate
+                .sorted { $0.value > $1.value }
+                .prefix(count)
+                .map { $0.key }
+
+            var revoked: [UUID] = []
+            for (hash, var token) in tokens where token.userId == userId && token.revokedAt == nil {
+                if !sortedSessions.contains(token.sessionId) {
+                    token.revokedAt = Date()
+                    tokens[hash] = token
+                    let sessionId = token.sessionId
+                    if !revoked.contains(sessionId) {
+                        revoked.append(sessionId)
+                    }
                 }
             }
             return revoked
