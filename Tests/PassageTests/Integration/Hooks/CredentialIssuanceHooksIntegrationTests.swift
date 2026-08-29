@@ -641,4 +641,240 @@ struct `Credential Issuance Hooks Integration Tests` {
             #expect(issuance.origin == .exchange)
         }
     }
+
+    @Test
+    func `magic link verify issues credential with magicLink origin`() async throws {
+        let spy = CredentialIssuanceSpy()
+        let captured = CapturedEmails()
+
+        try await withApp(configure: { app in
+            try await self.configure(app, hooks: .init(account: spy.makeAccountHook()), capturedEmails: captured)
+        }) { app in
+            let token = try await requestMagicLinkToken(app: app, captured: captured, email: "magic-origin@test.com")
+
+            var accessToken = ""
+            var refreshToken = ""
+            try await app.testing().test(.GET, "auth/magic-link/email/verify?token=\(token)", afterResponse: { res async throws in
+                #expect(res.status == .ok)
+                let authUser = try res.content.decode(AuthUser.self)
+                accessToken = authUser.accessToken
+                refreshToken = authUser.refreshToken
+            })
+
+            try await assertBearerIssuance(app: app, spy: spy, origin: .magicLink, accessToken: accessToken, refreshToken: refreshToken)
+        }
+    }
+
+    @Test
+    func `federated login with sessions enabled issues credential with federatedLogin origin`() async throws {
+        let spy = CredentialIssuanceSpy()
+
+        try await withApp(configure: { app in
+            app.middleware.use(app.sessions.middleware)
+
+            await app.jwt.keys.add(
+                hmac: HMACKey(from: "test-secret-key-for-jwt-signing"),
+                digestAlgorithm: .sha256,
+                kid: JWKIdentifier(string: "test-key")
+            )
+
+            let store = Passage.OnlyForTest.InMemoryStore()
+            let emailDelivery = Passage.OnlyForTest.MockEmailDelivery()
+            let phoneDelivery = Passage.OnlyForTest.MockPhoneDelivery()
+
+            let services = Passage.Services(
+                store: store,
+                random: DefaultRandomGenerator(),
+                emailDelivery: emailDelivery,
+                phoneDelivery: phoneDelivery,
+                federatedLogin: nil
+            )
+
+            let emptyJwks = """
+            {"keys":[]}
+            """
+
+            let loginView = Passage.Configuration.Views.LoginView(
+                style: .minimalism,
+                theme: Passage.Views.Theme(colors: .defaultLight),
+                identifier: .email
+            )
+            let viewsConfig = Passage.Configuration.Views(login: loginView)
+
+            let configuration = try Passage.Configuration(
+                origin: URL(string: "http://localhost:8080")!,
+                routes: .init(),
+                tokens: .init(
+                    issuer: "test-issuer",
+                    accessToken: .init(timeToLive: 3600),
+                    refreshToken: .init(timeToLive: 86400)
+                ),
+                sessions: .init(enabled: true),
+                jwt: .init(jwks: .init(json: emptyJwks)),
+                verification: .init(
+                    email: .init(codeLength: 6, codeExpiration: 600, maxAttempts: 5),
+                    phone: .init(codeLength: 6, codeExpiration: 600, maxAttempts: 5),
+                    useQueues: false
+                ),
+                restoration: .init(
+                    email: .init(codeLength: 6, codeExpiration: 600, maxAttempts: 5),
+                    phone: .init(codeLength: 6, codeExpiration: 600, maxAttempts: 5),
+                    useQueues: false
+                ),
+                federatedLogin: .init(
+                    providers: [],
+                    accountLinking: .init(resolution: .disabled),
+                    redirectLocation: "/dashboard"
+                ),
+                views: viewsConfig
+            )
+
+            let hooks = Passage.Hooks(
+                account: spy.makeAccountHook()
+            )
+
+            try await app.passage.configure(
+                services: services,
+                configuration: configuration,
+                hooks: hooks
+            )
+
+            // Register a test route to call federated login through the middleware chain
+            app.post("test", "federated-login") { req async throws -> String in
+                let identity = FederatedIdentity(
+                    identifier: .federated(.google, userId: "fed-user-hook-test"),
+                    provider: .google,
+                    verifiedEmails: [],
+                    verifiedPhoneNumbers: [],
+                    displayName: nil,
+                    profilePictureURL: nil
+                )
+
+                _ = try await req.federated.login(identity: identity)
+                return "ok"
+            }
+        }) { app in
+            try await app.testing().test(.POST, "test/federated-login", afterResponse: { res async in
+                #expect(res.status == .ok)
+            })
+
+            #expect(spy.willIssuances.count == 1)
+            #expect(spy.didIssuances.count == 1)
+            let issuance = try #require(spy.willIssuances.first)
+            #expect(issuance.kind == .browser)
+            #expect(issuance.origin == .federatedLogin)
+        }
+    }
+
+    @Test
+    func `passkey authentication finish with sessions enabled issues credential with passkey origin`() async throws {
+        let spy = CredentialIssuanceSpy()
+        let sharedChallengeBytes = MockPasskeyService.sharedChallengeBytes
+        let sharedCredentialID = "credential-id-mock"
+
+        try await withApp(configure: { app in
+            app.middleware.use(app.sessions.middleware)
+
+            await app.jwt.keys.add(
+                hmac: HMACKey(from: "test-secret-key-for-jwt-signing"),
+                digestAlgorithm: .sha256,
+                kid: JWKIdentifier(string: "test-key")
+            )
+
+            let store = Passage.OnlyForTest.InMemoryStore()
+            let service = MockPasskeyService()
+
+            let services = Passage.Services(
+                store: store,
+                random: DefaultRandomGenerator(),
+                emailDelivery: Passage.OnlyForTest.MockEmailDelivery(),
+                phoneDelivery: Passage.OnlyForTest.MockPhoneDelivery(),
+                federatedLogin: nil,
+                passkey: service
+            )
+
+            let emptyJwks = """
+            {"keys":[]}
+            """
+
+            let configuration = try Passage.Configuration(
+                origin: URL(string: "http://localhost:8080")!,
+                tokens: .init(
+                    issuer: "test-issuer",
+                    accessToken: .init(timeToLive: 3600),
+                    refreshToken: .init(timeToLive: 86400)
+                ),
+                sessions: .init(enabled: true),
+                jwt: .init(jwks: .init(json: emptyJwks)),
+                verification: .init(
+                    email: .init(codeLength: 6, codeExpiration: 600, maxAttempts: 5),
+                    phone: .init(codeLength: 6, codeExpiration: 600, maxAttempts: 5),
+                    useQueues: false
+                ),
+                restoration: .init(
+                    email: .init(codeLength: 6, codeExpiration: 600, maxAttempts: 5),
+                    phone: .init(codeLength: 6, codeExpiration: 600, maxAttempts: 5),
+                    useQueues: false
+                ),
+                passkey: .init()
+            )
+
+            let hooks = Passage.Hooks(
+                account: spy.makeAccountHook()
+            )
+
+            try await app.passage.configure(services: services, configuration: configuration, hooks: hooks)
+
+            // Seed the user + credential + challenge
+            let user = try await store.users.create(
+                identifier: .email("passkey-hook@example.com"),
+                with: nil
+            )
+
+            if let credentials = store.passkeyCredentials {
+                _ = try await credentials.createPasskeyCredential(
+                    for: user,
+                    from: PasskeyCredential(
+                        credentialID: sharedCredentialID,
+                        publicKey: Data([0x04, 0xDE, 0xAD]),
+                        signCount: 0,
+                        uvInitialized: false,
+                        transports: [.internal],
+                        backupEligible: false,
+                        isBackedUp: false,
+                        aaguid: nil,
+                        attestationFormat: nil
+                    )
+                )
+            }
+
+            if let challenges = store.passkeyChallenges {
+                _ = try await challenges.createPasskeyChallenge(
+                    from: PasskeyChallenge(
+                        bytes: sharedChallengeBytes,
+                        kind: .authentication,
+                        expiresAt: Date().addingTimeInterval(300)
+                    )
+                )
+            }
+        }) { app in
+            let minimalFinishBody = #"{"id":"credential-id-mock","rawId":"credential-id-mock","type":"public-key","response":{"clientDataJSON":"","authenticatorData":"","signature":""}}"#
+
+            try await app.testing().test(
+                .POST, "/auth/passkey/authentication/finish",
+                headers: ["Content-Type": "application/json"],
+                body: .init(string: minimalFinishBody)
+            ) { res in
+                #expect(res.status == .ok)
+            }
+
+            #expect(spy.willIssuances.count == 1)
+            #expect(spy.didIssuances.count == 1)
+            let issuance = try #require(spy.willIssuances.first)
+            #expect(issuance.kind == .browser)
+            #expect(issuance.origin == .passkey)
+        }
+    }
+
+
 }

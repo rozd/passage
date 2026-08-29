@@ -210,6 +210,104 @@ struct `Session ID Integration Tests` {
             {"keys":[]}
             """
 
+            let loginView = Passage.Configuration.Views.LoginView(
+                style: .minimalism,
+                theme: Passage.Views.Theme(colors: .defaultLight),
+                identifier: .email
+            )
+            let viewsConfig = Passage.Configuration.Views(login: loginView)
+
+            let configuration = try Passage.Configuration(
+                origin: URL(string: "http://localhost:8080")!,
+                routes: .init(),
+                tokens: .init(
+                    issuer: "test-issuer",
+                    accessToken: .init(timeToLive: 3600),
+                    refreshToken: .init(timeToLive: 86400)
+                ),
+                sessions: .init(enabled: true),
+                jwt: .init(jwks: .init(json: emptyJwks)),
+                verification: .init(
+                    email: .init(codeLength: 6, codeExpiration: 600, maxAttempts: 5),
+                    phone: .init(codeLength: 6, codeExpiration: 600, maxAttempts: 5),
+                    useQueues: false
+                ),
+                restoration: .init(
+                    email: .init(codeLength: 6, codeExpiration: 600, maxAttempts: 5),
+                    phone: .init(codeLength: 6, codeExpiration: 600, maxAttempts: 5),
+                    useQueues: false
+                ),
+                views: viewsConfig
+            )
+
+            try await app.passage.configure(services: services, configuration: configuration)
+
+            app.get("get-session-id") { req -> String in
+                if let sessionId = req.passage.sessionId {
+                    return sessionId.uuidString
+                }
+                return "no-session-id"
+            }
+        }
+
+        try await withApp(configure: configureWithSessions!) { app in
+            try await createTestUser(app: app, email: "sid4@test.com")
+
+            var sessionCookie: String?
+
+            try await app.testing().test(.POST, "auth/login", beforeRequest: { req in
+                req.headers.replaceOrAdd(name: .accept, value: "text/html")
+                try req.content.encode(["email": "sid4@test.com", "password": "password123"], as: .urlEncodedForm)
+            }, afterResponse: { res async throws in
+                #expect(res.status == .seeOther || res.status == .found)
+
+                if let cookieHeader = res.headers[.setCookie].first(where: { $0.contains("vapor-session") }) {
+                    let parts = cookieHeader.split(separator: ";")
+                    if let cookiePart = parts.first {
+                        sessionCookie = String(cookiePart)
+                    }
+                }
+            })
+
+            #expect(sessionCookie != nil)
+
+            try await app.testing().test(.GET, "get-session-id", beforeRequest: { req in
+                if let cookie = sessionCookie {
+                    req.headers.add(name: .cookie, value: cookie)
+                }
+            }, afterResponse: { res async throws in
+                #expect(res.status == .ok)
+                let body = String(buffer: res.body)
+                #expect(UUID(uuidString: body) != nil)
+            })
+        }
+    }
+
+    @Test
+    func `GET get-session-id with no bearer token and no session cookie returns no-session-id`() async throws {
+        var configureWithSessions: (@Sendable (Application) async throws -> Void)?
+        configureWithSessions = { app in
+            await app.jwt.keys.add(
+                hmac: HMACKey(from: "test-secret-key-for-jwt-signing"),
+                digestAlgorithm: .sha256,
+                kid: JWKIdentifier(string: "test-key")
+            )
+
+            app.middleware.use(app.sessions.middleware)
+
+            let store = Passage.OnlyForTest.InMemoryStore()
+            let services = Passage.Services(
+                store: store,
+                random: DefaultRandomGenerator(),
+                emailDelivery: nil,
+                phoneDelivery: nil,
+                federatedLogin: nil
+            )
+
+            let emptyJwks = """
+            {"keys":[]}
+            """
+
             let configuration = try Passage.Configuration(
                 origin: URL(string: "http://localhost:8080")!,
                 routes: .init(),
@@ -243,12 +341,10 @@ struct `Session ID Integration Tests` {
         }
 
         try await withApp(configure: configureWithSessions!) { app in
-            try await createTestUser(app: app, email: "sid4@test.com")
-
-            try await app.testing().test(.POST, "auth/login", beforeRequest: { req in
-                try req.content.encode(["email": "sid4@test.com", "password": "password123"])
-            }, afterResponse: { res async in
+            try await app.testing().test(.GET, "get-session-id", afterResponse: { res async throws in
                 #expect(res.status == .ok)
+                let body = String(buffer: res.body)
+                #expect(body == "no-session-id")
             })
         }
     }

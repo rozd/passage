@@ -35,7 +35,8 @@ struct `Manual Linking Route Collection Integration Tests` {
     @Sendable private func configureWithManualLinking(
         _ app: Application,
         allowedIdentifiers: [Identifier.Kind] = [.email],
-        withViews: Bool = true
+        withViews: Bool = true,
+        hooks: Passage.Hooks = .init()
     ) async throws {
         // Enable sessions middleware (required for linking state)
         app.middleware.use(app.sessions.middleware)
@@ -102,7 +103,8 @@ struct `Manual Linking Route Collection Integration Tests` {
 
         try await app.passage.configure(
             services: services,
-            configuration: configuration
+            configuration: configuration,
+            hooks: hooks
         )
 
         // Register test routes that simulate OAuth callback initiating linking
@@ -515,6 +517,90 @@ struct `Manual Linking Route Collection Integration Tests` {
             )
             #expect(federatedUser != nil)
             #expect(federatedUser?.id?.description == userId)
+        }
+    }
+
+    @Test
+    func `Link verify form submission issues credential with accountLinking origin`() async throws {
+        // The verify route only calls `passage.login(origin: .accountLinking, via: .browser)`
+        // on an HTML form submission with the verify view configured; an API client gets an
+        // exchange code instead and the hook fires later with origin `.exchange`.
+        typealias Spy = `Credential Issuance Hooks Integration Tests`.CredentialIssuanceSpy
+        let spy = Spy()
+
+        try await withApp(configure: { app in
+            try await configureWithManualLinking(app, withViews: true, hooks: .init(account: spy.makeAccountHook()))
+        }) { app in
+            let user = try await createTestUser(
+                app: app,
+                email: "origin-flow@example.com",
+                password: "secure-password",
+                isEmailVerified: true
+            )
+            let userId = user.id!.description
+
+            var sessionCookie: String?
+
+            try await app.testing().test(
+                .POST, "test/initiate-linking",
+                beforeRequest: { req in
+                    try req.content.encode(InitiateRequest(
+                        provider: "github",
+                        userId: "github-user-origin",
+                        verifiedEmails: ["origin-flow@example.com"],
+                        verifiedPhones: []
+                    ))
+                },
+                afterResponse: { res in
+                    #expect(res.status == .ok)
+                    sessionCookie = extractSessionCookie(from: res)
+                }
+            )
+
+            #expect(sessionCookie != nil)
+            #expect(spy.willIssuances.isEmpty)
+
+            try await app.testing().test(
+                .POST, "auth/connect/link/select",
+                beforeRequest: { req in
+                    if let cookie = sessionCookie {
+                        req.headers.add(name: .cookie, value: cookie)
+                    }
+                    req.headers.contentType = .urlEncodedForm
+                    try req.content.encode(["selectedUserId": userId], as: .urlEncodedForm)
+                },
+                afterResponse: { res in
+                    #expect(res.status == .ok)
+                    if let newCookie = extractSessionCookie(from: res) {
+                        sessionCookie = newCookie
+                    }
+                }
+            )
+
+            #expect(spy.willIssuances.isEmpty)
+
+            try await app.testing().test(
+                .POST, "auth/connect/link/verify",
+                beforeRequest: { req in
+                    if let cookie = sessionCookie {
+                        req.headers.add(name: .cookie, value: cookie)
+                    }
+                    req.headers.replaceOrAdd(name: .accept, value: "text/html")
+                    req.headers.contentType = .urlEncodedForm
+                    try req.content.encode(["password": "secure-password"], as: .urlEncodedForm)
+                },
+                afterResponse: { res in
+                    #expect(res.status == .seeOther || res.status == .found || res.status == .ok)
+                }
+            )
+
+            #expect(spy.willIssuances.count == 1)
+            #expect(spy.didIssuances.count == 1)
+            let issuance = try #require(spy.willIssuances.first)
+            #expect(issuance.kind == .browser)
+            #expect(issuance.origin == .accountLinking)
+            #expect(issuance.user.id?.description == userId)
+            #expect(issuance.accessToken == nil)
         }
     }
 
