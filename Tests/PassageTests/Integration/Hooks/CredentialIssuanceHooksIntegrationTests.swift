@@ -36,6 +36,33 @@ struct `Credential Issuance Hooks Integration Tests` {
         }
     }
 
+    final class TransactionSpyStore: Passage.Store {
+        let inner: any Passage.Store
+        let isTransactionBound: Bool
+
+        init(inner: any Passage.Store, isTransactionBound: Bool = false) {
+            self.inner = inner
+            self.isTransactionBound = isTransactionBound
+        }
+
+        var users: any Passage.UserStore { inner.users }
+        var tokens: any Passage.TokenStore { inner.tokens }
+        var verificationCodes: any Passage.VerificationCodeStore { inner.verificationCodes }
+        var restorationCodes: any Passage.RestorationCodeStore { inner.restorationCodes }
+        var magicLinkTokens: any Passage.MagicLinkTokenStore { inner.magicLinkTokens }
+        var exchangeTokens: any Passage.ExchangeTokenStore { inner.exchangeTokens }
+        var passkeyCredentials: (any Passage.PasskeyCredentialStore)? { inner.passkeyCredentials }
+        var passkeyChallenges: (any Passage.PasskeyChallengeStore)? { inner.passkeyChallenges }
+
+        func transaction<T: Sendable>(
+            _ body: @Sendable (any Passage.Store) async throws -> T
+        ) async throws -> T {
+            try await inner.transaction { bound in
+                try await body(TransactionSpyStore(inner: bound, isTransactionBound: true))
+            }
+        }
+    }
+
     final class CapturedEmails: @unchecked Sendable {
         var emails: [Passage.OnlyForTest.MockEmailDelivery.EphemeralEmail] = []
     }
@@ -44,7 +71,8 @@ struct `Credential Issuance Hooks Integration Tests` {
         _ app: Application,
         hooks: Passage.Hooks = .init(),
         sessionsEnabled: Bool = false,
-        capturedEmails: CapturedEmails? = nil
+        capturedEmails: CapturedEmails? = nil,
+        store: (any Passage.Store)? = nil
     ) async throws {
         await app.jwt.keys.add(
             hmac: HMACKey(from: "test-secret-key-for-jwt-signing"),
@@ -56,7 +84,7 @@ struct `Credential Issuance Hooks Integration Tests` {
             app.middleware.use(app.sessions.middleware)
         }
 
-        let store = Passage.OnlyForTest.InMemoryStore()
+        let store = store ?? Passage.OnlyForTest.InMemoryStore()
         let emailDelivery: (any Passage.EmailDelivery)? = capturedEmails.map { captured in
             Passage.OnlyForTest.MockEmailDelivery(callback: { @Sendable in captured.emails.append($0) })
         }
@@ -361,6 +389,54 @@ struct `Credential Issuance Hooks Integration Tests` {
             #expect(issuance.origin == .login)
             #expect(issuance.accessToken == nil)
             #expect(issuance.refreshTokenExpiresAt == nil)
+        }
+    }
+
+    @Test
+    func `form login hands willIssueCredential a transaction-bound store`() async throws {
+        let spy = CredentialIssuanceSpy()
+        let store = TransactionSpyStore(inner: Passage.OnlyForTest.InMemoryStore())
+
+        try await withApp(configure: { app in
+            try await self.configure(app, hooks: .init(account: spy.makeAccountHook()), sessionsEnabled: true, store: store)
+        }) { app in
+            try await createTestUser(app: app, email: "browser4@test.com")
+
+            try await app.testing().test(.POST, "auth/login", beforeRequest: { req in
+                req.headers.replaceOrAdd(name: .accept, value: "text/html")
+                try req.content.encode(["email": "browser4@test.com", "password": "password123"], as: .urlEncodedForm)
+            }, afterResponse: { res async in
+                #expect(res.status == .seeOther || res.status == .found)
+            })
+
+            let issuance = try #require(spy.willIssuances.first)
+            #expect(issuance.kind == .browser)
+            let issuanceStore = try #require(issuance.store as? TransactionSpyStore)
+            #expect(issuanceStore.isTransactionBound)
+            #expect(!store.isTransactionBound)
+        }
+    }
+
+    @Test
+    func `JSON login hands willIssueCredential a transaction-bound store`() async throws {
+        let spy = CredentialIssuanceSpy()
+        let store = TransactionSpyStore(inner: Passage.OnlyForTest.InMemoryStore())
+
+        try await withApp(configure: { app in
+            try await self.configure(app, hooks: .init(account: spy.makeAccountHook()), store: store)
+        }) { app in
+            try await createTestUser(app: app, email: "bearer4@test.com")
+
+            try await app.testing().test(.POST, "auth/login", beforeRequest: { req in
+                try req.content.encode(["email": "bearer4@test.com", "password": "password123"])
+            }, afterResponse: { res async in
+                #expect(res.status == .ok)
+            })
+
+            let issuance = try #require(spy.willIssuances.first)
+            #expect(issuance.kind == .bearer)
+            let issuanceStore = try #require(issuance.store as? TransactionSpyStore)
+            #expect(issuanceStore.isTransactionBound)
         }
     }
 
