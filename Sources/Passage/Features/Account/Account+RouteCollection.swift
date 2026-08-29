@@ -74,8 +74,17 @@ extension Passage.Account.RouteCollection {
             let user = try await req.account.login(form: form)
 
             guard req.isFormSubmission, req.isWaitingForHTML, let view = req.configuration.views.login else {
-                return try await user.encodeResponse(for: req)
+                guard let authUser = try await req.passage.login(
+                    user,
+                    origin: .login,
+                    via: .bearer,
+                ) else {
+                    throw Abort(.internalServerError)
+                }
+                return try await authUser.encodeResponse(for: req)
             }
+
+            _ = try await req.passage.login(user, origin: .login, via: .browser)
 
             return req.views.handleLoginFormSuccess(
                 of: view,

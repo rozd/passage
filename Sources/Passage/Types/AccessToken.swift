@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 public import JWT
 
 public struct AccessToken: Sendable {
@@ -10,6 +10,9 @@ public struct AccessToken: Sendable {
     let issuer: IssuerClaim?
     let audience: AudienceClaim?
 
+    // Session claim
+    public let sessionId: UUID
+
     // Authorization claims
     let scope: String?
 
@@ -19,7 +22,8 @@ public struct AccessToken: Sendable {
         expiresAt: Date,
         issuer: String?,
         audience: String?,
-        scope: String?
+        scope: String?,
+        sessionId: UUID
     ) {
         self.subject = SubjectClaim(value: userId)
         self.issuedAt = IssuedAtClaim(value: issuedAt)
@@ -27,6 +31,7 @@ public struct AccessToken: Sendable {
         self.issuer = issuer.map { IssuerClaim(value: $0) }
         self.audience = audience.map { AudienceClaim(value: $0) }
         self.scope = scope
+        self.sessionId = sessionId
     }
 }
 
@@ -39,6 +44,7 @@ extension AccessToken: JWTPayload {
         case issuedAt = "iat"
         case issuer = "iss"
         case audience = "aud"
+        case sessionId = "sid"
         case scope
     }
 

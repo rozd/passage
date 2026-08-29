@@ -33,7 +33,8 @@ struct `Authentication Error Tests` {
     @Test(arguments: [
         (AuthenticationError.invalidRefreshToken, HTTPResponseStatus.unauthorized),
         (AuthenticationError.refreshTokenExpired, HTTPResponseStatus.unauthorized),
-        (AuthenticationError.refreshTokenNotFound, HTTPResponseStatus.notFound)
+        (AuthenticationError.refreshTokenNotFound, HTTPResponseStatus.notFound),
+        (AuthenticationError.sessionRevoked, HTTPResponseStatus.unauthorized)
     ])
     func `Token error status codes`(error: AuthenticationError, expectedStatus: HTTPResponseStatus) {
         #expect(error.status == expectedStatus)
@@ -117,7 +118,8 @@ struct `Authentication Error Tests` {
     @Test(arguments: [
         (AuthenticationError.invalidRefreshToken, "The refresh token is invalid."),
         (AuthenticationError.refreshTokenExpired, "The refresh token has expired."),
-        (AuthenticationError.refreshTokenNotFound, "Refresh token not found.")
+        (AuthenticationError.refreshTokenNotFound, "Refresh token not found."),
+        (AuthenticationError.sessionRevoked, "The session has been revoked.")
     ])
     func `Token error reasons`(error: AuthenticationError, expectedReason: String) {
         #expect(error.reason == expectedReason)
@@ -268,6 +270,7 @@ struct `Authentication Error Tests` {
             .invalidRefreshToken,
             .refreshTokenExpired,
             .refreshTokenNotFound,
+            .sessionRevoked,
             .userNotFound,
             .emailNotSet,
             .emailAlreadyVerified,
@@ -307,6 +310,7 @@ struct `Authentication Error Tests` {
             .invalidRefreshToken,
             .refreshTokenExpired,
             .refreshTokenNotFound,
+            .sessionRevoked,
             .userNotFound,
             .emailNotSet,
             .emailAlreadyVerified,

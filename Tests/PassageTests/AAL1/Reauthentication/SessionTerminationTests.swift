@@ -29,7 +29,8 @@ struct `AAL1 session termination` {
         _ = try await store.tokens.createRefreshToken(
             for: user,
             tokenHash: tokenHash,
-            expiresAt: expiredAt
+            expiresAt: expiredAt,
+            sessionId: UUID()
         )
 
         let stored = try await store.tokens.find(refreshTokenHash: tokenHash)
@@ -70,11 +71,12 @@ struct `AAL1 session termination` {
         _ = try await store.tokens.createRefreshToken(
             for: user,
             tokenHash: hash,
-            expiresAt: Date().addingTimeInterval(3600)
+            expiresAt: Date().addingTimeInterval(3600),
+            sessionId: UUID()
         )
 
         // Terminate it (logout or admin revoke).
-        try await store.tokens.revokeRefreshToken(for: user)
+        try await store.tokens.revokeRefreshTokens(for: user)
 
         // The secret no longer resolves to a *live* session: the record is
         // retained (so `Passage.Tokens.refresh` can detect reuse attempts
@@ -95,7 +97,8 @@ struct `AAL1 session termination` {
         _ = try await store.tokens.createRefreshToken(
             for: user,
             tokenHash: freshHash,
-            expiresAt: Date().addingTimeInterval(3600)
+            expiresAt: Date().addingTimeInterval(3600),
+            sessionId: UUID()
         )
         let freshLookup = try await store.tokens.find(refreshTokenHash: freshHash)
         #expect(freshLookup?.isValid == true,

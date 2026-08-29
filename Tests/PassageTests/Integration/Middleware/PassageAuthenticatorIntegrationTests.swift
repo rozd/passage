@@ -102,7 +102,8 @@ struct `PassageBearerAuthenticator Integration Tests` {
             expiresAt: expiresAt,
             issuer: "test-issuer",
             audience: nil,
-            scope: nil
+            scope: nil,
+            sessionId: UUID()
         )
 
         let req = Request(application: app, on: app.eventLoopGroup.any())

@@ -9,7 +9,7 @@ import Testing
 // by the session subject when the subscriber logs out. Passage's
 // `Passage.Account.logout()` implements this by calling
 // `Passage.Tokens.revoke(for:)`, which in turn calls
-// `store.tokens.revokeRefreshToken(for: user)`. After revocation, the
+// `store.tokens.revokeRefreshTokens(for: user)`. After revocation, the
 // refresh-token record is either gone or no longer valid — a subsequent
 // rotation attempt with the now-stale secret is rejected.
 
@@ -19,7 +19,7 @@ struct `AAL1 session invalidation` {
     @Test(.tags(.aal1, .sessionManagement, .authenticator, .unit, .shall))
     func `§7.1-h: Refresh-token session secret is invalidated on logout`() async throws {
         // Drive the real logout-side storage path: mint a secret, then call
-        // `revokeRefreshToken(for: user)` — the exact call `Passage.Tokens
+        // `revokeRefreshTokens(for: user)` — the exact call `Passage.Tokens
         // .revoke` makes. The invariant: after logout, the formerly-valid
         // secret can no longer be used to resolve a live session.
         let random = DefaultRandomGenerator()
@@ -34,7 +34,8 @@ struct `AAL1 session invalidation` {
         _ = try await store.tokens.createRefreshToken(
             for: user,
             tokenHash: hash,
-            expiresAt: Date().addingTimeInterval(3600)
+            expiresAt: Date().addingTimeInterval(3600),
+            sessionId: UUID()
         )
 
         // Sanity: before logout the session is alive.
@@ -43,7 +44,7 @@ struct `AAL1 session invalidation` {
                      "precondition: session secret must be valid before logout")
 
         // Logout — the same storage call `Passage.Tokens.revoke` issues.
-        try await store.tokens.revokeRefreshToken(for: user)
+        try await store.tokens.revokeRefreshTokens(for: user)
 
         // §7.1-h: the secret must no longer open a valid session. Either
         // the record is removed outright, or it remains but is no longer

@@ -334,7 +334,8 @@ struct `Current User (GET /me) Integration Tests` {
                 expiresAt: Date().addingTimeInterval(-3600), // Expired 1 hour ago
                 issuer: "test-issuer",
                 audience: nil,
-                scope: nil
+                scope: nil,
+                sessionId: UUID()
             )
 
             let req = Request(application: app, on: app.eventLoopGroup.any())

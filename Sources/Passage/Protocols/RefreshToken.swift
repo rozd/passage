@@ -16,6 +16,8 @@ public protocol RefreshToken: Sendable {
     var revokedAt: Date? { get }
 
     var replacedBy: Id? { get }
+
+    var sessionId: UUID { get }
 }
 
 // MARK:

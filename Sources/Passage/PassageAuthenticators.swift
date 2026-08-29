@@ -12,6 +12,11 @@ public struct PassageBearerAuthenticator: JWTAuthenticator {
         jwt: AccessToken,
         for request: Vapor.Request,
     ) async throws {
+        let sessionId = jwt.sessionId
+        if await request.hooks.account?.isSessionRevoked(sessionId, on: request) == true {
+            throw AuthenticationError.sessionRevoked
+        }
+        request.storage[PassageContext.BearerSessionIdKey.self] = sessionId
         let user = try await request.account.user(for: jwt)
         request.auth.login(user)
     }
@@ -39,11 +44,16 @@ public struct PassageSessionAuthenticator: AsyncAuthenticator {
         }
 
         if request.hasSession, let aID = request.session.authenticated(request.store.users.userType) {
-            // try to find user with id from session
-            let user = try await request.account.user(
-                withId: aID.description
-            )
-            request.auth.login(user)
+            if let sessionId = request.session.sessionId,
+               await request.hooks.account?.isSessionRevoked(sessionId, on: request) == true {
+                request.session.unauthenticate(request.store.users.userType)
+                request.session.sessionId = nil
+            } else {
+                let user = try await request.account.user(
+                    withId: aID.description
+                )
+                request.auth.login(user)
+            }
         }
 
         // respond to the request

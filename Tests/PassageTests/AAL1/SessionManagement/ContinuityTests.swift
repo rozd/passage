@@ -33,7 +33,8 @@ struct `AAL1 session continuity` {
         let validToken = try await store.tokens.createRefreshToken(
             for: user,
             tokenHash: random.hashOpaqueToken(token: validSecret),
-            expiresAt: Date().addingTimeInterval(3600)
+            expiresAt: Date().addingTimeInterval(3600),
+            sessionId: UUID()
         )
         #expect(validToken.isValid,
                 "§7.2-a: a valid session secret must permit continuation")
@@ -47,7 +48,7 @@ struct `AAL1 session continuity` {
                 "§7.2-a: continuity must not be granted without the session secret")
 
         // Path C — continuity ends when the secret is revoked (logout).
-        try await store.tokens.revokeRefreshToken(for: user)
+        try await store.tokens.revokeRefreshTokens(for: user)
         let revoked = try await store.tokens.find(
             refreshTokenHash: random.hashOpaqueToken(token: validSecret)
         )
@@ -75,7 +76,8 @@ struct `AAL1 session continuity` {
         _ = try await store.tokens.createRefreshToken(
             for: user,
             tokenHash: hash,
-            expiresAt: Date().addingTimeInterval(-1) // models the TTL expiring
+            expiresAt: Date().addingTimeInterval(-1), // models the TTL expiring
+            sessionId: UUID()
         )
 
         let stored = try await store.tokens.find(refreshTokenHash: hash)
@@ -118,7 +120,8 @@ struct `AAL1 session continuity` {
         _ = try await store.tokens.createRefreshToken(
             for: user,
             tokenHash: hash,
-            expiresAt: originalExpiry
+            expiresAt: originalExpiry,
+            sessionId: UUID()
         )
 
         // Present the secret repeatedly (simulated by successive lookups):

@@ -58,7 +58,8 @@ struct `AAL1 federation reauthentication` {
             expiresAt: eventTime.addingTimeInterval(900),
             issuer: "passage-test",
             audience: "rp-test",
-            scope: nil
+            scope: nil,
+            sessionId: UUID()
         )
 
         // The `iat` claim carries the auth-event time — not the token-mint

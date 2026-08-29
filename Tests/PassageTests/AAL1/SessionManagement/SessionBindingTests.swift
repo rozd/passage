@@ -36,7 +36,8 @@ struct `AAL1 session binding` {
         _ = try await store.tokens.createRefreshToken(
             for: user,
             tokenHash: persistedHash,
-            expiresAt: Date().addingTimeInterval(3600)
+            expiresAt: Date().addingTimeInterval(3600),
+            sessionId: UUID()
         )
 
         // Service-side: look up by the secret the subscriber would present.
@@ -75,7 +76,8 @@ struct `AAL1 session binding` {
         _ = try await store.tokens.createRefreshToken(
             for: user,
             tokenHash: random.hashOpaqueToken(token: subscriberSecret),
-            expiresAt: Date().addingTimeInterval(3600)
+            expiresAt: Date().addingTimeInterval(3600),
+            sessionId: UUID()
         )
 
         // Directly presenting the secret resolves the session.
@@ -125,13 +127,15 @@ struct `AAL1 session binding` {
         _ = try await store.tokens.createRefreshToken(
             for: user,
             tokenHash: random.hashOpaqueToken(token: firstSecret),
-            expiresAt: Date().addingTimeInterval(3600)
+            expiresAt: Date().addingTimeInterval(3600),
+            sessionId: UUID()
         )
         let secondSecret = random.generateOpaqueToken()
         _ = try await store.tokens.createRefreshToken(
             for: user,
             tokenHash: random.hashOpaqueToken(token: secondSecret),
-            expiresAt: Date().addingTimeInterval(3600)
+            expiresAt: Date().addingTimeInterval(3600),
+            sessionId: UUID()
         )
 
         #expect(firstSecret != secondSecret,
@@ -171,7 +175,8 @@ struct `AAL1 session binding` {
         let token = try await store.tokens.createRefreshToken(
             for: user,
             tokenHash: random.hashOpaqueToken(token: hostSecret),
-            expiresAt: Date().addingTimeInterval(3600)
+            expiresAt: Date().addingTimeInterval(3600),
+            sessionId: UUID()
         )
         #expect(token.tokenHash == random.hashOpaqueToken(token: hostSecret),
                 "§7.1-f: the persisted hash must match the host-generated secret")

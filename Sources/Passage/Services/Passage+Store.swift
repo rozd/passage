@@ -13,15 +13,16 @@ public extension Passage {
         var exchangeTokens: any ExchangeTokenStore { get }
         var passkeyCredentials: (any PasskeyCredentialStore)? { get }
         var passkeyChallenges: (any PasskeyChallengeStore)? { get }
+
+        func transaction<T: Sendable>(
+            _ body: @Sendable (any Store) async throws -> T
+        ) async throws -> T
     }
 
 }
 
 // MARK: - Store Default Implementations
 
-/// Default-nil implementations for the opt-in passkey sub-stores. This preserves
-/// source compatibility for existing `Store` conformances (e.g. third-party
-/// stores and `PassageFluent.DatabaseStore`) that predate passkey support.
 public extension Passage.Store {
     var passkeyCredentials: (any Passage.PasskeyCredentialStore)? { nil }
     var passkeyChallenges: (any Passage.PasskeyChallengeStore)? { nil }
@@ -79,6 +80,7 @@ public extension Passage {
             for user: any User,
             tokenHash hash: String,
             expiresAt: Date,
+            sessionId: UUID
         ) async throws -> any RefreshToken
 
         @discardableResult
@@ -86,13 +88,17 @@ public extension Passage {
             for user: any User,
             tokenHash hash: String,
             expiresAt: Date,
+            sessionId: UUID,
             replacing tokenToReplace: (any RefreshToken)?
         ) async throws -> any RefreshToken
 
         func find(refreshTokenHash hash: String) async throws -> (any RefreshToken)?
-        func revokeRefreshToken(for user: any User) async throws
+
+        @discardableResult
+        func revokeRefreshTokens(for user: any User) async throws -> [UUID]
         func revokeRefreshToken(withHash hash: String) async throws
         func revoke(refreshTokenFamilyStartingFrom token: any RefreshToken) async throws
+        func revokeRefreshTokens(sessionId: UUID) async throws
     }
 
 }

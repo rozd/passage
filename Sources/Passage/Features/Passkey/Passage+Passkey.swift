@@ -256,7 +256,9 @@ extension Passage.Passkey {
         )
         try await challenges.consume(passkeyChallenge: result.matchedChallenge)
 
-        request.passage.login(user)
+        if request.configuration.sessions.enabled {
+            _ = try await request.passage.login(user, origin: .passkey, via: .browser)
+        }
         let code = try await request.tokens.createExchangeCode(for: user)
 
         await request.hooks.passkey?.didFinishAuthentication(

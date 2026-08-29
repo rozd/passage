@@ -233,6 +233,9 @@ struct `PasskeyChallengeStore Protocol Tests` {
             var restorationCodes: any Passage.RestorationCodeStore { fatalError() }
             var magicLinkTokens: any Passage.MagicLinkTokenStore { fatalError() }
             var exchangeTokens: any Passage.ExchangeTokenStore { fatalError() }
+            func transaction<T: Sendable>(_ body: @Sendable (any Passage.Store) async throws -> T) async throws -> T {
+                try await body(self)
+            }
             var passkeyChallenges: (any Passage.PasskeyChallengeStore)? { MockPasskeyChallengeStore() }
         }
 
@@ -249,7 +252,9 @@ struct `PasskeyChallengeStore Protocol Tests` {
             var restorationCodes: any Passage.RestorationCodeStore { fatalError() }
             var magicLinkTokens: any Passage.MagicLinkTokenStore { fatalError() }
             var exchangeTokens: any Passage.ExchangeTokenStore { fatalError() }
-            // default-nil extension applies to passkeyChallenges
+            func transaction<T: Sendable>(_ body: @Sendable (any Passage.Store) async throws -> T) async throws -> T {
+                try await body(self)
+            }
         }
 
         let store: any Passage.Store = LegacyStore()

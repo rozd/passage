@@ -42,6 +42,7 @@ extension Passage.OnlyForTest {
         var expiresAt: Date
         var revokedAt: Date?
         var replacedBy: String?
+        var sessionId: UUID
     }
 
     struct InMemoryEmailVerificationCode: EmailVerificationCode, @unchecked Sendable {
@@ -362,12 +363,14 @@ public extension Passage.OnlyForTest.InMemoryStore {
         public func createRefreshToken(
             for user: any User,
             tokenHash hash: String,
-            expiresAt: Date
+            expiresAt: Date,
+            sessionId: UUID
         ) async throws -> any RefreshToken {
             return try await createRefreshToken(
                 for: user,
                 tokenHash: hash,
                 expiresAt: expiresAt,
+                sessionId: sessionId,
                 replacing: nil
             )
         }
@@ -377,6 +380,7 @@ public extension Passage.OnlyForTest.InMemoryStore {
             for user: any User,
             tokenHash hash: String,
             expiresAt: Date,
+            sessionId: UUID,
             replacing tokenToReplace: (any RefreshToken)?
         ) async throws -> any RefreshToken {
             let tokenId = UUID().uuidString
@@ -400,11 +404,24 @@ public extension Passage.OnlyForTest.InMemoryStore {
                 tokenHash: hash,
                 expiresAt: expiresAt,
                 revokedAt: nil,
-                replacedBy: nil
+                replacedBy: nil,
+                sessionId: sessionId
             )
 
             tokens[hash] = token
             return token
+        }
+
+        public var refreshTokens: [any RefreshToken] {
+            Array(tokens.values)
+        }
+
+        func snapshot() -> [String: Passage.OnlyForTest.InMemoryRefreshToken] {
+            tokens
+        }
+
+        func restore(_ snapshot: [String: Passage.OnlyForTest.InMemoryRefreshToken]) {
+            tokens = snapshot
         }
 
         public func find(refreshTokenHash hash: String) async throws -> (any RefreshToken)? {
@@ -422,6 +439,29 @@ public extension Passage.OnlyForTest.InMemoryStore {
 
         public func revokeRefreshToken(withHash hash: String) async throws {
             tokens[hash]?.revokedAt = Date()
+        }
+
+        @discardableResult
+        public func revokeRefreshTokens(for user: any User) async throws -> [UUID] {
+            guard let userId = user.id?.description else { return [] }
+
+            var revoked: [UUID] = []
+            for (hash, var token) in tokens where token.userId == userId && token.revokedAt == nil {
+                token.revokedAt = Date()
+                tokens[hash] = token
+                let sessionId = token.sessionId
+                if !revoked.contains(sessionId) {
+                    revoked.append(sessionId)
+                }
+            }
+            return revoked
+        }
+
+        public func revokeRefreshTokens(sessionId: UUID) async throws {
+            for (hash, var token) in tokens where token.sessionId == sessionId && token.revokedAt == nil {
+                token.revokedAt = Date()
+                tokens[hash] = token
+            }
         }
 
         public func revoke(refreshTokenFamilyStartingFrom token: any RefreshToken) async throws {

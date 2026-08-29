@@ -66,11 +66,26 @@ extension Passage.Passwordless.MagicLinkEmailRouteCollection {
     func verify(_ req: Request) async throws -> Response {
         do {
             let form = try req.decodeQueryAsFormOfType(req.contracts.emailMagicLinkVerifyForm)
-            let authUser = try await req.passwordless.verifyEmailMagicLink(token: form.token)
+            let user = try await req.passwordless.verifyEmailMagicLink(token: form.token)
 
             guard let view = req.configuration.views.magicLinkVerify else {
+                guard let authUser = try await req.passage.login(
+                    user,
+                    origin: .magicLink,
+                    via: .bearer,
+                    revokeExisting: req.configuration.passwordless.revokeExistingTokens
+                ) else {
+                    throw Abort(.internalServerError)
+                }
                 return try await authUser.encodeResponse(for: req)
             }
+
+            _ = try await req.passage.login(
+                user,
+                origin: .magicLink,
+                via: .browser,
+                revokeExisting: req.configuration.passwordless.revokeExistingTokens
+            )
 
             let html = try await req.views.renderMagicLinkVerifySuccess(
                 of: view,

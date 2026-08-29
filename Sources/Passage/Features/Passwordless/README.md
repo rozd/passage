@@ -125,8 +125,13 @@ sequenceDiagram
     end
 
     Passage->>Store: Invalidate magic link
-    Passage->>Passage: Issue tokens
-    Passage-->>App: AuthUser (tokens)
+    Passage-->>App: User
+    App->>Passage: passage.login(user, origin: .magicLink, via:)
+    alt Verify view configured (browser)
+        Passage-->>App: Cookie session set
+    else API client
+        Passage-->>App: AuthUser (tokens)
+    end
     App-->>User: Authenticated
 ```
 

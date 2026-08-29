@@ -47,8 +47,8 @@ struct `PassageContext Tests` {
     @Test
     func `PassageContext has login method`() {
         // Verify PassageContext has a login method that accepts a User
-        func checkLoginMethod(_ context: PassageContext, _ user: any User) {
-            context.login(user)
+        func checkLoginMethod(_ context: PassageContext, _ user: any User) async throws {
+            _ = try await context.login(user, origin: .login, via: .bearer)
         }
         // Test passes if it compiles
     }

@@ -66,7 +66,7 @@ extension Passage.Account {
 
 extension Passage.Account {
 
-    func login(form: any LoginForm) async throws -> AuthUser {
+    func login(form: any LoginForm) async throws -> any User {
         let identifier = try form.asIdentifier()
         let rules = configuration.throttle.login
         let now = Date()
@@ -105,11 +105,9 @@ extension Passage.Account {
 
         try await request.hooks.account?.willLogin(user: user, on: request)
 
-        request.passage.login(user)
-
         await request.hooks.account?.didLogin(user: user, on: request)
 
-        return try await request.tokens.issue(for: user)
+        return user
     }
 
 }

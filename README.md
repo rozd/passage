@@ -31,7 +31,8 @@ Use with caution. The library is functional, but the API is subject to change be
 - 📋 **Web Forms** - Built-in Leaf templates for registration, login, and password reset
 - ⚡ **Async Queue Support** - Optional background job processing via Vapor Queues
 - 🔧 **Protocol-Based Services** - Pluggable storage, email, phone, and OAuth providers
-- 🪝 **Lifecycle Hooks** - Async will/did callbacks for custom policy and audit
+- 🪝 **Lifecycle Hooks** - Async will/did callbacks for custom policy and audit, including a transactional credential-issuance hook
+- 🗂️ **Session Inventory** - Stable `sid` claim across refresh, session-scoped revocation, and a host-provided revocation check
 - 🎨 **Fully Customizable** - Configure routes, tokens, templates, and behavior
 
 ## Standards Compliance
@@ -132,7 +133,7 @@ Passage is designed for flexibility through:
 - **Protocol-Based Services** - Implement your own storage, email delivery, phone delivery, or OAuth providers
 - **Extensible Forms** - Default form types can be replaced with custom implementations via contracts
 - **Stylable Default Views** - Default Leaf views with different styles and themes
-- **Lifecycle Hooks** - Inject async pre/post callbacks around authentication flows; throw from `will*` hooks to gate flows on custom policy
+- **Lifecycle Hooks** - Inject async pre/post callbacks around authentication flows; throw from `will*` hooks to gate flows on custom policy, or from `willIssueCredential` to roll a sign-in back inside the store transaction
 
 ## Services to Implement
 
@@ -278,6 +279,96 @@ Over-limit requests return **`429 Too Many Requests`** with a `Retry-After` head
 
 #### Feature guide
 Configuration: [`Sources/Passage/Configuration/Configuration+Throttle.swift`](./Sources/Passage/Configuration/Configuration+Throttle.swift). Middleware: [`Sources/Passage/LoginThrottleMiddleware.swift`](./Sources/Passage/LoginThrottleMiddleware.swift). Per-identifier enforcement lives in the login service at [`Sources/Passage/Features/Account/Passage+Account.swift`](./Sources/Passage/Features/Account/Passage+Account.swift).
+
+#### Example
+_No dedicated example yet — see [rozd/passage-example](https://github.com/rozd/passage-example) for the canonical walkthrough._
+</details>
+
+<details>
+<summary><h3>🗂️ Session inventory in the host</h3> — record every live credential in your own tables, atomically with issuance.</summary>
+
+#### Configuration
+A host that keeps its own session inventory — list a user's devices, revoke one of them, including a credential that was never used after sign-in — used to learn about a new credential only by inspecting the HTTP response after Passage had already committed it. That is a dual write. If the host's bookkeeping fails, either the login answers 5xx while the token is already live (the client retries and mints more live tokens), or the host swallows the error and the token exists outside its inventory until its first authenticated request. Both are wrong, and neither is fixable from outside Passage. Two things remove the dual write: an issuance hook that runs **inside** the store transaction, and a stable session id (`sid`) that names the refresh-token family.
+
+```swift
+try await app.passage.configure(
+    services: .init(/* ... */),
+    configuration: .init(/* ... */),
+    hooks: .init(
+        account: .hook(
+            willIssueCredential: { issuance, request in
+                let db = (issuance.store as? DatabaseStore)?.database ?? request.db
+                try await HostSession(
+                    id: issuance.sessionId,
+                    userId: try issuance.user.requiredIdAsString,
+                    kind: issuance.kind == .bearer ? "bearer" : "browser",
+                    expiresAt: issuance.refreshTokenExpiresAt,
+                    device: request.headers.first(name: .userAgent)
+                ).save(on: db)
+                try await HostSession.query(on: db)
+                    .filter(\.$id ~~ issuance.revokedSessionIds)
+                    .set(\.$revokedAt, to: .now)
+                    .update()
+            },
+            didIssueCredential: { issuance, request in
+                try? await analytics.track(.signIn, origin: issuance.origin, user: issuance.user)
+            },
+            isSessionRevoked: { sessionId, request in
+                (try? await HostSession.find(sessionId, on: request.db))?.revokedAt != nil
+            }
+        )
+    )
+)
+```
+
+**`willIssueCredential(_:on:)`** runs inside the store transaction before commit. For `.bearer` credentials it runs after the access token is signed and the refresh-token row is written; for `.browser` credentials it runs before the session cookie is set. A throw aborts the transaction: no refresh-token row (for `.bearer`), no credential returned, and the route answers the thrown error. Use `issuance.store` — the transaction-bound store — for your own writes; with PassageFluent that is `(issuance.store as? DatabaseStore)?.database.
+
+**`didIssueCredential(_:on:)`** runs after commit and cannot throw. Put side effects that must not roll issuance back here (analytics, mail).
+
+Every login issues exactly one credential and fires the hooks exactly once for it. The route decides which credential from the transport the client can use:
+
+| Request                                                           | Credential                                   | `kind`     |
+|-------------------------------------------------------------------|----------------------------------------------|------------|
+| Form submission accepting `text/html`, with the matching view configured | Cookie session (requires `sessions.enabled`) | `.browser` |
+| Anything else (JSON body, no view, API client)                    | JWT + refresh token                          | `.bearer`  |
+
+Password login, magic-link verify, and manual account linking follow this rule. Federated login and passkey authentication set the cookie session for the browser (when sessions are enabled) and hand API clients an exchange code; the later `POST` exchange issues the `.bearer` credential and never touches the cookie. Token refresh is always `.bearer`. A `.bearer` issuance therefore always means the client received those tokens, and a `.browser` issuance always means a cookie was set — there is no discarded credential to filter out.
+
+A browser login while `sessions.enabled` is `false` fails with `PassageError.sessionsDisabled` rather than rendering a success page with no credential behind it: the `login`, `magicLinkVerify`, and `linkAccountVerify` views can only sign a browser in with a cookie.
+
+Hosts that authenticate users from their own routes call the same helper the built-in routes use:
+
+```swift
+let user = try await req.passwordless.verifyEmailMagicLink(token: token)
+let authUser = try await req.passage.login(user, origin: .magicLink, via: .bearer)
+```
+
+`request.passage.login(_:origin:via:sessionId:revokeExisting:)` returns the `AuthUser` for `.bearer` and `nil` for `.browser`.
+
+`CredentialIssuance` fields:
+
+| Field                   | Meaning                                                                                                   |
+|-------------------------|-----------------------------------------------------------------------------------------------------------|
+| `kind`                  | `.bearer` (JWT + refresh token) or `.browser` (cookie session; token fields are `nil`)                    |
+| `origin`                | `.login`, `.magicLink`, `.refresh`, `.exchange`, `.federatedLogin`, `.passkey`, `.accountLinking`          |
+| `user`                  | The user the credential belongs to                                                                        |
+| `sessionId`             | The `sid`; new on `issue`, carried forward on `refresh`                                                   |
+| `accessToken`           | The signed JWT (`.bearer` only)                                                                           |
+| `accessTokenExpiresAt`  | `exp` of the JWT (`.bearer` only)                                                                         |
+| `refreshTokenExpiresAt` | Expiry of the refresh-token row (`.bearer` only)                                                          |
+| `revokedSessionIds`     | Sessions whose refresh tokens this sign-in revoked (see below); retire those rows in the same transaction |
+| `store`                 | The store bound to the transaction the hook runs in                                                       |
+
+**`sid`.** Every access token carries a `sid` claim (UUID string) and every refresh-token row stores the same `sessionId`. `issue` mints a new one; `refresh` copies it onto the replacement refresh token and the new access token, so a session keeps its name across rotations. The refresh-token family already existed (`revoke(refreshTokenFamilyStartingFrom:)`); `sid` is its name. Read it on an authenticated request with `request.passage.sessionId` — from the bearer JWT, or from the cookie session for browser logins.
+
+**Revocation.** `try await request.passage.revoke(sessionId:)` revokes the family; the next refresh with any of its tokens fails with `invalidRefreshToken`. To reject an already-issued JWT before its `exp`, or to sign a cookie session out, implement `isSessionRevoked` against your own revocation table — it is consulted by `PassageBearerAuthenticator` on every request whose JWT carries a `sid` and by `PassageSessionAuthenticator` for every cookie session that stored one, is off by default, and keeps Passage from growing a denylist of its own.
+
+**`revokeExisting`.** `issue(for:revokeExisting:)` defaults to `true`: every sign-in revokes all of the user's existing refresh tokens (the magic-link flow exposes this as `revokeExistingTokens` in its configuration). The hook reports the affected sessions in `revokedSessionIds` so your inventory can retire them atomically.
+
+**Transactional guarantee.** `Passage.Store.transaction(_:)` is a required protocol member: `PassageFluent.DatabaseStore` wraps issuance in `database.transaction { … }`, and a custom store must do the equivalent so a throwing hook rolls the refresh-token row back; see [DEVELOPER_NOTES.md](./DEVELOPER_NOTES.md#store).
+
+#### Feature guide
+See [`Sources/Passage/Features/Tokens/README.md`](./Sources/Passage/Features/Tokens/README.md) for the claim table and the issue / refresh ordering, and [`Sources/Passage/Types/CredentialIssuance.swift`](./Sources/Passage/Types/CredentialIssuance.swift) for the value type.
 
 #### Example
 _No dedicated example yet — see [rozd/passage-example](https://github.com/rozd/passage-example) for the canonical walkthrough._
@@ -619,16 +710,19 @@ try await app.passage.configure(
 
 Hook protocols expose `will*` / `did*` pairs around each flow. `will*` methods are `async throws` and abort the flow when they throw; `did*` methods are non-throwing observers that fire after the underlying step has succeeded. All methods have empty default implementations, so a custom hook type only overrides the events it cares about. The `.hook(...)` factory shown above is convenient for ad-hoc wiring; for richer behavior conform a type to the protocol directly.
 
-**`Passage.Hooks.Account`** — Account flows (register / login / logout):
+**`Passage.Hooks.Account`** — Account flows (register / login / logout) and credential issuance:
 
-| Hook                | Fires…                                                              |
-|---------------------|---------------------------------------------------------------------|
-| `willRegister`      | Before password validation and user creation                        |
-| `didRegister`       | After user creation, before the verification code is dispatched     |
-| `willLogin`         | After credentials succeed, before the session is established        |
-| `didLogin`          | After the session is established, before access tokens are issued   |
-| `willLogout`        | Before the session is cleared                                       |
-| `didLogout`         | After the session is cleared, before the refresh token is revoked   |
+| Hook                  | Fires…                                                                                              |
+|-----------------------|-----------------------------------------------------------------------------------------------------|
+| `willRegister`        | Before password validation and user creation                                                        |
+| `didRegister`         | After user creation, before the verification code is dispatched                                     |
+| `willLogin`           | After credentials succeed, before the session is established                                        |
+| `didLogin`            | After the session is established, before access tokens are issued                                   |
+| `willLogout`          | Before the session is cleared                                                                       |
+| `didLogout`           | After the session is cleared, before the refresh token is revoked                                   |
+| `willIssueCredential` | Inside the store transaction, after the refresh-token row is written, before commit — throw to abort |
+| `didIssueCredential`  | After the transaction commits; non-throwing                                                         |
+| `isSessionRevoked`    | On every bearer request whose JWT carries a `sid`; return `true` to reject it with 401              |
 
 `willLogin` fires **after** the password check passes — it is the gate where you enforce post-authentication policy (account suspension, license expiry, forced MFA), not credential validation.
 

@@ -63,7 +63,8 @@ struct `Tokens Methods Unit Tests` {
     @Sendable private func createRefreshToken(
         app: Application,
         user: any User,
-        expiresAt: Date? = nil
+        expiresAt: Date? = nil,
+        sessionId: UUID = UUID()
     ) async throws -> String {
         let store = app.passage.storage.services.store
         let random = app.passage.storage.services.random
@@ -75,7 +76,8 @@ struct `Tokens Methods Unit Tests` {
         try await store.tokens.createRefreshToken(
             for: user,
             tokenHash: tokenHash,
-            expiresAt: expiration
+            expiresAt: expiration,
+            sessionId: sessionId
         )
 
         return opaqueToken
@@ -94,7 +96,7 @@ struct `Tokens Methods Unit Tests` {
         let request = Request(application: app, on: app.eventLoopGroup.next())
         let tokens = Passage.Tokens(request: request)
 
-        let authUser = try await tokens.issue(for: user)
+        let authUser = try await tokens.issue(for: user, sessionId: UUID(), origin: .login)
 
         #expect(!authUser.accessToken.isEmpty)
         #expect(!authUser.refreshToken.isEmpty)
@@ -116,7 +118,7 @@ struct `Tokens Methods Unit Tests` {
         let tokens = Passage.Tokens(request: request)
 
         // Issue new tokens (should revoke existing)
-        _ = try await tokens.issue(for: user)
+        _ = try await tokens.issue(for: user, sessionId: UUID(), origin: .login)
 
         // Verify existing token is revoked
         await #expect(throws: AuthenticationError.self) {
@@ -137,7 +139,7 @@ struct `Tokens Methods Unit Tests` {
         let tokens = Passage.Tokens(request: request)
 
         // Issue new tokens without revoking existing
-        _ = try await tokens.issue(for: user, revokeExisting: false)
+        _ = try await tokens.issue(for: user, sessionId: UUID(), revokeExisting: false, origin: .login)
 
         // Verify existing token still works
         let authUser = try await tokens.refresh(using: existingToken)
@@ -155,7 +157,7 @@ struct `Tokens Methods Unit Tests` {
         let request = Request(application: app, on: app.eventLoopGroup.next())
         let tokens = Passage.Tokens(request: request)
 
-        let authUser = try await tokens.issue(for: user)
+        let authUser = try await tokens.issue(for: user, sessionId: UUID(), origin: .login)
 
         // Verify refresh token is in store
         let store = app.passage.storage.services.store
@@ -215,7 +217,8 @@ struct `Tokens Methods Unit Tests` {
         let refreshToken = try await createRefreshToken(
             app: app,
             user: user,
-            expiresAt: Date.now.addingTimeInterval(-3600) // Expired 1 hour ago
+            expiresAt: Date.now.addingTimeInterval(-3600), // Expired 1 hour ago
+            sessionId: UUID()
         )
 
         let request = Request(application: app, on: app.eventLoopGroup.next())

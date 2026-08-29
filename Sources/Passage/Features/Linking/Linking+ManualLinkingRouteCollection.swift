@@ -59,6 +59,8 @@ extension Passage.Linking {
                         return req.redirect(to: redirectURL)
                     }
 
+                    _ = try await req.passage.login(user, origin: .accountLinking, via: .browser)
+
                     return req.views.handleLinkAccountVerifyFormSubmit(
                         of: view,
                         at: group + configuration.federatedLogin.linkAccountVerifyPath,

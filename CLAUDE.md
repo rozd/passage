@@ -72,3 +72,7 @@ Password reset flows for email/phone. Similar pattern to verification with queue
 - **Configurable routes**: All route paths are customizable via `Configuration.Routes`
 - **Optional queues**: Set `useQueues: true` in verification/restoration config to dispatch jobs async
 - **JWKS configuration**: Load from environment (`JWKS`) or file path (`JWKS_FILE_PATH`)
+
+## Compatibility Policy (IMPORTANT)
+
+Passage is **pre-release**. Breaking changes are welcome; do **not** add backward-compatibility shims (no forwarding defaults on protocol extensions, no deprecated aliases, no dual code paths). When a change breaks a protocol or public type, make it cleanly and list the concrete updates required in each implementor — `passage-fluent`, `passage-imperial`, `passage-mailgun`, and custom stores (`DEVELOPER_NOTES.md`) — under a **Breaking** heading in `CHANGELOG.md`.
