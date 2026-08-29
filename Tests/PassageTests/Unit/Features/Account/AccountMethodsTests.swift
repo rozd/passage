@@ -95,7 +95,7 @@ struct `Account Methods Unit Tests` {
             for: user,
             tokenHash: tokenHash,
             expiresAt: expiration,
-            sessionId: UUID()
+            sessionId: sessionId
         )
 
         return opaqueToken

@@ -32,22 +32,28 @@ extension PassageContext {
                 throw PassageError.sessionsDisabled
             }
 
-            let issuance = CredentialIssuance(
-                kind: .browser,
-                origin: origin,
-                user: user,
-                sessionId: sessionId,
-                store: request.store
-            )
+            let request = self.request
+            let hooks = request.hooks.account
 
-            try await request.hooks.account?.willIssueCredential(issuance, on: request)
+            let issuance = try await request.store.transaction { store in
+                let issuance = CredentialIssuance(
+                    kind: .browser,
+                    origin: origin,
+                    user: user,
+                    sessionId: sessionId,
+                    store: store
+                )
+
+                try await hooks?.willIssueCredential(issuance, on: request)
+
+                return issuance
+            }
 
             request.auth.login(user)
             request.session.authenticate(user)
             request.session.sessionId = issuance.sessionId
 
-            await request.hooks.account?.didIssueCredential(issuance, on: request)
-
+            await hooks?.didIssueCredential(issuance, on: request)
             return nil
 
         case .bearer:

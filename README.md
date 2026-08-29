@@ -321,7 +321,7 @@ try await app.passage.configure(
 )
 ```
 
-**`willIssueCredential(_:on:)`** runs after the access token is signed and the refresh-token row is written, inside the same store transaction, before commit. A throw aborts the transaction: no refresh-token row, no credential returned, and the route answers the thrown error. Use `issuance.store` — the transaction-bound store — for your own writes; with PassageFluent that is `(issuance.store as? DatabaseStore)?.database`.
+**`willIssueCredential(_:on:)`** runs inside the store transaction before commit. For `.bearer` credentials it runs after the access token is signed and the refresh-token row is written; for `.browser` credentials it runs before the session cookie is set. A throw aborts the transaction: no refresh-token row (for `.bearer`), no credential returned, and the route answers the thrown error. Use `issuance.store` — the transaction-bound store — for your own writes; with PassageFluent that is `(issuance.store as? DatabaseStore)?.database.
 
 **`didIssueCredential(_:on:)`** runs after commit and cannot throw. Put side effects that must not roll issuance back here (analytics, mail).
 
