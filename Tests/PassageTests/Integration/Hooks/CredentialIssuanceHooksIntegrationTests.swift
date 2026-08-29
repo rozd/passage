@@ -72,7 +72,8 @@ struct `Credential Issuance Hooks Integration Tests` {
         hooks: Passage.Hooks = .init(),
         sessionsEnabled: Bool = false,
         capturedEmails: CapturedEmails? = nil,
-        store: (any Passage.Store)? = nil
+        store: (any Passage.Store)? = nil,
+        tokenConcurrency: Passage.Configuration.Tokens.RefreshToken.Concurrency = .unlimited
     ) async throws {
         await app.jwt.keys.add(
             hmac: HMACKey(from: "test-secret-key-for-jwt-signing"),
@@ -113,7 +114,7 @@ struct `Credential Issuance Hooks Integration Tests` {
             tokens: .init(
                 issuer: "test-issuer",
                 accessToken: .init(timeToLive: 3600),
-                refreshToken: .init(timeToLive: 86400)
+                refreshToken: .init(timeToLive: 86400, concurrency: tokenConcurrency)
             ),
             sessions: .init(enabled: sessionsEnabled),
             jwt: .init(jwks: .init(json: emptyJwks)),
@@ -234,7 +235,7 @@ struct `Credential Issuance Hooks Integration Tests` {
         let spy = CredentialIssuanceSpy()
 
         try await withApp(configure: { app in
-            try await self.configure(app, hooks: .init(account: spy.makeAccountHook()))
+            try await self.configure(app, hooks: .init(account: spy.makeAccountHook()), tokenConcurrency: .single)
         }) { app in
             let userId = try await createTestUser(app: app, email: "user3@test.com")
 

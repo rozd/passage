@@ -21,7 +21,10 @@ Passage.Configuration(
     tokens: .init(
         issuer: "https://api.example.com",              // JWT issuer claim
         accessToken: .init(timeToLive: 15 * 60),        // 15 minutes
-        refreshToken: .init(timeToLive: 7 * 24 * 3600)  // 7 days
+        refreshToken: .init(
+            timeToLive: 7 * 24 * 3600,                  // 7 days
+            concurrency: .unlimited                      // Session concurrency policy
+        )
     ),
     routes: .init(
         refreshToken: .init(path: "refresh-token"),     // POST /auth/refresh-token
@@ -37,6 +40,19 @@ Passage.Configuration(
 | `tokens.issuer` | `String?` | `nil` | JWT `iss` claim value |
 | `tokens.accessToken.timeToLive` | `TimeInterval` | `900` (15 min) | Access token validity duration |
 | `tokens.refreshToken.timeToLive` | `TimeInterval` | `604800` (7 days) | Refresh token validity duration |
+| `tokens.refreshToken.concurrency` | `Concurrency` | `.unlimited` | Session concurrency policy |
+
+### Concurrency Policy
+
+The `concurrency` option controls how many concurrent refresh-token sessions a user may hold:
+
+| Policy | Behavior |
+|--------|----------|
+| `.unlimited` | User may hold any number of concurrent sessions; new logins never revoke existing ones |
+| `.single` | User may hold only one session; new login revokes all other sessions |
+| `.limit(n)` | User may hold up to `n` concurrent sessions; oldest sessions are revoked when limit exceeded |
+
+**Important:** `refresh` never triggers session eviction, even under `.single` or `.limit(n)`. Only new authentications (login, OAuth exchange) enforce the policy. Password reset and password change always revoke all sessions.
 
 ## Token Types
 
@@ -79,12 +95,12 @@ One-time code for OAuth redirect flows. Allows secure token handoff after browse
 
 ### Issue (Login/OAuth)
 
-Reached through `request.passage.login(_:origin:via: .bearer)`, which the built-in routes call for JSON clients, and through `refresh` and `exchange`. Browser logins (`via: .browser`) set a cookie session instead and never enter this path.
+Reached through `request.passage.login(_:origin:via: .bearer)`, which the built-in routes call for JSON clients, and through `exchange`. Browser logins (`via: .browser`) set a cookie session instead and never enter this path. (Refresh uses a different path; see "Refresh" below.)
 
 1. Take the `sessionId` handed in by the caller and sign the JWT access token with user claims and `sid`
 2. Generate random opaque refresh token and hash it
 3. Open a store transaction (`Passage.Store.transaction`):
-   1. With `revokeExisting: true` (the default) revoke the user's existing refresh tokens and collect their session ids
+   1. Enforce the configured concurrency policy: apply `.unlimited` (no action), `.single` (revoke all existing sessions), or `.limit(n)` (keep the `n-1` most recently active sessions, revoke the rest); collect the revoked session ids
    2. Store the refresh-token row with `sessionId`
    3. Call `Passage.Hooks.Account.willIssueCredential` — a throw rolls everything back and the route answers the error
 4. Commit, then call `didIssueCredential`
@@ -99,6 +115,8 @@ Reached through `request.passage.login(_:origin:via: .bearer)`, which the built-
 5. Reuse the row's `sessionId` and sign a new access token with the same `sid`
 6. Inside the store transaction: store the new refresh token with that `sessionId`, mark the old token as replaced, call `willIssueCredential` with `origin: .refresh`
 7. Commit, call `didIssueCredential`, return new `AuthUser`
+
+**Important:** Refresh never enforces the concurrency policy. Only new authentication events (login, OAuth exchange) can trigger session eviction.
 
 ### Revoke (Logout/Password Change)
 

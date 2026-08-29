@@ -96,6 +96,13 @@ public extension Passage {
 
         @discardableResult
         func revokeRefreshTokens(for user: any User) async throws -> [UUID]
+
+        @discardableResult
+        func revokeRefreshTokens(
+            for user: any User,
+            keepingNewestSessions count: Int
+        ) async throws -> [UUID]
+
         func revokeRefreshToken(withHash hash: String) async throws
         func revoke(refreshTokenFamilyStartingFrom token: any RefreshToken) async throws
         func revokeRefreshTokens(sessionId: UUID) async throws

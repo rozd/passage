@@ -10,7 +10,10 @@ struct `Tokens Methods Unit Tests` {
     // MARK: - Helper Methods
 
     /// Configures a test Vapor application with Passage
-    @Sendable private func configure(_ app: Application) async throws {
+    @Sendable private func configure(
+        _ app: Application,
+        tokenConcurrency: Passage.Configuration.Tokens.RefreshToken.Concurrency = .unlimited
+    ) async throws {
         await app.jwt.keys.add(
             hmac: HMACKey(from: "test-secret-key-for-jwt-signing"),
             digestAlgorithm: .sha256,
@@ -36,7 +39,7 @@ struct `Tokens Methods Unit Tests` {
             tokens: .init(
                 issuer: "test-issuer",
                 accessToken: .init(timeToLive: 3600),
-                refreshToken: .init(timeToLive: 86400)
+                refreshToken: .init(timeToLive: 86400, concurrency: tokenConcurrency)
             ),
             jwt: .init(jwks: .init(json: emptyJwks))
         )
@@ -106,10 +109,10 @@ struct `Tokens Methods Unit Tests` {
     }
 
     @Test
-    func `issue revokes existing tokens by default`() async throws {
+    func `issue revokes existing tokens with single concurrency`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
-        try await configure(app)
+        try await configure(app, tokenConcurrency: .single)
 
         let user = try await createTestUser(app: app, email: "user@example.com")
         let existingToken = try await createRefreshToken(app: app, user: user)
@@ -117,17 +120,15 @@ struct `Tokens Methods Unit Tests` {
         let request = Request(application: app, on: app.eventLoopGroup.next())
         let tokens = Passage.Tokens(request: request)
 
-        // Issue new tokens (should revoke existing)
         _ = try await tokens.issue(for: user, sessionId: UUID(), origin: .login)
 
-        // Verify existing token is revoked
         await #expect(throws: AuthenticationError.self) {
             try await tokens.refresh(using: existingToken)
         }
     }
 
     @Test
-    func `issue does not revoke existing tokens when revokeExisting is false`() async throws {
+    func `issue keeps existing tokens with unlimited concurrency policy`() async throws {
         let app = try await Application.make(.testing)
         defer { Task { try await app.asyncShutdown() } }
         try await configure(app)
@@ -138,10 +139,8 @@ struct `Tokens Methods Unit Tests` {
         let request = Request(application: app, on: app.eventLoopGroup.next())
         let tokens = Passage.Tokens(request: request)
 
-        // Issue new tokens without revoking existing
-        _ = try await tokens.issue(for: user, sessionId: UUID(), revokeExisting: false, origin: .login)
+        _ = try await tokens.issue(for: user, sessionId: UUID(), origin: .login)
 
-        // Verify existing token still works
         let authUser = try await tokens.refresh(using: existingToken)
         #expect(!authUser.accessToken.isEmpty)
     }
@@ -326,5 +325,69 @@ struct `Tokens Methods Unit Tests` {
         let tokens = request.tokens
         let typeName = String(describing: type(of: tokens))
         #expect(typeName == "Tokens")
+    }
+
+    @Test
+    func `refresh never triggers eviction even under limit(1) policy`() async throws {
+        let app = try await Application.make(.testing)
+        defer { Task { try await app.asyncShutdown() } }
+        try await configure(app, tokenConcurrency: .limit(1))
+
+        let user = try await createTestUser(app: app, email: "user@example.com")
+        let request = Request(application: app, on: app.eventLoopGroup.next())
+        let tokens = Passage.Tokens(request: request)
+
+        let sessionId = UUID()
+        let authUser1 = try await tokens.issue(for: user, sessionId: sessionId, origin: .login)
+
+        let authUser2 = try await tokens.refresh(using: authUser1.refreshToken)
+        #expect(!authUser2.refreshToken.isEmpty)
+
+        let authUser3 = try await tokens.refresh(using: authUser2.refreshToken)
+        #expect(!authUser3.refreshToken.isEmpty)
+
+        let authUser4 = try await tokens.refresh(using: authUser3.refreshToken)
+        #expect(!authUser4.refreshToken.isEmpty)
+    }
+
+    @Test
+    func `limit(2) policy keeps two newest sessions and revokes oldest`() async throws {
+        let app = try await Application.make(.testing)
+        defer { Task { try await app.asyncShutdown() } }
+        try await configure(app, tokenConcurrency: .limit(2))
+
+        let user = try await createTestUser(app: app, email: "user@example.com")
+        let request = Request(application: app, on: app.eventLoopGroup.next())
+        let tokens = Passage.Tokens(request: request)
+
+        let sessionId1 = UUID()
+        let sessionId2 = UUID()
+        let sessionId3 = UUID()
+
+        let authUser1 = try await tokens.issue(for: user, sessionId: sessionId1, origin: .login)
+        let authUser2 = try await tokens.issue(for: user, sessionId: sessionId2, origin: .login)
+        let authUser3 = try await tokens.issue(for: user, sessionId: sessionId3, origin: .login)
+
+        let store = app.passage.storage.services.store as! Passage.OnlyForTest.InMemoryStore
+        let tokenStore = store.tokens as! Passage.OnlyForTest.InMemoryStore.InMemoryTokenStore
+        let refreshTokens = tokenStore.refreshTokens
+
+        let session1Tokens = refreshTokens.filter { $0.sessionId == sessionId1 }
+        let session2Tokens = refreshTokens.filter { $0.sessionId == sessionId2 }
+        let session3Tokens = refreshTokens.filter { $0.sessionId == sessionId3 }
+
+        #expect(!session1Tokens.isEmpty && session1Tokens.allSatisfy { $0.revokedAt != nil })
+        #expect(!session2Tokens.isEmpty && session2Tokens.allSatisfy { $0.revokedAt == nil })
+        #expect(!session3Tokens.isEmpty && session3Tokens.allSatisfy { $0.revokedAt == nil })
+
+        let authUser2Refreshed = try await tokens.refresh(using: authUser2.refreshToken)
+        #expect(!authUser2Refreshed.refreshToken.isEmpty)
+
+        let authUser3Refreshed = try await tokens.refresh(using: authUser3.refreshToken)
+        #expect(!authUser3Refreshed.refreshToken.isEmpty)
+
+        await #expect(throws: AuthenticationError.self) {
+            try await tokens.refresh(using: authUser1.refreshToken)
+        }
     }
 }

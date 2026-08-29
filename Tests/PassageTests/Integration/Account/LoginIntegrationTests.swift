@@ -12,6 +12,13 @@ struct `Login Integration Tests` {
 
     /// Configures a test Vapor application with Passage
     @Sendable private func configure(_ app: Application) async throws {
+        try await configureWithConcurrency(app, concurrency: .unlimited)
+    }
+
+    @Sendable private func configureWithConcurrency(
+        _ app: Application,
+        concurrency: Passage.Configuration.Tokens.RefreshToken.Concurrency
+    ) async throws {
         // Add HMAC key directly for testing (simpler than RSA)
         // Using JWTKit's direct API instead of JWKS
         await app.jwt.keys.add(
@@ -45,7 +52,7 @@ struct `Login Integration Tests` {
             tokens: .init(
                 issuer: "test-issuer",
                 accessToken: .init(timeToLive: 3600),
-                refreshToken: .init(timeToLive: 86400)
+                refreshToken: .init(timeToLive: 86400, concurrency: concurrency)
             ),
             jwt: .init(jwks: .init(json: emptyJwks)),
             verification: .init(
@@ -462,7 +469,9 @@ struct `Login Integration Tests` {
 
     @Test
     func `Login revokes previous refresh tokens`() async throws {
-        try await withApp(configure: configure) { app in
+        try await withApp(configure: { app in
+            try await self.configureWithConcurrency(app, concurrency: .single)
+        }) { app in
             // Create verified user
             try await createTestUser(
                 app: app,

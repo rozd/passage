@@ -79,10 +79,11 @@ struct `AAL1 periodic reauthentication` {
         )
 
         // Simulate the subscriber re-presenting their auth factor before
-        // expiry — the `issue(for:)` path with `revokeExisting: true`
-        // revokes the prior family and mints a fresh session secret whose
-        // `expiresAt` is `now + TTL`. We model a fresh Bcrypt-backed
-        // successful login here by calling the same storage primitives.
+        // expiry — a new authentication event creates a fresh session with
+        // a distinct session id and `expiresAt: now + TTL`. Concurrency
+        // policies may revoke prior sessions, but the new session always
+        // exists. We model a fresh login here by calling storage primitives
+        // directly.
         try await store.tokens.revokeRefreshTokens(for: user)
         let freshSecret = random.generateOpaqueToken()
         let freshExpiresAt = Date().addingTimeInterval(600) // post-reauth TTL

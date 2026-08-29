@@ -73,7 +73,6 @@ extension Passage.Passwordless.MagicLinkEmailRouteCollection {
                     user,
                     origin: .magicLink,
                     via: .bearer,
-                    revokeExisting: req.configuration.passwordless.revokeExistingTokens
                 ) else {
                     throw Abort(.internalServerError)
                 }
@@ -84,7 +83,6 @@ extension Passage.Passwordless.MagicLinkEmailRouteCollection {
                 user,
                 origin: .magicLink,
                 via: .browser,
-                revokeExisting: req.configuration.passwordless.revokeExistingTokens
             )
 
             let html = try await req.views.renderMagicLinkVerifySuccess(

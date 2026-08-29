@@ -31,7 +31,7 @@ struct `Passwordless Authentication Integration Tests` {
         captured: CapturedMessages? = nil,
         linkExpiration: TimeInterval = 600,
         autoCreateUser: Bool = true,
-        revokeExistingTokens: Bool = true,
+        concurrency: Passage.Configuration.Tokens.RefreshToken.Concurrency = .unlimited,
         useQueues: Bool = true,
         requireSameBrowser: Bool = false
     ) async throws {
@@ -73,11 +73,10 @@ struct `Passwordless Authentication Integration Tests` {
             tokens: .init(
                 issuer: "test-issuer",
                 accessToken: .init(timeToLive: 3600),
-                refreshToken: .init(timeToLive: 86400)
+                refreshToken: .init(timeToLive: 86400, concurrency: concurrency)
             ),
             jwt: .init(jwks: .init(json: emptyJwks)),
             passwordless: .init(
-                revokeExistingTokens: revokeExistingTokens,
                 emailMagicLink: .email(
                     useQueues: useQueues,
                     linkExpiration: linkExpiration,
@@ -431,7 +430,7 @@ struct `Passwordless Authentication Integration Tests` {
         let email = "revoke@example.com"
 
         try await withApp(configure: { app in
-            try await configureWithCapture(app, captured: captured, revokeExistingTokens: true)
+            try await configureWithCapture(app, captured: captured, concurrency: .single)
         }) { app in
             // Create user and login normally first
             try await createTestUser(app: app, email: email, password: "password123", isEmailVerified: true)

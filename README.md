@@ -343,7 +343,7 @@ let user = try await req.passwordless.verifyEmailMagicLink(token: token)
 let authUser = try await req.passage.login(user, origin: .magicLink, via: .bearer)
 ```
 
-`request.passage.login(_:origin:via:sessionId:revokeExisting:)` returns the `AuthUser` for `.bearer` and `nil` for `.browser`.
+`request.passage.login(_:origin:via:sessionId:)` returns the `AuthUser` for `.bearer` and `nil` for `.browser`.
 
 `CredentialIssuance` fields:
 
@@ -363,7 +363,7 @@ let authUser = try await req.passage.login(user, origin: .magicLink, via: .beare
 
 **Revocation.** `try await request.passage.revoke(sessionId:)` revokes the family; the next refresh with any of its tokens fails with `invalidRefreshToken`. To reject an already-issued JWT before its `exp`, or to sign a cookie session out, implement `isSessionRevoked` against your own revocation table — it is consulted by `PassageBearerAuthenticator` on every request whose JWT carries a `sid` and by `PassageSessionAuthenticator` for every cookie session that stored one, is off by default, and keeps Passage from growing a denylist of its own.
 
-**`revokeExisting`.** `issue(for:revokeExisting:)` defaults to `true`: every sign-in revokes all of the user's existing refresh tokens (the magic-link flow exposes this as `revokeExistingTokens` in its configuration). The hook reports the affected sessions in `revokedSessionIds` so your inventory can retire them atomically.
+**Session concurrency.** The `tokens.refreshToken.concurrency` policy controls how many concurrent refresh-token sessions a user may hold. `.unlimited` (the default) allows any number; `.single` enforces one session per user; `.limit(n)` keeps the `n` most recently active sessions. Only new authentications (login, OAuth exchange) enforce the policy; refresh never evicts. The hook reports the affected sessions in `revokedSessionIds` so your inventory can retire them atomically. See [`Sources/Passage/Features/Tokens/README.md`](./Sources/Passage/Features/Tokens/README.md#concurrency-policy) for details.
 
 **Transactional guarantee.** `Passage.Store.transaction(_:)` is a required protocol member: `PassageFluent.DatabaseStore` wraps issuance in `database.transaction { … }`, and a custom store must do the equivalent so a throwing hook rolls the refresh-token row back; see [DEVELOPER_NOTES.md](./DEVELOPER_NOTES.md#store).
 
@@ -419,8 +419,13 @@ Requires `EmailDelivery`. See the [Services chapter](#services-to-implement) for
 ```swift
 Passage.Configuration(
     // ... other config ...
+    tokens: .init(
+        refreshToken: .init(
+            timeToLive: 7 * 24 * 3600,
+            concurrency: .unlimited         // Session concurrency policy
+        )
+    ),
     passwordless: .init(
-        revokeExistingTokens: true,
         emailMagicLink: .email(
             useQueues: true,
             linkExpiration: 15 * 60,        // 15 minutes

@@ -43,14 +43,12 @@ extension Passage.Tokens {
     func issue(
         for user: any User,
         sessionId: UUID,
-        revokeExisting: Bool = true,
         origin: CredentialIssuance.Origin
     ) async throws -> AuthUser {
         try await mint(
             for: user,
             sessionId: sessionId,
             origin: origin,
-            revokeExisting: revokeExisting,
             replacing: nil
         )
     }
@@ -77,7 +75,6 @@ extension Passage.Tokens {
             for: refreshToken.user,
             sessionId: refreshToken.sessionId,
             origin: .refresh,
-            revokeExisting: false,
             replacing: refreshToken
         )
     }
@@ -92,7 +89,6 @@ extension Passage.Tokens {
         for user: any User,
         sessionId: UUID,
         origin: CredentialIssuance.Origin,
-        revokeExisting: Bool,
         replacing tokenToReplace: (any RefreshToken)?
     ) async throws -> AuthUser {
         let now = Date.now
@@ -117,9 +113,19 @@ extension Passage.Tokens {
         let hooks = request.hooks.account
 
         let issuance = try await store.transaction { store in
-            let revokedSessionIds = revokeExisting
-                ? try await store.tokens.revokeRefreshTokens(for: user)
-                : []
+            let revokedSessionIds: [UUID]
+            if tokenToReplace != nil {
+                revokedSessionIds = []
+            } else {
+                switch configuration.refreshToken.concurrency {
+                case .unlimited:
+                    revokedSessionIds = []
+                case .single:
+                    revokedSessionIds = try await store.tokens.revokeRefreshTokens(for: user)
+                case .limit(let n):
+                    revokedSessionIds = try await store.tokens.revokeRefreshTokens(for: user, keepingNewestSessions: n - 1)
+                }
+            }
 
             try await store.tokens.createRefreshToken(
                 for: user,

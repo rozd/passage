@@ -189,6 +189,13 @@ struct `Store Protocols Tests` {
             []
         }
 
+        func revokeRefreshTokens(
+            for user: any User,
+            keepingNewestSessions count: Int
+        ) async throws -> [UUID] {
+            []
+        }
+
         func revokeRefreshToken(withHash hash: String) async throws {
             // Method signature test
         }

@@ -78,6 +78,7 @@ struct `Services Tests` {
 
         func find(refreshTokenHash hash: String) async throws -> (any RefreshToken)? { nil }
         func revokeRefreshTokens(for user: any User) async throws -> [UUID] { [] }
+        func revokeRefreshTokens(for user: any User, keepingNewestSessions count: Int) async throws -> [UUID] { [] }
         func revokeRefreshToken(withHash hash: String) async throws {}
         func revoke(refreshTokenFamilyStartingFrom token: any RefreshToken) async throws {}
         func revokeRefreshTokens(sessionId: UUID) async throws {}
