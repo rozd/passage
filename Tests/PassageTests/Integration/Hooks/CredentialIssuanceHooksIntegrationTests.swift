@@ -55,7 +55,7 @@ struct `Credential Issuance Hooks Integration Tests` {
         var passkeyChallenges: (any Passage.PasskeyChallengeStore)? { inner.passkeyChallenges }
 
         func transaction<T: Sendable>(
-            _ body: @Sendable (any Passage.Store) async throws -> T
+            _ body: @escaping @Sendable (any Passage.Store) async throws -> T
         ) async throws -> T {
             try await inner.transaction { bound in
                 try await body(TransactionSpyStore(inner: bound, isTransactionBound: true))

@@ -127,7 +127,7 @@ struct `Services Tests` {
         var restorationCodes: any Passage.RestorationCodeStore { MockRestorationCodeStore() }
         var magicLinkTokens: any Passage.MagicLinkTokenStore { MockMagicLinkTokenStore() }
         var exchangeTokens: any Passage.ExchangeTokenStore { MockExchangeTokenStore() }
-        func transaction<T: Sendable>(_ body: @Sendable (any Passage.Store) async throws -> T) async throws -> T {
+        func transaction<T: Sendable>(_ body: @escaping @Sendable (any Passage.Store) async throws -> T) async throws -> T {
             try await body(self)
         }
     }

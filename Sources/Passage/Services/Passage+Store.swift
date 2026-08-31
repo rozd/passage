@@ -15,7 +15,7 @@ public extension Passage {
         var passkeyChallenges: (any PasskeyChallengeStore)? { get }
 
         func transaction<T: Sendable>(
-            _ body: @Sendable (any Store) async throws -> T
+            _ body: @escaping @Sendable (any Store) async throws -> T
         ) async throws -> T
     }
 

@@ -26,7 +26,7 @@ public extension Passage {
             }
 
             public func transaction<T: Sendable>(
-                _ body: @Sendable (any Passage.Store) async throws -> T
+                _ body: @escaping @Sendable (any Passage.Store) async throws -> T
             ) async throws -> T {
                 guard let tokens = tokens as? InMemoryTokenStore else {
                     return try await body(self)

@@ -219,7 +219,7 @@ struct `PasskeyCredentialStore Protocol Tests` {
             var restorationCodes: any Passage.RestorationCodeStore { fatalError() }
             var magicLinkTokens: any Passage.MagicLinkTokenStore { fatalError() }
             var exchangeTokens: any Passage.ExchangeTokenStore { fatalError() }
-            func transaction<T: Sendable>(_ body: @Sendable (any Passage.Store) async throws -> T) async throws -> T {
+            func transaction<T: Sendable>(_ body: @escaping @Sendable (any Passage.Store) async throws -> T) async throws -> T {
                 try await body(self)
             }
             var passkeyCredentials: (any Passage.PasskeyCredentialStore)? { MockPasskeyCredentialStore() }
@@ -238,7 +238,7 @@ struct `PasskeyCredentialStore Protocol Tests` {
             var restorationCodes: any Passage.RestorationCodeStore { fatalError() }
             var magicLinkTokens: any Passage.MagicLinkTokenStore { fatalError() }
             var exchangeTokens: any Passage.ExchangeTokenStore { fatalError() }
-            func transaction<T: Sendable>(_ body: @Sendable (any Passage.Store) async throws -> T) async throws -> T {
+            func transaction<T: Sendable>(_ body: @escaping @Sendable (any Passage.Store) async throws -> T) async throws -> T {
                 try await body(self)
             }
             // Intentionally no passkeyCredentials override — default-nil extension applies.
